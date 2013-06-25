@@ -208,6 +208,10 @@ def test_suite():
         'xpdl.txt',
         setUp=setUp, tearDown=tearDown,
         optionflags=doctest.NORMALIZE_WHITESPACE))
+    suite.addTest(doctest.DocFileSuite(
+        'xpdl-2.1.txt',
+        setUp=setUp, tearDown=tearDown,
+        optionflags=doctest.NORMALIZE_WHITESPACE))
     suite.addTest(doctest.DocTestSuite(
         setUp=testing.setUp, tearDown=testing.tearDown))
     return suite
