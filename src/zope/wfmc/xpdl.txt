@@ -14,7 +14,7 @@ contains a definition for the publication example developed in the
     >>> from zope.wfmc import xpdl
     >>> import os
     >>> package = xpdl.read(open(os.path.join(this_directory,
-    ...                                       'publication.xpdl')))
+    ...                                       'publication-1.0.xpdl')))
 
 This package contains a single definition:
 
