@@ -20,11 +20,12 @@ from zope import component, interface
 from zope.wfmc import interfaces
 
 interface.moduleProvides(interfaces.IIntegration)
-    
-def createParticipant(activity, process_definition_identifier, performer):
+
+
+def createParticipant(activity, process, performer):
     participant = component.queryAdapter(
         activity, interfaces.IParticipant,
-        process_definition_identifier + '.' + performer)
+        process.definition.id + '.' + performer)
 
     if participant is None:
         participant = component.getAdapter(
@@ -32,12 +33,12 @@ def createParticipant(activity, process_definition_identifier, performer):
 
     return participant
 
-def createWorkItem(participant,
-                   process_definition_identifier, application):
+
+def createWorkItem(participant, process, activity, application):
 
     workitem = component.queryAdapter(
         participant, interfaces.IWorkItem,
-        process_definition_identifier + '.' + application)
+        process.definition.id + '.' + application)
     if workitem is None:
         workitem = component.getAdapter(
             participant, interfaces.IWorkItem, '.' + application)

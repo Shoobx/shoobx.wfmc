@@ -27,15 +27,14 @@ class IIntegration(interface.Interface):
     """
 
 
-    def createParticipant(activity, process_definition_identifier, performer):
+    def createParticipant(activity, process, performer):
         """Create a participant for an activity
 
         The process id and especially the performer (id) are used to
         select an appropriate participant type.
         """
 
-    def createWorkItem(participant,
-                       process_definition_identifier, application):
+    def createWorkItem(participant, process, activity, application):
         """Create a work item for the given participant
 
         The process id and especially the application (id) are used to

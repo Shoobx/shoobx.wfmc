@@ -65,7 +65,7 @@ def test_multiple_input_parameters():
     ...     zope.component.adapts(interfaces.IActivity)
     ...     zope.interface.implements(interfaces.IParticipant)
     ...
-    ...     def __init__(self, activity):
+    ...     def __init__(self, activity, process):
     ...         self.activity = activity
 
     >>> from zope.wfmc.attributeintegration import AttributeIntegration
@@ -79,7 +79,7 @@ def test_multiple_input_parameters():
     ...     component.adapts(interfaces.IParticipant)
     ...     interface.implements(interfaces.IWorkItem)
     ...
-    ...     def __init__(self, participant):
+    ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...
     ...     def start(self, x, y):
@@ -151,7 +151,7 @@ def test_inputoutput():
     >>> pd.activities['eek'].addApplication('eek', ['x'])
 
     >>> class Participant(object):
-    ...     def __init__(self, activity):
+    ...     def __init__(self, activity, process):
     ...         self.activity = activity
 
     >>> from zope.wfmc.attributeintegration import AttributeIntegration
@@ -161,7 +161,7 @@ def test_inputoutput():
     >>> integration.Participant = Participant
 
     >>> class Eek:
-    ...     def __init__(self, participant):
+    ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...
     ...     def start(self, x):

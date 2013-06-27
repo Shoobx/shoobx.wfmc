@@ -20,6 +20,7 @@ $Id$
 from zope.wfmc import interfaces
 from zope import interface
 
+
 class AttributeIntegration:
     """Integration component that uses simple attributes
 
@@ -28,12 +29,11 @@ class AttributeIntegration:
     """
 
     interface.implements(interfaces.IIntegration)
-    
-    def createParticipant(self, activity,
-                          process_definition_identifier, performer):
-        return getattr(self, performer+'Participant')(activity)
-        
 
-    def createWorkItem(self, participant,
-                       process_definition_identifier, application):
-        return getattr(self, application+'WorkItem')(participant)
+    def createParticipant(self, activity, process, performer):
+        factory = getattr(self, performer + 'Participant')
+        return factory(activity, process)
+
+    def createWorkItem(self, participant, process, activity, application):
+        factory = getattr(self, application + 'WorkItem')
+        return factory(participant, process, activity)

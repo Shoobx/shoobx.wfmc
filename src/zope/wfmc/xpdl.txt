@@ -50,7 +50,7 @@ and we'll define and register participant and application adapters:
     ...     zope.component.adapts(interfaces.IActivity)
     ...     zope.interface.implements(interfaces.IParticipant)
     ...
-    ...     def __init__(self, activity):
+    ...     def __init__(self, activity, process):
     ...         self.activity = activity
 
     >>> class User:
@@ -64,8 +64,8 @@ and we'll define and register participant and application adapters:
     >>> tech2 = User()
 
     >>> class Author(Participant):
-    ...     def __init__(self, activity):
-    ...         Participant.__init__(self, activity)
+    ...     def __init__(self, activity, process):
+    ...         Participant.__init__(self, activity, process)
     ...         author_name = activity.process.workflowRelevantData.author
     ...         print "Author `%s` selected" % author_name
     ...         self.user = authors[author_name]
@@ -90,7 +90,7 @@ and we'll define and register participant and application adapters:
     ...     zope.component.adapts(interfaces.IParticipant)
     ...     zope.interface.implements(interfaces.IWorkItem)
     ...
-    ...     def __init__(self, participant):
+    ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...         self.activity = participant.activity
     ...         participant.user.work_list.append(self)
@@ -178,7 +178,7 @@ and we'll define and register participant and application adapters:
     ...     zope.component.adapts(interfaces.IParticipant)
     ...     zope.interface.implements(interfaces.IWorkItem)
     ...
-    ...     def __init__(self, participant):
+    ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...
     ...     def start(self):

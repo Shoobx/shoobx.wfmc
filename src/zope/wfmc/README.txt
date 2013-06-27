@@ -228,7 +228,7 @@ We'll start by defining a simple Participant class:
     ...     zope.component.adapts(interfaces.IActivity)
     ...     zope.interface.implements(interfaces.IParticipant)
     ...
-    ...     def __init__(self, activity):
+    ...     def __init__(self, activity, process):
     ...         self.activity = activity
 
 We set attributes on the integration for each participant:
@@ -249,7 +249,7 @@ Now we'll define our work-items. First we'll define some classes:
     ...     zope.component.adapts(interfaces.IParticipant)
     ...     zope.interface.implements(interfaces.IWorkItem)
     ...
-    ...     def __init__(self, participant):
+    ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...         work_list.append(self)
     ...
@@ -745,8 +745,8 @@ them. Finally, we'll create multiple authors and use the selected one:
     >>> tech2 = User()
 
     >>> class Author(Participant):
-    ...     def __init__(self, activity):
-    ...         Participant.__init__(self, activity)
+    ...     def __init__(self, activity, process):
+    ...         Participant.__init__(self, activity, process)
     ...         author_name = activity.process.workflowRelevantData.author
     ...         print "Author `%s` selected" % author_name
     ...         self.user = authors[author_name]
@@ -782,7 +782,7 @@ Now we'll create our applications. Let's start with our author:
     ...     zope.component.adapts(interfaces.IParticipant)
     ...     zope.interface.implements(interfaces.IWorkItem)
     ...
-    ...     def __init__(self, participant):
+    ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...         self.activity = participant.activity
     ...         participant.user.work_list.append(self)

@@ -125,8 +125,10 @@ class ProcessDefinition(object):
 
     _start = zope.cachedescriptors.property.Lazy(_start)
 
-    def __call__(self, context=None):
-        return Process(self, self._start, context)
+    def __call__(self, context=None, factory=None):
+        if factory is None:
+            factory = Process
+        return factory(self, self._start, context)
 
     def _dirty(self):
         try:
@@ -321,18 +323,12 @@ class Activity(persistent.Persistent):
         if definition.applications:
 
             participant = integration.createParticipant(
-                self,
-                self.process.process_definition_identifier,
-                definition.performer,
-                )
+                self, self.process, definition.performer)
 
             i = 0
             for application, formal, actual in definition.applications:
                 workitem = integration.createWorkItem(
-                    participant,
-                    self.process.process_definition_identifier,
-                    application,
-                    )
+                    participant, self.process, self, application)
                 i += 1
                 workitem.id = i
                 workitems[i] = workitem, application, formal, actual
