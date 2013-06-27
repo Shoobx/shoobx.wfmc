@@ -196,12 +196,15 @@ class Process(persistent.Persistent):
 
     def __init__(self, definition, start, context=None):
         self.process_definition_identifier = definition.id
-        self.startTransition = start
         self.context = context
         self.activities = {}
         self.nextActivityId = 0
         self.workflowRelevantData = WorkflowData()
         self.applicationRelevantData = WorkflowData()
+
+    @property
+    def startTransition(self):
+        return self.definition._start
 
     def definition(self):
         return component.getUtility(
@@ -262,6 +265,7 @@ class Process(persistent.Persistent):
 
                 if next is None:
                     next = Activity(self, activity_definition)
+                    next.createWorkItems()
                     self.nextActivityId += 1
                     next.id = self.nextActivityId
 
@@ -310,14 +314,15 @@ class Activity(persistent.Persistent):
         self.process = process
         self.activity_definition_identifier = definition.id
 
-        integration = process.definition.integration
-
+    def createWorkItems(self):
+        integration = self.process.definition.integration
+        definition = self.definition
         workitems = {}
         if definition.applications:
 
             participant = integration.createParticipant(
                 self,
-                process.process_definition_identifier,
+                self.process.process_definition_identifier,
                 definition.performer,
                 )
 
@@ -325,7 +330,7 @@ class Activity(persistent.Persistent):
             for application, formal, actual in definition.applications:
                 workitem = integration.createWorkItem(
                     participant,
-                    process.process_definition_identifier,
+                    self.process.process_definition_identifier,
                     application,
                     )
                 i += 1
