@@ -375,6 +375,14 @@ class Activity(persistent.Persistent):
         unused, app, formal, actual = self.workitems.pop(work_item.id)
         self._p_changed = True
         res = results
+        outputs = [(param, name) for param, name in zip(formal, actual)
+                   if param.output]
+        if len(res) != len(outputs):
+            formalnames = tuple([p.__name__ for p, a in outputs])
+            raise TypeError("Not enough parameters returned by work "
+                            "item. Expected: %s, got: %s" % (formalnames,
+                                                             results))
+
         for parameter, name in zip(formal, actual):
             if parameter.output:
                 v = res[0]
