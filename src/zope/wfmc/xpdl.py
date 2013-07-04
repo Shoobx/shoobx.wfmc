@@ -164,6 +164,14 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     start_handlers[(xpdlns10, 'Participant')] = Participant
     start_handlers[(xpdlns21, 'Participant')] = Participant
 
+    def ParticipantType(self, attrs):
+        tp = attrs.get((None, 'Type'))
+        participant = self.stack[-1]
+        participant.type = tp
+        return participant
+    start_handlers[(xpdlns10, 'ParticipantType')] = ParticipantType
+    start_handlers[(xpdlns21, 'ParticipantType')] = ParticipantType
+
     def Application(self, attrs):
         id = attrs[(None, 'Id')]
         name = attrs.get((None, 'Name'))
