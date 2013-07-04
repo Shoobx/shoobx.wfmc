@@ -364,8 +364,9 @@ class Activity(persistent.Persistent):
                 args = []
                 for parameter, name in zip(formal, actual):
                     if parameter.input:
-                        args.append(
-                            getattr(self.process.workflowRelevantData, name))
+                        value = evaluate(name, vars(self.process.workflowRelevantData))
+                        args.append(value)
+
                 workitem.start(*args)
         else:
             # Since we don't have any work items, we're done
@@ -504,3 +505,7 @@ class Participant:
 
     def __repr__(self):
         return "Participant(%r, %r)" % (self.__name__, self.type)
+
+
+def evaluate(expr, locals):
+    return eval(expr, {'__builtins__': None}, locals)
