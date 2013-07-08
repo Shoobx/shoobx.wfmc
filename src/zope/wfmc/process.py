@@ -244,11 +244,7 @@ class Process(persistent.Persistent):
         return outputs
 
     def _finish(self):
-        if self.context is not None:
-            self.context.processFinished(self, *self.outputs())
-
         zope.event.notify(ProcessFinished(self))
-
 
     def transition(self, activity, transitions):
         if transitions:
