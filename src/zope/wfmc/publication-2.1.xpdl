@@ -597,6 +597,15 @@
                         <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
                     </xpdl:ConnectorGraphicsInfos>
                 </xpdl:Transition>
+                <xpdl:Transition From="rfinal1" Id="Publication_Tra13" Name="Transition" To="publish">
+                    <xpdl:Condition Type="OTHERWISE"/>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
                 <xpdl:Transition From="rfinal1" Id="Publication_Tra12" Name="Transition" To="final">
                     <xpdl:Condition Type="CONDITION">ed_changes</xpdl:Condition>
                     <xpdl:ExtendedAttributes>
@@ -605,14 +614,6 @@
                     </xpdl:ExtendedAttributes>
                     <xpdl:ConnectorGraphicsInfos>
                         <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
-                    </xpdl:ConnectorGraphicsInfos>
-                </xpdl:Transition>
-                <xpdl:Transition From="rfinal1" Id="Publication_Tra13" Name="Transition" To="publish">
-                    <xpdl:ExtendedAttributes>
-                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
-                    </xpdl:ExtendedAttributes>
-                    <xpdl:ConnectorGraphicsInfos>
-                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
                     </xpdl:ConnectorGraphicsInfos>
                 </xpdl:Transition>
                 <xpdl:Transition From="review1" Id="Publication_tra1" Name="Transition" To="review">

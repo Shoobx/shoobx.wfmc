@@ -40,6 +40,11 @@ class TransitionDefinition(object):
         self.condition = condition
         self.__name__ = __name__
         self.description = None
+        self.type = 'CONDITION'
+
+    @property
+    def otherwise(self):
+        return self.type in ('OTHERWISE', )
 
     def __repr__(self):
         return "TransitionDefinition(from=%r, to=%r)" %(self.from_, self.to)
@@ -401,11 +406,20 @@ class Activity(persistent.Persistent):
         definition = self.definition
 
         transitions = []
+        otherwises = []
         for transition in definition.outgoing:
+            if transition.otherwise:
+                # do not consider 'otherwise' transitions just yet
+                otherwises.append(transition)
+                continue
             if transition.condition(self.process.workflowRelevantData):
                 transitions.append(transition)
                 if not definition.andSplitSetting:
                     break # xor split, want first one
+
+        if not transitions:
+            # no condition was met, choose 'otherwise' transitions
+            transitions = otherwises
 
         self.process.transition(self, transitions)
 

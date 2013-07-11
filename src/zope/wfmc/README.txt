@@ -1073,11 +1073,6 @@ Coming Soon
 
 - Timeouts/exceptions
 
-- "otherwise" conditions
-
-
-.. [1] There are other kinds of conditions, namely "otherwise" and
-       "exception" conditions.
 
 See also
 ---------

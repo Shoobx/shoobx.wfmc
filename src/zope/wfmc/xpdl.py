@@ -280,12 +280,24 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     end_handlers[(xpdlns10, 'Transition')] = transition
     end_handlers[(xpdlns21, 'Transition')] = transition
 
-    def condition(self, ignored):
+    def Condition(self, attrs):
+        tp = attrs.get((None, 'Type'), 'CONDITION')
+        transdef = self.stack[-1]
+        assert isinstance(transdef, self.TransitionDefinitionFactory)
+
+        transdef.type = tp
+        condition = TextCondition(tp)
+        return condition
+    start_handlers[(xpdlns10, 'Condition')] = Condition
+    start_handlers[(xpdlns21, 'Condition')] = Condition
+
+    def condition(self, condition):
         assert isinstance(self.stack[-1],
                           self.TransitionDefinitionFactory)
 
         text = self.text
-        self.stack[-1].condition = TextCondition("(%s)" % text)
+        condition.set_source('(%s)' % text)
+        self.stack[-1].condition = condition
     end_handlers[(xpdlns10, 'Condition')] = condition
     end_handlers[(xpdlns21, 'Condition')] = condition
 
@@ -299,14 +311,21 @@ class Tool:
 
 class TextCondition:
 
-    def __init__(self, source):
-        self.source = source
+    def __init__(self, type='CONDITION', source=''):
+        self.type = type
+        self.otherwise = type in ('OTHERWISE', )
 
+        if source:
+            self.set_source(source)
+
+    def set_source(self, source):
+        self.source = source
         # make sure that we can compile the source
         compile(source, '<string>', 'eval')
 
     def __getstate__(self):
-        return {'source': self.source}
+        return {'source': self.source,
+                'type': self.type}
 
     def __call__(self, data):
         # We *depend* on being able to use the data's dict.
