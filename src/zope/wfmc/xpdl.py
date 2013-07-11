@@ -23,6 +23,7 @@ import xml.sax.xmlreader
 import xml.sax.handler
 
 import zope.wfmc.process
+from zope.wfmc.interfaces import IExtendedAttributesContainer
 
 xpdlns10 = "http://www.wfmc.org/2002/XPDL1.0"
 xpdlns21 = "http://www.wfmc.org/2008/XPDL2.1"
@@ -305,6 +306,23 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
         self.stack[-1].condition = condition
     end_handlers[(xpdlns10, 'Condition')] = condition
     end_handlers[(xpdlns21, 'Condition')] = condition
+
+    def ExtendedAttributes(self, attrs):
+        parent = self.stack[-1]
+        if IExtendedAttributesContainer.providedBy(parent):
+            return parent.attributes
+
+        return {}  # dummy dict that will be discarded
+    start_handlers[(xpdlns10, 'ExtendedAttributes')] = ExtendedAttributes
+    start_handlers[(xpdlns21, 'ExtendedAttributes')] = ExtendedAttributes
+
+    def ExtendedAttribute(self, attrs):
+        container = self.stack[-1]
+        name = attrs[(None, 'Name')]
+        value = attrs[(None, 'Value')]
+        container[name] = value
+    start_handlers[(xpdlns10, 'ExtendedAttribute')] = ExtendedAttribute
+    start_handlers[(xpdlns21, 'ExtendedAttribute')] = ExtendedAttribute
 
 
 class Tool:

@@ -143,7 +143,8 @@ class ProcessDefinition(object):
 
 class ActivityDefinition(object):
 
-    interface.implements(interfaces.IActivityDefinition)
+    interface.implements(interfaces.IActivityDefinition,
+                         interfaces.IExtendedAttributesContainer)
 
     performer = ''
     process = None
@@ -155,6 +156,7 @@ class ActivityDefinition(object):
         self.applications = ()
         self.andJoinSetting = self.andSplitSetting = False
         self.description = None
+        self.attributes = {}
 
     def andSplit(self, setting):
         self.andSplitSetting = setting

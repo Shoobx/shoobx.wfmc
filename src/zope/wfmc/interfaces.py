@@ -127,6 +127,10 @@ class IProcessDefinition(interface.Interface):
 
         """
 
+class IExtendedAttributesContainer(interface.Interface):
+    """Container for extended attributes"""
+    attributes = interface.Attribute("Extended attribute dictionary")
+
 class IActivityDefinition(interface.Interface):
     """Activity definition
     """

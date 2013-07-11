@@ -408,4 +408,15 @@ Most process elements can have names and descriptions.
         [None, None, None, None, None, None, None, None, None, None, None, None,
          None, None, None, None, None,
          u'Use this transition if there are editorial changes required.']
-  
+
+
+Extended attributes
+-------------------
+
+Extended attributes are stored in ActivityDefinition.attributes dictionary
+
+    >>> author_activity = pd.activities['prepare']
+    >>> author_activity.attributes
+    {u'ParticipantID': u'author',
+     u'XOffset': u'110',
+     u'YOffset': u'20'}
