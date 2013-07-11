@@ -341,7 +341,7 @@ class TextCondition:
             self._v_compiled = compile(self.source, '<string>', 'eval')
             compiled = self._v_compiled
 
-        return eval(compiled, {'__builtins__': None}, data.__dict__)
+        return eval(compiled, zope.wfmc.process.ALLOWED_BUILINS, data.__dict__)
 
 
 def read(file):

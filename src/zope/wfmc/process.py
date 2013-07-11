@@ -517,5 +517,10 @@ class Participant:
         return "Participant(%r, %r)" % (self.__name__, self.type)
 
 
+ALLOWED_BUILIN_NAMES = ['True', 'False', 'None']
+ALLOWED_BUILINS = {k: v for k, v in __builtins__.items()
+                   if k in ALLOWED_BUILIN_NAMES}
+
 def evaluate(expr, locals):
-    return eval(expr, {'__builtins__': None}, locals)
+    __traceback_info__ = (expr, locals)
+    return eval(expr, ALLOWED_BUILINS, locals)
