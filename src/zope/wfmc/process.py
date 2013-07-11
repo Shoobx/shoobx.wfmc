@@ -474,6 +474,9 @@ class Parameter(object):
     def __init__(self, name):
         self.__name__ = name
 
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__.__name__, self.__name__)
+
 class OutputParameter(Parameter):
 
     output = True
