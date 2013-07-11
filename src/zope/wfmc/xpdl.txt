@@ -346,7 +346,7 @@ Now, let's try out our process.  We'll follow the same steps we did in
     ActivityFinished(Activity(u'Publication.publish'))
     ProcessFinished(Process(u'Publication'))
 
-    >>> context.decision
+    >>> proc.workflowRelevantData.publish
     True
 
 

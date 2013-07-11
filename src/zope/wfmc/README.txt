@@ -1063,7 +1063,7 @@ review the document and approve it for publication:
 At this point, the rest of the process finished automatically.  In
 addition, the decision was recorded in the process context object:
 
-    >>> context.decision
+    >>> proc.workflowRelevantData.publish
     True
 
 Coming Soon

@@ -197,9 +197,6 @@ and a process context, so we can pass parameters:
 
     >>> class PublicationContext:
     ...     zope.interface.implements(interfaces.IProcessContext)
-    ...
-    ...     def processFinished(self, process, decision):
-    ...         self.decision = decision
 
 
 Now, let's try out our process.  We'll follow the same steps we did in
@@ -366,7 +363,7 @@ Now, let's try out our process.  We'll follow the same steps we did in
     ActivityFinished(Activity(u'Publication.finish'))
     ProcessFinished(Process(u'Publication'))
 
-    >>> context.decision
+    >>> proc.workflowRelevantData.publish
     True
 
 
