@@ -77,6 +77,11 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     def __init__(self, package):
         self.package = package
         self.stack = []
+        self.textstack = []
+
+    @property
+    def text(self):
+        return self.textstack[-1]
 
     def startElementNS(self, name, qname, attrs):
         handler = self.start_handlers.get(name)
@@ -94,7 +99,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
             result = self.stack[-1]
 
         self.stack.append(result)
-        self.text = u''
+        self.textstack.append(u'')
 
     def endElementNS(self, name, qname):
         last = self.stack.pop()
@@ -106,10 +111,10 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
                 raise HandlerError(sys.exc_info()[1], name[1], self.locator
                     ), None, sys.exc_info()[2]
 
-        self.text = u''
+        self.textstack.pop()
 
     def characters(self, text):
-        self.text += text
+        self.textstack[-1] += text
 
     def setDocumentLocator(self, locator):
         self.locator = locator

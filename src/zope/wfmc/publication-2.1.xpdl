@@ -562,7 +562,8 @@
                     </xpdl:ConnectorGraphicsInfos>
                 </xpdl:Transition>
                 <xpdl:Transition From="review2" Id="Publication_Tra8" Name="Transition" To="final">
-                    <xpdl:Condition Type="CONDITION">ed_changes</xpdl:Condition>
+                    <xpdl:Condition Type="CONDITION">ed_changes<xpdl:Expression ScriptGrammar="python"/>
+                    </xpdl:Condition>
                     <xpdl:Description>Use this transition if there are editorial changes required.</xpdl:Description>
                     <xpdl:ExtendedAttributes>
                         <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
