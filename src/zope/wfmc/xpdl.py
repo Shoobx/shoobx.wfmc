@@ -51,6 +51,7 @@ class Package(dict):
     def __init__(self):
         self.applications = {}
         self.participants = {}
+        
 
     def defineApplications(self, **applications):
         for id, application in applications.items():
@@ -71,6 +72,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
 
     ProcessDefinitionFactory = zope.wfmc.process.ProcessDefinition
     ParticipantFactory = zope.wfmc.process.Participant
+    DataFieldFactory = zope.wfmc.process.DataField
     ApplicationFactory = zope.wfmc.process.Application
     ActivityDefinitionFactory = zope.wfmc.process.ActivityDefinition
     TransitionDefinitionFactory = zope.wfmc.process.TransitionDefinition
@@ -177,6 +179,20 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
         return participant
     start_handlers[(xpdlns10, 'ParticipantType')] = ParticipantType
     start_handlers[(xpdlns21, 'ParticipantType')] = ParticipantType
+
+    def DataField(self, attrs):
+        id = attrs[(None, 'Id')]
+        name = attrs.get((None, 'Name'))
+        datafield = self.DataFieldFactory(id, name)
+        self.stack[-1].defineDataFields(**{str(id): datafield})
+        return datafield
+    start_handlers[(xpdlns10, 'DataField')] = DataField
+    start_handlers[(xpdlns21, 'DataField')] = DataField
+
+    def initialValue(self, datafield):
+        self.stack[-1].initialValue = self.text.strip()
+    end_handlers[(xpdlns10, 'InitialValue')] = initialValue
+    end_handlers[(xpdlns21, 'InitialValue')] = initialValue
 
     def Application(self, attrs):
         id = attrs[(None, 'Id')]

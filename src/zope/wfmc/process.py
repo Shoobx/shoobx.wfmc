@@ -53,7 +53,7 @@ class TransitionDefinition(object):
 class ProcessDefinition(object):
 
     interface.implements(interfaces.IProcessDefinition)
-    
+
     TransitionDefinitionFactory = TransitionDefinition
 
     def __init__(self, id, integration=None):
@@ -63,6 +63,7 @@ class ProcessDefinition(object):
         self.transitions = []
         self.applications = {}
         self.participants = {}
+        self.datafields = {}
         self.parameters = ()
         self.description = None
 
@@ -97,6 +98,11 @@ class ProcessDefinition(object):
         for id, participant in participants.items():
             participant.id = id
             self.participants[id] = participant
+
+    def defineDataFields(self, **datafields):
+        for id, datafield in datafields.items():
+            datafield.id = id
+            self.datafields[id] = datafield
 
     def defineParameters(self, *parameters):
         self.parameters += parameters
@@ -236,6 +242,12 @@ class Process(persistent.Persistent):
         if args:
             raise TypeError("Too many arguments. Expected %s. got %s" %
                             (len(definition.parameters), len(arguments)))
+
+        for id, datafield in definition.datafields.items():
+            val = None
+            if datafield.initialValue:
+                val = evaluate(datafield.initialValue, vars(data))
+            setattr(data, id, val)
 
         zope.event.notify(ProcessStarted(self))
         self.transition(None, (self.startTransition, ))
@@ -520,6 +532,20 @@ class Participant:
 
     def __repr__(self):
         return "Participant(%r, %r)" % (self.__name__, self.type)
+
+
+class DataField:
+
+    interface.implements(interfaces.IDataFieldDefinition)
+
+    def __init__(self, name=None, title=None, initialValue=None):
+        self.__name__ = name
+        self.title = title
+        self.initialValue = initialValue
+
+    def __repr__(self):
+        return "DataField(%r, %r, %r)" % (
+            self.__name__, self.title, self.initialValue)
 
 
 ALLOWED_BUILIN_NAMES = ['True', 'False', 'None']

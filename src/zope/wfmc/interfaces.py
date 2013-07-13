@@ -271,6 +271,10 @@ class IParticipant(interface.Interface):
 
     description = interface.Attribute("Description")
 
+class IDataFieldDefinition(interface.Interface):
+    """Participant definition
+    """
+
 class IWorkItem(interface.Interface):
     """Work items
     """
