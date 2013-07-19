@@ -136,9 +136,9 @@ class IActivityDefinition(interface.Interface):
     """
 
     id = interface.Attribute("Activity identifier")
-    
+
     __name__ = interface.Attribute("Activity Name")
-    
+
     description = interface.Attribute("Description")
 
     def addApplication(id, *parameters):
@@ -175,18 +175,18 @@ class ITransitionDefinition(interface.Interface):
     """Transition definition
     """
     id = interface.Attribute("Transition identifier")
-    
+
     __name__ = interface.Attribute(
         "Transition name, Text used to identify the Transition.")
-    
+
     description = interface.Attribute("Description")
-    
+
     from_ = interface.Attribute(
         "Determines the FROM source of a Transition. (Activity Identifier)")
-    
+
     to = interface.Attribute(
         "Determines the TO target of a Transition (Activity Identifier)")
-    
+
     condition = interface.Attribute(
         "A Transition condition expression based on relevant data field.")
 
@@ -213,6 +213,17 @@ class IProcess(interface.Interface):
         """
         )
 
+    def start(self, *arguments):
+        """Start the process with the given parameters.
+        """
+
+    def abort(self):
+        """Abort the process.
+
+        All current activities should be properly aborted as well.
+        """
+
+
 class IProcessContext(interface.Interface):
     """Object that can receive process results.
     """
@@ -234,9 +245,40 @@ class IActivity(interface.Interface):
 
     definition = interface.Attribute("Activity definition")
 
+    def start(transition):
+        """Start an activity originating from the given transition.
+
+        If we do not have enough incoming transitions yet (via a parallel
+        gateway for example), then wait for more transitions.
+        """
+
+    def finish():
+        """Finish the activity."""
+
+    def abort():
+        """Abort the activity.
+
+        Aborting activities can be used as part of aborting the process or to
+        intervene in a process manually, for example to correct a previous
+        mistake.
+
+        Contrary to finish(), when aborting an activity no result is
+        produced. Also, all workitems are aborted at this time as well.
+
+        Important: Aborting activities can leave your process in a state where
+        is cannot properly finish anymore!
+        """
+
+    def cleanup():
+        """Cleanup any effects of the activity.
+
+        This method is used when the process is aborted manually.
+        """
+
     def workItemFinished(work_item, *results):
         """Notify the activity that the work item has been completed.
         """
+
 
 class IApplicationDefinition(interface.Interface):
     """Application definition
@@ -276,7 +318,7 @@ class IDataFieldDefinition(interface.Interface):
     """
 
 class IWorkItem(interface.Interface):
-    """Work items
+    """Work item
     """
 
     id = interface.Attribute(
@@ -287,7 +329,21 @@ class IWorkItem(interface.Interface):
         """)
 
     def start(*arguments):
-        """Start the work
+        """Start the work.
+        """
+
+class IAbortWorkItem(IWorkItem):
+    """A work item that can be aborted."""
+
+    def abort():
+        """Abort the work.
+        """
+
+class ICleanupWorkItem(IWorkItem):
+    """A work item whose work can be celaned up."""
+
+    def cleanup():
+        """Cleanup the work done by the workitem.
         """
 
 
@@ -300,13 +356,19 @@ class ProcessError(Exception):
     """
 
 class IProcessStarted(interface.Interface):
-    """A process has begun executing
+    """A process has begun executing.
     """
 
     process = interface.Attribute("The process")
 
 class IProcessFinished(interface.Interface):
-    """A process has finished executing
+    """A process has finished executing.
+    """
+
+    process = interface.Attribute("The process")
+
+class IProcessAborted(interface.Interface):
+    """A process has been aborted.
     """
 
     process = interface.Attribute("The process")

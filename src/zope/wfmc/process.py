@@ -213,6 +213,7 @@ class Process(persistent.Persistent):
         self.process_definition_identifier = definition.id
         self.context = context
         self.activities = {}
+        self.finishedActivities = {}
         self.nextActivityId = 0
         self.workflowRelevantData = WorkflowData()
         self.applicationRelevantData = WorkflowData()
@@ -221,12 +222,12 @@ class Process(persistent.Persistent):
     def startTransition(self):
         return self.definition._start
 
+    @property
     def definition(self):
         return component.getUtility(
             interfaces.IProcessDefinition,
             self.process_definition_identifier,
             )
-    definition = property(definition)
 
     def start(self, *arguments):
         if self.activities:
@@ -265,6 +266,13 @@ class Process(persistent.Persistent):
     def _finish(self):
         zope.event.notify(ProcessFinished(self))
 
+    def abort(self):
+        for idx, activity in self.activities.items():
+            activity.abort()
+        for idx, activity in self.finishedActivities.items():
+            activity.cleanup()
+        zope.event.notify(ProcessAborted(self))
+
     def transition(self, activity, transitions):
         if transitions:
             definition = self.definition
@@ -292,6 +300,7 @@ class Process(persistent.Persistent):
 
         if activity is not None:
             del self.activities[activity.id]
+            self.finishedActivities[activity.id] = activity
             if not self.activities:
                 self._finish()
 
@@ -322,6 +331,15 @@ class ProcessFinished:
     def __repr__(self):
         return "ProcessFinished(%r)" % self.process
 
+class ProcessAborted:
+    interface.implements(interfaces.IProcessFinished)
+
+    def __init__(self, process):
+        self.process = process
+
+    def __repr__(self):
+        return "ProcessAborted(%r)" % self.process
+
 
 class Activity(persistent.Persistent):
 
@@ -330,6 +348,8 @@ class Activity(persistent.Persistent):
     def __init__(self, process, definition):
         self.process = process
         self.activity_definition_identifier = definition.id
+        self.workitems = None
+        self.finishedWorkitems = {}
 
     def createWorkItems(self):
         integration = self.process.definition.integration
@@ -383,12 +403,14 @@ class Activity(persistent.Persistent):
                         args.append(value)
 
                 workitem.start(*args)
+
         else:
             # Since we don't have any work items, we're done
             self.finish()
 
     def workItemFinished(self, work_item, *results):
         unused, app, formal, actual = self.workitems.pop(work_item.id)
+        self.finishedWorkitems[work_item.id] = work_item
         self._p_changed = True
         res = results
         outputs = [(param, name) for param, name in zip(formal, actual)
@@ -421,6 +443,7 @@ class Activity(persistent.Persistent):
 
         transitions = []
         otherwises = []
+
         for transition in definition.outgoing:
             if transition.otherwise:
                 # do not consider 'otherwise' transitions just yet
@@ -436,6 +459,22 @@ class Activity(persistent.Persistent):
             transitions = otherwises
 
         self.process.transition(self, transitions)
+
+    def abort(self):
+        # Abort all workitems.
+        for workitem, app, formal, actual in self.workitems.values():
+            if interfaces.IAbortWorkItem.providedBy(workitem):
+                workitem.abort()
+                zope.event.notify(WorkItemAborted(workitem, app, actual))
+        # Remove itself from the process activities list.
+        del self.process.activities[self.id]
+        zope.event.notify(ActivityAborted(self))
+
+    def cleanup(self):
+        # Cleanup all finished workitems.
+        for workitem in self.finishedWorkitems.values():
+            if interfaces.ICleanupWorkItem.providedBy(workitem):
+                workitem.cleanup()
 
     def __repr__(self):
         return "Activity(%r)" % (
@@ -454,6 +493,16 @@ class WorkItemFinished:
     def __repr__(self):
         return "WorkItemFinished(%r)" % self.application
 
+class WorkItemAborted:
+
+    def __init__(self, workitem, application, parameters):
+        self.workitem =  workitem
+        self.application = application
+        self.parameters = parameters
+
+    def __repr__(self):
+        return "WorkItemAborted(%r)" % self.application
+
 class Transition:
 
     def __init__(self, from_, to):
@@ -470,6 +519,14 @@ class ActivityFinished:
 
     def __repr__(self):
         return "ActivityFinished(%r)" % self.activity
+
+class ActivityAborted:
+
+    def __init__(self, activity):
+        self.activity = activity
+
+    def __repr__(self):
+        return "ActivityAborted(%r)" % self.activity
 
 class ActivityStarted:
 

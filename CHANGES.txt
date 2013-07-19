@@ -5,6 +5,24 @@ CHANGES
 3.6.0 (unreleased)
 ------------------
 
+- Support for aborting processes and activities.
+
+  * Work items can be abortable by implementing ``IAbortWorkItem``.
+
+  * Work items can be cleaned up, if they implement ``ICleanupWorkItem``.
+
+  * Activities keep track of finished work items.
+
+  * Activities can clean themselves up by cleaning up work items.
+
+  * Processes keep track of finished activities.
+
+  * When processes are aborted, the following is done:
+
+    + All activities are aborted.
+
+    + All finished activities are cleaned up.
+
 - Support for reading XPDL-2.1 added
 
 3.5.0 (2009-07-24)

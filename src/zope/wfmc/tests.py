@@ -12,13 +12,14 @@
 #
 ##############################################################################
 """Test hookup
-
-$Id$
 """
 import os
 import unittest
 import zope.event
+import zope.interface
 from zope.component import testing
+
+from zope.wfmc import interfaces
 
 def tearDown(test):
     testing.tearDown(test)
@@ -27,6 +28,29 @@ def tearDown(test):
 def setUp(test):
     test.globs['this_directory'] = os.path.dirname(__file__)
     testing.setUp(test)
+
+@zope.interface.implementer(
+    interfaces.IAbortWorkItem, interfaces.ICleanupWorkItem)
+class WorkItemStub(object):
+
+    def __init__(self, participant, process, activity):
+        self.participant = participant
+        self.process = process
+        self.activity = activity
+
+    def start(self, *args):
+        self.args = args
+        print 'Workitem %i for activity %r started.' % (
+            self.id, self.activity.definition.id)
+
+    def abort(self):
+        print 'Workitem %i for activity %r aborted.' % (
+            self.id, self.activity.definition.id)
+
+    def cleanup(self):
+        print 'Workitem %i for activity %r cleaned up.' % (
+            self.id, self.activity.definition.id)
+
 
 def test_multiple_input_parameters():
     """
@@ -194,6 +218,53 @@ def test_wrong_number_process_args_error_message():
     Traceback (most recent call last):
     ...
     TypeError: Too many arguments. Expected 0. got 1
+    """
+
+def test_process_abort():
+    """
+    >>> from zope.wfmc import process
+    >>> pd = process.ProcessDefinition('sample')
+    >>> from zope import component, interface
+    >>> component.provideUtility(pd, name=pd.id)
+
+    >>> pd.defineActivities(
+    ...    eek = process.ActivityDefinition(),
+    ...    ook = process.ActivityDefinition(),
+    ...    )
+
+    >>> pd.defineTransitions(process.TransitionDefinition('eek', 'ook'))
+
+    >>> pd.defineApplications(
+    ...     eek = process.Application(
+    ...         process.InputParameter('x'),
+    ...         process.InputParameter('y'),
+    ...         ),
+    ...     ook = process.Application()
+    ...     )
+
+    >>> pd.activities['eek'].addApplication('eek', ['x', 'y'])
+    >>> pd.activities['ook'].addApplication('ook')
+
+    >>> from zope.wfmc.attributeintegration import AttributeIntegration
+    >>> integration = AttributeIntegration()
+    >>> integration.eekWorkItem = WorkItemStub
+    >>> integration.ookWorkItem = WorkItemStub
+    >>> integration.Participant = process.Participant
+    >>> pd.integration = integration
+
+    >>> proc = pd()
+    >>> proc.workflowRelevantData.x = 1
+    >>> proc.workflowRelevantData.y = 2
+
+    >>> proc.start()
+    Workitem 1 for activity 'eek' started.
+
+    >>> proc.activities[1].workItemFinished(proc.activities[1].workitems[1][0])
+    Workitem 1 for activity 'ook' started.
+
+    >>> proc.abort()
+    Workitem 1 for activity 'ook' aborted.
+    Workitem 1 for activity 'eek' cleaned up.
     """
 
 

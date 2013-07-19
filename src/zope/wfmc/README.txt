@@ -1069,8 +1069,6 @@ addition, the decision was recorded in the process context object:
 Coming Soon
 ------------
 
-- XPDL support
-
 - Timeouts/exceptions
 
 
