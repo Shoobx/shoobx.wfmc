@@ -409,8 +409,8 @@ class Activity(persistent.Persistent):
             self.finish()
 
     def workItemFinished(self, work_item, *results):
-        unused, app, formal, actual = self.workitems.pop(work_item.id)
-        self.finishedWorkitems[work_item.id] = work_item
+        unused, app, formal, actual = entry = self.workitems.pop(work_item.id)
+        self.finishedWorkitems[work_item.id] = entry
         self._p_changed = True
         res = results
         outputs = [(param, name) for param, name in zip(formal, actual)
@@ -472,7 +472,7 @@ class Activity(persistent.Persistent):
 
     def cleanup(self):
         # Cleanup all finished workitems.
-        for workitem in self.finishedWorkitems.values():
+        for workitem, app, formal, actual in self.finishedWorkitems.values():
             if interfaces.ICleanupWorkItem.providedBy(workitem):
                 workitem.cleanup()
 
