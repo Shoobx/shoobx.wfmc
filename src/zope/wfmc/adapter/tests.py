@@ -12,26 +12,24 @@
 #
 ##############################################################################
 """Test hookup
-
-$Id$
 """
-import os
 import unittest
 import zope.event
-from zope.component import testing
+from zope.component import testing, provideAdapter
 from zope.testing import doctest
+
+from zope.wfmc import process
 
 def tearDown(test):
     testing.tearDown(test)
     zope.event.subscribers.pop()
 
 def setUp(test):
-    test.globs['this_directory'] = os.path.dirname(__file__)
     testing.setUp(test)
+    provideAdapter(process.PythonExpressionEvaluator)
 
 def test_suite():
-    return doctest.DocFileSuite('integration.txt',
-                                setUp=testing.setUp, tearDown=tearDown)
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')
+    return unittest.TestSuite((
+            doctest.DocFileSuite(
+                'integration.txt', setUp=setUp, tearDown=tearDown),
+            ))

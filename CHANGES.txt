@@ -2,8 +2,28 @@
 CHANGES
 =======
 
-3.6.0 (unreleased)
+4.0.0 (unreleased)
 ------------------
+
+- The simplistic Python ``evaluate(expr, locals)`` function has been replaced
+  by the `PythonExpressionEvaluator` component, which is an adapter from
+  `IProcess` to `IPythonExpressionEvaluator`. The evaluation locals namespace
+  is automatically filled with workflow- and application-relevant data
+  attributes, the context of the process and the passed in locals variable.
+
+  All calls of `evaluate()` have been updated to use the adapter.
+
+  This change allows for easy replacement of the evaluation engine to hook up
+  a safe Python engine (i.e. RestrictedPython) and to provide more namespace
+  entries.
+
+- Transition conditions can now be evaluated in the larger context of a
+  process, instead of just the workflow-relevant data. Thus their calling
+  signature changed from `condition(data)` to `condition(process, data)`.
+
+- `TextCondition` has been changed to use the `PythonExpressionEvaluator`
+  component. Also, the compile optimization has been removed, since the
+  expression evalautor can do this more effectively.
 
 - Support for aborting processes and activities.
 

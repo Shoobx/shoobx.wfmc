@@ -12,17 +12,11 @@
 #
 ##############################################################################
 """Processes
-
-$Id$
 """
-
 import persistent
-
 import zope.cachedescriptors.property
-
-from zope import component, interface
-
 import zope.event
+from zope import component, interface
 
 from zope.wfmc import interfaces
 
@@ -244,10 +238,11 @@ class Process(persistent.Persistent):
             raise TypeError("Too many arguments. Expected %s. got %s" %
                             (len(definition.parameters), len(arguments)))
 
+        evaluator = interfaces.IPythonExpressionEvaluator(self)
         for id, datafield in definition.datafields.items():
             val = None
             if datafield.initialValue:
-                val = evaluate(datafield.initialValue, vars(data))
+                val = evaluator.evaluate(datafield.initialValue)
             setattr(data, id, val)
 
         zope.event.notify(ProcessStarted(self))
@@ -395,11 +390,12 @@ class Activity(persistent.Persistent):
         zope.event.notify(ActivityStarted(self))
 
         if self.workitems:
+            evaluator = interfaces.IPythonExpressionEvaluator(self.process)
             for workitem, app, formal, actual in self.workitems.values():
                 args = []
                 for parameter, name in zip(formal, actual):
                     if parameter.input:
-                        value = evaluate(name, vars(self.process.workflowRelevantData))
+                        value = evaluator.evaluate(name)
                         args.append(value)
 
                 workitem.start(*args)
@@ -449,7 +445,7 @@ class Activity(persistent.Persistent):
                 # do not consider 'otherwise' transitions just yet
                 otherwises.append(transition)
                 continue
-            if transition.condition(self.process.workflowRelevantData):
+            if transition.condition(self.process):
                 transitions.append(transition)
                 if not definition.andSplitSetting:
                     break # xor split, want first one
@@ -511,6 +507,28 @@ class Transition:
 
     def __repr__(self):
         return "Transition(%r, %r)" % (self.from_, self.to)
+
+class TextCondition:
+
+    def __init__(self, type='CONDITION', source=''):
+        self.type = type
+        self.otherwise = type in ('OTHERWISE', )
+
+        if source:
+            self.set_source(source)
+
+    def set_source(self, source):
+        self.source = source
+        # make sure that we can compile the source
+        compile(source, '<string>', 'eval')
+
+    def __getstate__(self):
+        return {'source': self.source,
+                'type': self.type}
+
+    def __call__(self, process, data={}):
+        evaluator = interfaces.IPythonExpressionEvaluator(process)
+        return evaluator.evaluate(self.source, data)
 
 class ActivityFinished:
 
@@ -605,10 +623,27 @@ class DataField:
             self.__name__, self.title, self.initialValue)
 
 
-ALLOWED_BUILIN_NAMES = ['True', 'False', 'None']
-ALLOWED_BUILINS = {k: v for k, v in __builtins__.items()
-                   if k in ALLOWED_BUILIN_NAMES}
+ALLOWED_BUILTIN_NAMES = ['True', 'False', 'None']
+ALLOWED_BUILTINS = {k: v for k, v in __builtins__.items()
+                    if k in ALLOWED_BUILTIN_NAMES}
 
-def evaluate(expr, locals):
-    __traceback_info__ = (expr, locals)
-    return eval(expr, ALLOWED_BUILINS, locals)
+
+class PythonExpressionEvaluator(object):
+    """Simple Python Expression Evaluator.
+
+    This evaluator only produces a limited namespace and does not use a safe
+    Python engine.
+    """
+    interface.implements(interfaces.IPythonExpressionEvaluator)
+    component.adapts(interfaces.IProcess)
+
+    def __init__(self, process):
+        self.process = process
+
+    def evaluate(self, expr, locals={}):
+        __traceback_info__ = (expr, locals)
+        ns = {'context': self.process.context}
+        ns.update(vars(self.process.workflowRelevantData))
+        ns.update(vars(self.process.applicationRelevantData))
+        ns.update(locals)
+        return eval(expr, ALLOWED_BUILTINS, ns)

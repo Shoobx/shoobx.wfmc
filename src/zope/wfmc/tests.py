@@ -17,9 +17,10 @@ import os
 import unittest
 import zope.event
 import zope.interface
-from zope.component import testing
+from zope.component import testing, provideAdapter
+from zope.testing import doctest
 
-from zope.wfmc import interfaces
+from zope.wfmc import interfaces, process
 
 def tearDown(test):
     testing.tearDown(test)
@@ -28,6 +29,7 @@ def tearDown(test):
 def setUp(test):
     test.globs['this_directory'] = os.path.dirname(__file__)
     testing.setUp(test)
+    provideAdapter(process.PythonExpressionEvaluator)
 
 @zope.interface.implementer(
     interfaces.IAbortWorkItem, interfaces.ICleanupWorkItem)
@@ -269,11 +271,10 @@ def test_process_abort():
 
 
 def test_suite():
-    from zope.testing import doctest
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocFileSuite(
         'README.txt',
-        setUp=testing.setUp, tearDown=tearDown,
+        setUp=setUp, tearDown=tearDown,
         optionflags=doctest.NORMALIZE_WHITESPACE))
     suite.addTest(doctest.DocFileSuite(
         'xpdl.txt',
@@ -284,8 +285,5 @@ def test_suite():
         setUp=setUp, tearDown=tearDown,
         optionflags=doctest.NORMALIZE_WHITESPACE))
     suite.addTest(doctest.DocTestSuite(
-        setUp=testing.setUp, tearDown=testing.tearDown))
+        setUp=setUp, tearDown=testing.tearDown))
     return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')

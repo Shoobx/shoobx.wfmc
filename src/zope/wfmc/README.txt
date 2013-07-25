@@ -115,7 +115,8 @@ rejects the content for publication.  We can use a condition for this:
     >>> pd.defineTransitions(
     ...     process.TransitionDefinition('author', 'review'),
     ...     process.TransitionDefinition(
-    ...         'review', 'publish', condition=lambda data: data.publish),
+    ...         'review', 'publish',
+    ...         condition=lambda proc: proc.workflowRelevantData.publish),
     ...     process.TransitionDefinition('review', 'reject'),
     ...     )
 
@@ -354,7 +355,8 @@ example by passing it to the definition constructor:
     ...     process.TransitionDefinition('author', 'review'),
     ...     process.TransitionDefinition('review', 'reject'),
     ...     process.TransitionDefinition(
-    ...         'review', 'publish', condition=lambda data: data.publish),
+    ...         'review', 'publish',
+    ...         condition=lambda proc: proc.workflowRelevantData.publish),
     ...     )
 
     >>> pd.defineApplications(
@@ -431,7 +433,7 @@ redefine the process:
     ...     process.TransitionDefinition('review', 'reject', id='reject'),
     ...     process.TransitionDefinition(
     ...         'review', 'publish', id='publish',
-    ...         condition=lambda data: data.publish),
+    ...         condition=lambda proc: proc.workflowRelevantData.publish),
     ...     )
 
     >>> pd.defineApplications(
@@ -632,22 +634,22 @@ We define our transitions:
     ...
     ...     process.TransitionDefinition(
     ...         'review', 'reject',
-    ...         condition=lambda data: not data.publish
+    ...         condition=lambda proc: not proc.workflowRelevantData.publish
     ...         ),
     ...     process.TransitionDefinition(
     ...         'review', 'prepare',
-    ...         condition=lambda data: data.tech_changes
+    ...         condition=lambda proc: proc.workflowRelevantData.tech_changes
     ...         ),
     ...     process.TransitionDefinition(
     ...         'review', 'final',
-    ...         condition=lambda data: data.ed_changes
+    ...         condition=lambda proc: proc.workflowRelevantData.ed_changes
     ...         ),
     ...     process.TransitionDefinition('review', 'publish'),
     ...
     ...     process.TransitionDefinition('final', 'rfinal'),
     ...     process.TransitionDefinition(
     ...         'rfinal', 'final',
-    ...         condition=lambda data: data.ed_changes
+    ...         condition=lambda proc: proc.workflowRelevantData.ed_changes
     ...         ),
     ...     process.TransitionDefinition('rfinal', 'publish'),
     ...     )

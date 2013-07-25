@@ -11,11 +11,8 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-"""Processes
-
-$Id$
+"""Integration Components
 """
-
 from zope import component, interface
 from zope.wfmc import interfaces
 

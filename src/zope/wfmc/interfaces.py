@@ -372,3 +372,23 @@ class IProcessAborted(interface.Interface):
     """
 
     process = interface.Attribute("The process")
+
+
+class IPythonExpressionEvaluator(interface.Interface):
+    """Python Expression Evaluator
+
+    A component that evaluates Python expressions in the context of a
+    process.
+
+    It is the responsibility of this component to create the necessary
+    namespace. At least the attributes of the workflow-relevant data must be
+    made available.
+    """
+
+    def evaluate(expr, locals):
+        """Evaluate the python expression.
+
+        `locals` is a mapping containing additional namesapce attributes.
+
+        Returns the result of the expression.
+        """

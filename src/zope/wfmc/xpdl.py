@@ -51,7 +51,7 @@ class Package(dict):
     def __init__(self):
         self.applications = {}
         self.participants = {}
-        
+
 
     def defineApplications(self, **applications):
         for id, application in applications.items():
@@ -76,6 +76,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     ApplicationFactory = zope.wfmc.process.Application
     ActivityDefinitionFactory = zope.wfmc.process.ActivityDefinition
     TransitionDefinitionFactory = zope.wfmc.process.TransitionDefinition
+    TextCondition = zope.wfmc.process.TextCondition
 
     def __init__(self, package):
         self.package = package
@@ -308,7 +309,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
         assert isinstance(transdef, self.TransitionDefinitionFactory)
 
         transdef.type = tp
-        condition = TextCondition(tp)
+        condition = self.TextCondition(tp)
         return condition
     start_handlers[(xpdlns10, 'Condition')] = Condition
     start_handlers[(xpdlns21, 'Condition')] = Condition
@@ -347,35 +348,6 @@ class Tool:
         self.id = id
 
     parameters = ()
-
-class TextCondition:
-
-    def __init__(self, type='CONDITION', source=''):
-        self.type = type
-        self.otherwise = type in ('OTHERWISE', )
-
-        if source:
-            self.set_source(source)
-
-    def set_source(self, source):
-        self.source = source
-        # make sure that we can compile the source
-        compile(source, '<string>', 'eval')
-
-    def __getstate__(self):
-        return {'source': self.source,
-                'type': self.type}
-
-    def __call__(self, data):
-        # We *depend* on being able to use the data's dict.
-        # TODO This needs to be part of the contract.
-        try:
-            compiled = self._v_compiled
-        except AttributeError:
-            self._v_compiled = compile(self.source, '<string>', 'eval')
-            compiled = self._v_compiled
-
-        return eval(compiled, zope.wfmc.process.ALLOWED_BUILINS, data.__dict__)
 
 
 def read(file):
