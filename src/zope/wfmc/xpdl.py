@@ -160,7 +160,9 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     def FormalParameter(self, attrs):
         mode = attrs.get((None, 'Mode'), 'IN')
         id = attrs[(None, 'Id')]
-        self.stack[-1].defineParameters(*[self.paramter_types[mode](id)])
+        parameter = self.paramter_types[mode](id)
+        self.stack[-1].defineParameters(parameter)
+        return parameter
     start_handlers[(xpdlns10, 'FormalParameter')] = FormalParameter
     start_handlers[(xpdlns21, 'FormalParameter')] = FormalParameter
 

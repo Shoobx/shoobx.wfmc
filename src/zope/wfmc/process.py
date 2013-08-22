@@ -229,21 +229,31 @@ class Process(persistent.Persistent):
 
         definition = self.definition
         data = self.workflowRelevantData
-        args = arguments
-        for parameter in definition.parameters:
-            if parameter.input:
-                arg, args = args[0], args[1:]
-                setattr(data, parameter.__name__, arg)
-        if args:
-            raise TypeError("Too many arguments. Expected %s. got %s" %
-                            (len(definition.parameters), len(arguments)))
-
         evaluator = interfaces.IPythonExpressionEvaluator(self)
+
+        # Assign data defaults.
         for id, datafield in definition.datafields.items():
             val = None
             if datafield.initialValue:
                 val = evaluator.evaluate(datafield.initialValue)
             setattr(data, id, val)
+
+        # Now apply input parameters on top of the defaults.
+        args = arguments
+        for parameter in definition.parameters:
+            if parameter.input:
+                if args:
+                    arg, args = args[0], args[1:]
+                elif parameter.initialValue is not None:
+                    arg = evaluator.evaluate(parameter.initialValue)
+                    pass
+                else:
+                    raise ValueError(
+                        'Insufficient arguments passed to process.')
+                setattr(data, parameter.__name__, arg)
+        if args:
+            raise TypeError("Too many arguments. Expected %s. got %s" %
+                            (len(definition.parameters), len(arguments)))
 
         zope.event.notify(ProcessStarted(self))
         self.transition(None, (self.startTransition, ))
@@ -398,6 +408,7 @@ class Activity(persistent.Persistent):
                         value = evaluator.evaluate(name)
                         args.append(value)
 
+                __traceback_info__ = workitem, args
                 workitem.start(*args)
 
         else:
@@ -559,6 +570,7 @@ class Parameter(object):
     interface.implements(interfaces.IParameterDefinition)
 
     input = output = False
+    initialValue = None
 
     def __init__(self, name):
         self.__name__ = name
