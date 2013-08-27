@@ -12,12 +12,14 @@
 #
 ##############################################################################
 """Workflow-integration interfaces
-
-$Id$
 """
 __docformat__ = "reStructuredText"
 
 from zope import interface
+
+class IExtendedAttributesContainer(interface.Interface):
+    """Container for extended attributes"""
+    attributes = interface.Attribute("Extended attribute dictionary")
 
 class IIntegration(interface.Interface):
     """Integration of a workflow definition with an application environment
@@ -41,7 +43,7 @@ class IIntegration(interface.Interface):
         select an appropriate work-item type.
         """
 
-class IProcessDefinition(interface.Interface):
+class IProcessDefinition(IExtendedAttributesContainer):
     """Process definition
 
     A process definition defines a particular workflow and define the control
@@ -126,10 +128,6 @@ class IProcessDefinition(interface.Interface):
         processFinished method of process-instances process contexts.
 
         """
-
-class IExtendedAttributesContainer(interface.Interface):
-    """Container for extended attributes"""
-    attributes = interface.Attribute("Extended attribute dictionary")
 
 class IActivityDefinition(interface.Interface):
     """Activity definition

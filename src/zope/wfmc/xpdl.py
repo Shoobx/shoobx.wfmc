@@ -338,10 +338,18 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     def ExtendedAttribute(self, attrs):
         container = self.stack[-1]
         name = attrs[(None, 'Name')]
-        value = attrs[(None, 'Value')]
+        value = attrs.get((None, 'Value'))
         container[name] = value
+        return container, name
     start_handlers[(xpdlns10, 'ExtendedAttribute')] = ExtendedAttribute
     start_handlers[(xpdlns21, 'ExtendedAttribute')] = ExtendedAttribute
+
+    def extendedAttribute(self, info):
+        container, name = info
+        if container[name] is None:
+            container[name] = self.text.strip()
+    end_handlers[(xpdlns10, 'ExtendedAttribute')] = extendedAttribute
+    end_handlers[(xpdlns21, 'ExtendedAttribute')] = extendedAttribute
 
 
 class Tool:

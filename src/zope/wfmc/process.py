@@ -16,6 +16,7 @@
 import persistent
 import zope.cachedescriptors.property
 import zope.event
+from collections import OrderedDict
 from zope import component, interface
 
 from zope.wfmc import interfaces
@@ -59,6 +60,7 @@ class ProcessDefinition(object):
         self.participants = {}
         self.datafields = {}
         self.parameters = ()
+        self.attributes = OrderedDict()
         self.description = None
 
     def __repr__(self):
@@ -156,7 +158,7 @@ class ActivityDefinition(object):
         self.applications = ()
         self.andJoinSetting = self.andSplitSetting = False
         self.description = None
-        self.attributes = {}
+        self.attributes = OrderedDict()
 
     def andSplit(self, setting):
         self.andSplitSetting = setting

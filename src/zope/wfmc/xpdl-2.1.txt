@@ -417,6 +417,6 @@ Extended attributes are stored in ActivityDefinition.attributes dictionary
 
     >>> author_activity = pd.activities['prepare']
     >>> author_activity.attributes
-    {u'ParticipantID': u'author',
-     u'XOffset': u'110',
-     u'YOffset': u'20'}
+   OrderedDict([(u'ParticipantID', u'author'),
+                (u'XOffset', u'110'),
+                (u'YOffset', u'20')])
