@@ -407,6 +407,7 @@ class Activity(persistent.Persistent):
                 args = []
                 for parameter, name in zip(formal, actual):
                     if parameter.input:
+                        __traceback_info__ = (workitem, parameter)
                         value = evaluator.evaluate(name)
                         args.append(value)
 
