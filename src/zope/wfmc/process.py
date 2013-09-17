@@ -450,24 +450,7 @@ class Activity(persistent.Persistent):
     def finish(self):
         zope.event.notify(ActivityFinished(self))
 
-        definition = self.definition
-
-        transitions = []
-        otherwises = []
-
-        for transition in definition.outgoing:
-            if transition.otherwise:
-                # do not consider 'otherwise' transitions just yet
-                otherwises.append(transition)
-                continue
-            if transition.condition(self.process):
-                transitions.append(transition)
-                if not definition.andSplitSetting:
-                    break # xor split, want first one
-
-        if not transitions:
-            # no condition was met, choose 'otherwise' transitions
-            transitions = otherwises
+        transitions = getValidOutgoingTransitions(self.process, self.definition)
 
         self.process.transition(self, transitions)
 
@@ -492,6 +475,45 @@ class Activity(persistent.Persistent):
             self.process.process_definition_identifier + '.' +
             self.activity_definition_identifier
             )
+
+
+def getValidOutgoingTransitions(process, activity_definition, strict=True):
+    """Return list of valid outgoing transitions from given activity_definition
+    in given process.
+
+    Valid outgoing transitions are transitions having conditions that are
+    evaluating to True (or "otherwise" transitions if all conditions are
+    False).
+
+    If any exception is raised during evaluation of condition expressions,
+    it will be rerised only if ``strict`` parameter is True. Otherwise, the
+    condition will be treated as False.
+    """
+    transitions = []
+    otherwises = []
+
+    for transition in activity_definition.outgoing:
+        if transition.otherwise:
+            # do not consider 'otherwise' transitions just yet
+            otherwises.append(transition)
+            continue
+        try:
+            active = transition.condition(process)
+        except:
+            if strict:
+                raise
+            else:
+                active = False
+        if active:
+            transitions.append(transition)
+            if not activity_definition.andSplitSetting:
+                break  # xor split, want first one
+
+    if not transitions:
+        # no condition was met, choose 'otherwise' transitions
+        return otherwises
+    return transitions
+
 
 class WorkItemFinished:
 
