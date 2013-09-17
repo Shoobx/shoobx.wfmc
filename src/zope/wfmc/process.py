@@ -28,14 +28,15 @@ class TransitionDefinition(object):
 
     interface.implements(interfaces.ITransitionDefinition)
 
-    def __init__(self, from_, to, condition=always_true, id=None, __name__=None):
+    def __init__(self, from_, to, condition=always_true, id=None,
+                 __name__=None, otherwise=False):
         self.id = id
         self.from_ = from_
         self.to = to
         self.condition = condition
         self.__name__ = __name__
         self.description = None
-        self.type = 'CONDITION'
+        self.type = 'OTHERWISE' if otherwise else 'CONDITION'
 
     @property
     def otherwise(self):
