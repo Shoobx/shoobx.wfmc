@@ -419,6 +419,12 @@ class Activity(persistent.Persistent):
             # Since we don't have any work items, we're done
             self.finish()
 
+    def workItemDiscardard(self, work_item):
+        self.workitems.pop(work_item.id)
+        self._p_changed = True
+        if not self.workitems:
+            self.finish()
+
     def workItemFinished(self, work_item, *results):
         unused, app, formal, actual = entry = self.workitems.pop(work_item.id)
         self.finishedWorkitems[work_item.id] = entry
