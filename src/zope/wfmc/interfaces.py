@@ -338,7 +338,7 @@ class IAbortWorkItem(IWorkItem):
         """
 
 class ICleanupWorkItem(IWorkItem):
-    """A work item whose work can be celaned up."""
+    """A work item whose work can be cleaned up."""
 
     def cleanup():
         """Cleanup the work done by the workitem.
