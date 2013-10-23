@@ -32,7 +32,7 @@ def setUp(test):
     provideAdapter(process.PythonExpressionEvaluator)
 
 @zope.interface.implementer(
-    interfaces.IAbortWorkItem, interfaces.ICleanupWorkItem)
+    interfaces.IAbortWorkItem, interfaces.IRevertableWorkItem)
 class WorkItemStub(object):
 
     def __init__(self, participant, process, activity):
@@ -49,8 +49,8 @@ class WorkItemStub(object):
         print 'Workitem %i for activity %r aborted.' % (
             self.id, self.activity.definition.id)
 
-    def cleanup(self):
-        print 'Workitem %i for activity %r cleaned up.' % (
+    def revert(self):
+        print 'Workitem %i for activity %r reverted.' % (
             self.id, self.activity.definition.id)
 
 
@@ -266,7 +266,7 @@ def test_process_abort():
 
     >>> proc.abort()
     Workitem 1 for activity 'ook' aborted.
-    Workitem 1 for activity 'eek' cleaned up.
+    Workitem 1 for activity 'eek' reverted.
     """
 
 

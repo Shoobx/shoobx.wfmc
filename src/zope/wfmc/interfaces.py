@@ -337,13 +337,13 @@ class IAbortWorkItem(IWorkItem):
         """Abort the work.
         """
 
-class ICleanupWorkItem(IWorkItem):
-    """A work item whose work can be cleaned up."""
 
-    def cleanup():
-        """Cleanup the work done by the workitem.
+class IRevertableWorkItem(IWorkItem):
+    """A work item whose work can be reverted."""
+
+    def revert():
+        """Undo the work done by the workitem.
         """
-
 
 class InvalidProcessDefinition(Exception):
     """A process definition isn't valid in some way.

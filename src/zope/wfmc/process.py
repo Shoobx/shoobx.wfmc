@@ -278,7 +278,7 @@ class Process(persistent.Persistent):
         for idx, activity in self.activities.items():
             activity.abort()
         for idx, activity in self.finishedActivities.items():
-            activity.cleanup()
+            activity.revert()
         zope.event.notify(ProcessAborted(self))
 
     def transition(self, activity, transitions):
@@ -470,11 +470,11 @@ class Activity(persistent.Persistent):
         del self.process.activities[self.id]
         zope.event.notify(ActivityAborted(self))
 
-    def cleanup(self):
-        # Cleanup all finished workitems.
+    def revert(self):
+        # Revert all finished workitems.
         for workitem, app, formal, actual in self.finishedWorkitems.values():
-            if interfaces.ICleanupWorkItem.providedBy(workitem):
-                workitem.cleanup()
+            if interfaces.IRevertableWorkItem.providedBy(workitem):
+                workitem.revert()
 
     def __repr__(self):
         return "Activity(%r)" % (
