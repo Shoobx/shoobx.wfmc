@@ -412,7 +412,7 @@ class Activity(persistent.Persistent):
                         value = evaluator.evaluate(name)
                         args.append(value)
 
-                __traceback_info__ = workitem, args
+                __traceback_info__ = workitem.activity, workitem, args
                 workitem.start(*args)
 
         else:
