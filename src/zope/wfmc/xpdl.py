@@ -11,10 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
-from zope.wfmc.process import ActivityDefinition
 """XPDL reader for process definitions
-
-$Id$
 """
 
 import sys
@@ -23,7 +20,8 @@ import xml.sax.xmlreader
 import xml.sax.handler
 
 import zope.wfmc.process
-from zope.wfmc.interfaces import IExtendedAttributesContainer
+from zope.wfmc.process import ActivityDefinition
+from zope.wfmc.interfaces import IExtendedAttributesContainer, SYNCHRONOUS
 
 xpdlns10 = "http://www.wfmc.org/2002/XPDL1.0"
 xpdlns21 = "http://www.wfmc.org/2008/XPDL2.1"
@@ -247,6 +245,22 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     end_handlers[(xpdlns10, 'Tool')] = tool
     end_handlers[(xpdlns21, 'TaskApplication')] = tool
 
+    def SubFlow(self, attrs):
+        return SubFlow(attrs[(None, 'Id')], attrs[(None, 'Execution')])
+    start_handlers[(xpdlns10, 'SubFlow')] = SubFlow
+    start_handlers[(xpdlns21, 'SubFlow')] = SubFlow
+
+    def subflow(self, subflow):
+        self.stack[-1].addSubFlow(
+            subflow.id, subflow.execution, subflow.parameters)
+    end_handlers[(xpdlns10, 'SubFlow')] = subflow
+    end_handlers[(xpdlns21, 'SubFlow')] = subflow
+
+    def script(self, script):
+        self.stack[-1].addScript(self.text)
+    end_handlers[(xpdlns10, 'Script')] = script
+    end_handlers[(xpdlns21, 'Script')] = script
+
     def actualparameter(self, ignored):
         self.stack[-1].parameters += (self.text,)
     end_handlers[(xpdlns10, 'ActualParameter')] = actualparameter
@@ -352,12 +366,20 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     end_handlers[(xpdlns21, 'ExtendedAttribute')] = extendedAttribute
 
 
-class Tool:
+class Tool(object):
+    parameters = ()
 
     def __init__(self, id):
         self.id = id
 
+
+class SubFlow(object):
     parameters = ()
+    execution = SYNCHRONOUS
+
+    def __init__(self, id, execution):
+        self.id = id
+        self.execution = execution
 
 
 def read(file):

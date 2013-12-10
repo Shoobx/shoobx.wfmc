@@ -17,6 +17,9 @@ __docformat__ = "reStructuredText"
 
 from zope import interface
 
+SYNCHRONOUS = 'SYNCHR'
+ASYNCHRONOUS = 'ASYNCHR'
+
 class IExtendedAttributesContainer(interface.Interface):
     """Container for extended attributes"""
     attributes = interface.Attribute("Extended attribute dictionary")
@@ -27,7 +30,6 @@ class IIntegration(interface.Interface):
     ``IIntegration`` objects provide methods for integrating workflow
     process definition with an application environment.
     """
-
 
     def createParticipant(activity, process, performer):
         """Create a participant for an activity
@@ -41,6 +43,20 @@ class IIntegration(interface.Interface):
 
         The process id and especially the application (id) are used to
         select an appropriate work-item type.
+        """
+
+    def createSubflowWorkItem(process, activity, subflow):
+        """Create a subflow work item.
+
+        The subflow id is used to lookup the sub-process to be executed.
+        """
+
+    def createScriptWorkItem(process, activity, code):
+        """Create a script work item.
+
+        The workitem for the given code of the script is created. The task of
+        the integration is to provide the proper execution environment for the
+        script.
         """
 
 class IProcessDefinition(IExtendedAttributesContainer):

@@ -157,6 +157,8 @@ class ActivityDefinition(object):
         self.incoming = self.outgoing = ()
         self.transition_outgoing = self.explicit_outgoing = ()
         self.applications = ()
+        self.subflows = ()
+        self.scripts = ()
         self.andJoinSetting = self.andSplitSetting = False
         self.description = None
         self.attributes = OrderedDict()
@@ -175,6 +177,14 @@ class ActivityDefinition(object):
                             "Actual=%s, Formal=%s for Application %s with id=%s"
                             %(actual, formal, app, app.id))
         self.applications += ((application, formal, tuple(actual)), )
+
+    def addSubFlow(self, subflow, execution, actual=()):
+        # Lookup of formal parameters must be delayed, since the subflow might
+        # not yet be loaded.
+        self.subflows += ((subflow, execution, None, tuple(actual)), )
+
+    def addScript(self, code):
+        self.scripts += (code,)
 
     def definePerformer(self, performer):
         self.performer = performer
@@ -362,19 +372,40 @@ class Activity(persistent.Persistent):
     def createWorkItems(self):
         integration = self.process.definition.integration
         definition = self.definition
+        participant = None
         workitems = {}
-        if definition.applications:
 
-            participant = integration.createParticipant(
-                self, self.process, definition.performer)
+        if definition.applications or definition.subflows or definition.scripts:
+
+            if definition.performer:
+                participant = integration.createParticipant(
+                    self, self.process, definition.performer)
 
             i = 0
+
+            # Instantiate Applications
             for application, formal, actual in definition.applications:
                 workitem = integration.createWorkItem(
                     participant, self.process, self, application)
                 i += 1
                 workitem.id = i
                 workitems[i] = workitem, application, formal, actual
+
+            # Instantiate Subflows
+            for subflow, execution, formal, actual in definition.subflows:
+                workitem = integration.createSubFlowWorkItem(
+                    self.process, self, subflow, execution)
+                i += 1
+                workitem.id = i
+                workitems[i] = workitem, subflow, formal, actual
+
+            # Script
+            for code in definition.scripts:
+                workitem = integration.createScriptWorkItem(
+                    self.process, self, code)
+                i += 1
+                workitem.id = i
+                workitems[i] = workitem, code, (), ()
 
         self.workitems = workitems
 
@@ -408,7 +439,8 @@ class Activity(persistent.Persistent):
                 args = []
                 for parameter, name in zip(formal, actual):
                     if parameter.input:
-                        __traceback_info__ = (workitem, parameter)
+                        __traceback_info__ = (
+                            workitem, workitem.activity, parameter)
                         value = evaluator.evaluate(name)
                         args.append(value)
 
@@ -521,7 +553,27 @@ def getValidOutgoingTransitions(process, activity_definition, strict=True):
     return transitions
 
 
-class WorkItemFinished:
+class ScriptWorkItem(object):
+    "Executes the script and stores all changed workflow-relevant attributes."
+
+    def __init__(self, process, activity, code):
+        self.process = process
+        self.activity = activity
+        self.code = code
+
+    def execute(self):
+        evaluator = interfaces.IPythonExpressionEvaluator(self.process)
+        evaluator.execute(self.code)
+
+    def start(self):
+        self.execute()
+        self.finish()
+
+    def finish(self):
+        self.activity.workItemFinished(self)
+
+
+class WorkItemFinished(object):
 
     def __init__(self, workitem, application, parameters, results):
         self.workitem =  workitem
@@ -691,3 +743,15 @@ class PythonExpressionEvaluator(object):
         ns.update(vars(self.process.applicationRelevantData))
         ns.update(locals)
         return eval(expr, ALLOWED_BUILTINS, ns)
+
+    def execute(self, code, locals={}):
+        __traceback_info__ = (code, locals)
+        ns = {'context': self.process.context}
+        ns.update(vars(self.process.workflowRelevantData))
+        ns.update(vars(self.process.applicationRelevantData))
+        ns.update(locals)
+        ns.update(ALLOWED_BUILTINS)
+        result = {}
+        exec code in ALLOWED_BUILTINS, result
+        for name, value in result:
+            pass
