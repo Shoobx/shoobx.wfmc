@@ -283,8 +283,8 @@ class IActivity(interface.Interface):
         is cannot properly finish anymore!
         """
 
-    def cleanup():
-        """Cleanup any effects of the activity.
+    def revert():
+        """Revert any effects of the activity.
 
         This method is used when the process is aborted manually.
         """
