@@ -426,6 +426,7 @@ class Process(persistent.Persistent):
                     arg = evaluator.evaluate(parameter.initialValue)
                     pass
                 else:
+                    __traceback_info__ = (self, args, definition.parameters)
                     raise ValueError(
                         'Insufficient arguments passed to process.')
                 setattr(data, parameter.__name__, arg)
