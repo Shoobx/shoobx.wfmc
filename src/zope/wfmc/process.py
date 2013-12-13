@@ -377,9 +377,8 @@ class Activity(persistent.Persistent):
 
         if definition.applications or definition.subflows or definition.scripts:
 
-            if definition.performer:
-                participant = integration.createParticipant(
-                    self, self.process, definition.performer)
+            participant = integration.createParticipant(
+                self, self.process, definition.performer)
 
             i = 0
 
@@ -440,11 +439,13 @@ class Activity(persistent.Persistent):
                 for parameter, name in zip(formal, actual):
                     if parameter.input:
                         __traceback_info__ = (
-                            workitem, workitem.activity, parameter)
+                            workitem, self.activity_definition_identifier,
+                            parameter)
                         value = evaluator.evaluate(name)
                         args.append(value)
 
-                __traceback_info__ = workitem.activity, workitem, args
+                __traceback_info__ = (self.activity_definition_identifier,
+                                      workitem, args)
                 workitem.start(*args)
 
         else:
