@@ -212,153 +212,6 @@ class ActivityDefinition(object):
         return "<ActivityDefinition %r>" %self.__name__
 
 
-class Process(persistent.Persistent):
-
-    interface.implements(interfaces.IProcess)
-
-    def __init__(self, definition, start, context=None):
-        self.process_definition_identifier = definition.id
-        self.context = context
-        self.activities = {}
-        self.finishedActivities = {}
-        self.nextActivityId = 0
-        self.workflowRelevantData = WorkflowData()
-        self.applicationRelevantData = WorkflowData()
-
-    @property
-    def startTransition(self):
-        return self.definition._start
-
-    @property
-    def definition(self):
-        return component.getUtility(
-            interfaces.IProcessDefinition,
-            self.process_definition_identifier,
-            )
-
-    def start(self, *arguments):
-        if self.activities:
-            raise TypeError("Already started")
-
-        definition = self.definition
-        data = self.workflowRelevantData
-        evaluator = interfaces.IPythonExpressionEvaluator(self)
-
-        # Assign data defaults.
-        for id, datafield in definition.datafields.items():
-            val = None
-            if datafield.initialValue:
-                val = evaluator.evaluate(datafield.initialValue)
-            setattr(data, id, val)
-
-        # Now apply input parameters on top of the defaults.
-        args = arguments
-        for parameter in definition.parameters:
-            if parameter.input:
-                if args:
-                    arg, args = args[0], args[1:]
-                elif parameter.initialValue is not None:
-                    arg = evaluator.evaluate(parameter.initialValue)
-                    pass
-                else:
-                    raise ValueError(
-                        'Insufficient arguments passed to process.')
-                setattr(data, parameter.__name__, arg)
-        if args:
-            raise TypeError("Too many arguments. Expected %s. got %s" %
-                            (len(definition.parameters), len(arguments)))
-
-        zope.event.notify(ProcessStarted(self))
-        self.transition(None, (self.startTransition, ))
-
-    def outputs(self):
-        outputs = []
-        for parameter in self.definition.parameters:
-            if parameter.output:
-                outputs.append(
-                    getattr(self.workflowRelevantData,
-                            parameter.__name__))
-
-        return outputs
-
-    def _finish(self):
-        zope.event.notify(ProcessFinished(self))
-
-    def abort(self):
-        for idx, activity in self.activities.items():
-            activity.abort()
-        for idx, activity in self.finishedActivities.items():
-            activity.revert()
-        zope.event.notify(ProcessAborted(self))
-
-    def transition(self, activity, transitions):
-        if transitions:
-            definition = self.definition
-
-            for transition in transitions:
-                activity_definition = definition.activities[transition.to]
-                next = None
-                if activity_definition.andJoinSetting:
-                    # If it's an and-join, we want only one.
-                    for i, a in self.activities.items():
-                        if a.activity_definition_identifier == transition.to:
-                            # we already have the activity -- use it
-                            next = a
-                            break
-
-                if next is None:
-                    next = Activity(self, activity_definition)
-                    next.createWorkItems()
-                    self.nextActivityId += 1
-                    next.id = self.nextActivityId
-
-                zope.event.notify(Transition(activity, next))
-                self.activities[next.id] = next
-                next.start(transition)
-
-        if activity is not None:
-            del self.activities[activity.id]
-            self.finishedActivities[activity.id] = activity
-            if not self.activities:
-                self._finish()
-
-        self._p_changed = True
-
-    def __repr__(self):
-        return "Process(%r)" % self.process_definition_identifier
-
-class WorkflowData(persistent.Persistent):
-    """Container for workflow-relevant and application-relevant data
-    """
-
-class ProcessStarted:
-    interface.implements(interfaces.IProcessStarted)
-
-    def __init__(self, process):
-        self.process = process
-
-    def __repr__(self):
-        return "ProcessStarted(%r)" % self.process
-
-class ProcessFinished:
-    interface.implements(interfaces.IProcessFinished)
-
-    def __init__(self, process):
-        self.process = process
-
-    def __repr__(self):
-        return "ProcessFinished(%r)" % self.process
-
-class ProcessAborted:
-    interface.implements(interfaces.IProcessFinished)
-
-    def __init__(self, process):
-        self.process = process
-
-    def __repr__(self):
-        return "ProcessAborted(%r)" % self.process
-
-
 class Activity(persistent.Persistent):
 
     interface.implements(interfaces.IActivity)
@@ -514,6 +367,158 @@ class Activity(persistent.Persistent):
             self.process.process_definition_identifier + '.' +
             self.activity_definition_identifier
             )
+
+
+class WorkflowData(persistent.Persistent):
+    """Container for workflow-relevant and application-relevant data
+    """
+
+
+class Process(persistent.Persistent):
+
+    interface.implements(interfaces.IProcess)
+
+    ActivityFactory = Activity
+    WorkflowDataFactory = WorkflowData
+
+    def __init__(self, definition, start, context=None):
+        self.process_definition_identifier = definition.id
+        self.context = context
+        self.activities = {}
+        self.finishedActivities = {}
+        self.nextActivityId = 0
+        self.workflowRelevantData = self.WorkflowDataFactory()
+        self.applicationRelevantData = self.WorkflowDataFactory()
+
+    @property
+    def startTransition(self):
+        return self.definition._start
+
+    @property
+    def definition(self):
+        return component.getUtility(
+            interfaces.IProcessDefinition,
+            self.process_definition_identifier,
+            )
+
+    def start(self, *arguments):
+        if self.activities:
+            raise TypeError("Already started")
+
+        definition = self.definition
+        data = self.workflowRelevantData
+        evaluator = interfaces.IPythonExpressionEvaluator(self)
+
+        # Assign data defaults.
+        for id, datafield in definition.datafields.items():
+            val = None
+            if datafield.initialValue:
+                val = evaluator.evaluate(datafield.initialValue)
+            setattr(data, id, val)
+
+        # Now apply input parameters on top of the defaults.
+        args = arguments
+        for parameter in definition.parameters:
+            if parameter.input:
+                if args:
+                    arg, args = args[0], args[1:]
+                elif parameter.initialValue is not None:
+                    arg = evaluator.evaluate(parameter.initialValue)
+                    pass
+                else:
+                    raise ValueError(
+                        'Insufficient arguments passed to process.')
+                setattr(data, parameter.__name__, arg)
+        if args:
+            raise TypeError("Too many arguments. Expected %s. got %s" %
+                            (len(definition.parameters), len(arguments)))
+
+        zope.event.notify(ProcessStarted(self))
+        self.transition(None, (self.startTransition, ))
+
+    def outputs(self):
+        outputs = []
+        for parameter in self.definition.parameters:
+            if parameter.output:
+                outputs.append(
+                    getattr(self.workflowRelevantData,
+                            parameter.__name__))
+
+        return outputs
+
+    def _finish(self):
+        zope.event.notify(ProcessFinished(self))
+
+    def abort(self):
+        for idx, activity in self.activities.items():
+            activity.abort()
+        for idx, activity in self.finishedActivities.items():
+            activity.revert()
+        zope.event.notify(ProcessAborted(self))
+
+    def transition(self, activity, transitions):
+        if transitions:
+            definition = self.definition
+
+            for transition in transitions:
+                activity_definition = definition.activities[transition.to]
+                next = None
+                if activity_definition.andJoinSetting:
+                    # If it's an and-join, we want only one.
+                    for i, a in self.activities.items():
+                        if a.activity_definition_identifier == transition.to:
+                            # we already have the activity -- use it
+                            next = a
+                            break
+
+                if next is None:
+                    next = self.ActivityFactory(self, activity_definition)
+                    next.createWorkItems()
+                    self.nextActivityId += 1
+                    next.id = self.nextActivityId
+
+                zope.event.notify(Transition(activity, next))
+                self.activities[next.id] = next
+                next.start(transition)
+
+        if activity is not None:
+            del self.activities[activity.id]
+            self.finishedActivities[activity.id] = activity
+            if not self.activities:
+                self._finish()
+
+        self._p_changed = True
+
+    def __repr__(self):
+        return "Process(%r)" % self.process_definition_identifier
+
+
+class ProcessStarted:
+    interface.implements(interfaces.IProcessStarted)
+
+    def __init__(self, process):
+        self.process = process
+
+    def __repr__(self):
+        return "ProcessStarted(%r)" % self.process
+
+class ProcessFinished:
+    interface.implements(interfaces.IProcessFinished)
+
+    def __init__(self, process):
+        self.process = process
+
+    def __repr__(self):
+        return "ProcessFinished(%r)" % self.process
+
+class ProcessAborted:
+    interface.implements(interfaces.IProcessFinished)
+
+    def __init__(self, process):
+        self.process = process
+
+    def __repr__(self):
+        return "ProcessAborted(%r)" % self.process
 
 
 def getValidOutgoingTransitions(process, activity_definition, strict=True):
