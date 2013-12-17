@@ -418,21 +418,21 @@ class Process(persistent.Persistent):
 
         # Now apply input parameters on top of the defaults.
         args = arguments
-        for parameter in definition.parameters:
-            if parameter.input:
-                if args:
-                    arg, args = args[0], args[1:]
-                elif parameter.initialValue is not None:
-                    arg = evaluator.evaluate(parameter.initialValue)
-                    pass
-                else:
-                    __traceback_info__ = (self, args, definition.parameters)
-                    raise ValueError(
-                        'Insufficient arguments passed to process.')
-                setattr(data, parameter.__name__, arg)
+        inputparams = [p for p in definition.parameters if p.input]
+        for parameter in inputparams:
+            if args:
+                arg, args = args[0], args[1:]
+            elif parameter.initialValue is not None:
+                arg = evaluator.evaluate(parameter.initialValue)
+                pass
+            else:
+                __traceback_info__ = (self, args, definition.parameters)
+                raise ValueError(
+                    'Insufficient arguments passed to process.')
+            setattr(data, parameter.__name__, arg)
         if args:
             raise TypeError("Too many arguments. Expected %s. got %s" %
-                            (len(definition.parameters), len(arguments)))
+                            (len(inputparams), len(arguments)))
 
         zope.event.notify(ProcessStarted(self))
         self.transition(None, (self.startTransition, ))
