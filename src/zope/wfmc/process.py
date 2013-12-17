@@ -257,7 +257,7 @@ class Activity(persistent.Persistent):
                     self.process, self, code)
                 i += 1
                 workitem.id = i
-                workitems[i] = workitem, code, (), ()
+                workitems[i] = workitem, "__script__", (), ()
 
         self.workitems = workitems
 
