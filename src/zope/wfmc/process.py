@@ -513,7 +513,7 @@ class ProcessFinished:
         return "ProcessFinished(%r)" % self.process
 
 class ProcessAborted:
-    interface.implements(interfaces.IProcessFinished)
+    interface.implements(interfaces.IProcessAborted)
 
     def __init__(self, process):
         self.process = process
