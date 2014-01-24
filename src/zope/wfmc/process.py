@@ -424,7 +424,6 @@ class Process(persistent.Persistent):
                 arg, args = args[0], args[1:]
             elif parameter.initialValue is not None:
                 arg = evaluator.evaluate(parameter.initialValue)
-                pass
             else:
                 __traceback_info__ = (self, args, definition.parameters)
                 raise ValueError(
@@ -439,11 +438,18 @@ class Process(persistent.Persistent):
 
     def outputs(self):
         outputs = []
+        evaluator = interfaces.IPythonExpressionEvaluator(self)
         for parameter in self.definition.parameters:
             if parameter.output:
-                outputs.append(
-                    getattr(self.workflowRelevantData,
-                            parameter.__name__))
+                if hasattr(self.workflowRelevantData, parameter.__name__):
+                    value = getattr(self.workflowRelevantData,
+                                    parameter.__name__)
+                elif parameter.initialValue is not None:
+                    value = evaluator.evaluate(parameter.initialValue)
+                else:
+                    __traceback_info__ = (self, parameters)
+                    raise ValueError('Output parameter not available.')
+                outputs.append(value)
 
         return outputs
 
