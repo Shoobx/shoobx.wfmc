@@ -340,6 +340,9 @@ class Activity(persistent.Persistent):
             self.finish()
 
     def finish(self):
+        proc = self.process
+        del proc.activities[self.id]
+        proc.finishedActivities[self.id] = self
         zope.event.notify(ActivityFinished(self))
 
         transitions = getValidOutgoingTransitions(self.process, self.definition)
@@ -481,12 +484,8 @@ class Process(persistent.Persistent):
                 zope.event.notify(Transition(activity, next))
                 self.activities[next.id] = next
                 next.start(transition)
-
-        if activity is not None:
-            del self.activities[activity.id]
-            self.finishedActivities[activity.id] = activity
-            if not self.activities:
-                self._finish()
+        else:
+            self._finish()
 
         self._p_changed = True
 
