@@ -277,7 +277,7 @@ def test_suite():
         suite.addTest(doctest.DocFileSuite(
             doctestfile,
             setUp=setUp, tearDown=tearDown,
-            optionflags=doctest.NORMALIZE_WHITESPACE))
+            optionflags=doctest.NORMALIZE_WHITESPACE | doctest.REPORT_NDIFF))
     suite.addTest(doctest.DocTestSuite(
         setUp=setUp, tearDown=testing.tearDown))
     return suite
