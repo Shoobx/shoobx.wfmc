@@ -246,7 +246,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     end_handlers[(xpdlns21, 'TaskApplication')] = tool
 
     def SubFlow(self, attrs):
-        return SubFlow(attrs[(None, 'Id')], attrs[(None, 'Execution')])
+        return SubFlow(attrs[(None, 'Id')], attrs.get((None, 'Execution')))
     start_handlers[(xpdlns10, 'SubFlow')] = SubFlow
     start_handlers[(xpdlns21, 'SubFlow')] = SubFlow
 
@@ -377,9 +377,10 @@ class SubFlow(object):
     parameters = ()
     execution = SYNCHRONOUS
 
-    def __init__(self, id, execution):
+    def __init__(self, id, execution=None):
         self.id = id
-        self.execution = execution
+        if execution is not None:
+            self.execution = execution
 
 
 def read(file):
