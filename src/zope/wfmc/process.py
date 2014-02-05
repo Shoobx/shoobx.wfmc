@@ -544,19 +544,19 @@ class Process(persistent.Persistent):
     def __repr__(self):
         return "Process(%r)" % self.process_definition_identifier
 
-    def initSubflow(self, subflow_pd_id, starter_workitem):
+    def initSubflow(self, subflow_pd_id, starter_activity_id,
+                    starter_workitem_id, proc_factory=None):
         subflow_pd = component.getUtility(interfaces.IProcessDefinition,
                                           subflow_pd_id)
-        subflow = subflow_pd(self.context)
+        subflow = subflow_pd(self.context, factory=proc_factory)
         subflow.activities = self.activities
         subflow.finishedActivities = self.finishedActivities
         subflow.activityIdSequence = self.activityIdSequence
         subflow.workflowRelevantData = self.workflowRelevantData
         subflow.applicationRelevantData = self.applicationRelevantData
-        subflow.startedSubflows = self.startedSubflows
 
-        subflow.starterActivityId = starter_workitem.activity.id
-        subflow.starterWorkitemId = starter_workitem.id
+        subflow.starterActivityId = starter_activity_id
+        subflow.starterWorkitemId = starter_workitem_id
 
         return subflow
 
@@ -660,7 +660,9 @@ class SubflowWorkItem(object):
         self.execution = execution
 
     def start(self):
-        subproc = self.process.initSubflow(self.subflow, self)
+        subproc = self.process.initSubflow(self.subflow,
+                                           self.activity.id, self.id,
+                                           proc_factory=self.processFactory)
         subproc.start()
 
 
