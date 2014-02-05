@@ -437,7 +437,6 @@ class Process(persistent.Persistent):
         self.activityIdSequence = Sequence()
         self.workflowRelevantData = self.WorkflowDataFactory()
         self.applicationRelevantData = self.WorkflowDataFactory()
-        self.startedSubflows = []
 
     @property
     def startTransition(self):
@@ -501,9 +500,6 @@ class Process(persistent.Persistent):
         self.isFinished = True
         if self.starterActivityId:
             # Subflow finished, continue with main flow
-            self.startedSubflows.remove((self.process_definition_identifier,
-                                         self.starterActivityId,
-                                         self.starterWorkitemId))
             starter = self.activities[self.starterActivityId]
             wi, _, _, _ = starter.workitems[self.starterWorkitemId]
             starter.workItemFinished(wi)
@@ -562,9 +558,6 @@ class Process(persistent.Persistent):
         subflow.starterActivityId = starter_workitem.activity.id
         subflow.starterWorkitemId = starter_workitem.id
 
-        self.startedSubflows.append((subflow.process_definition_identifier,
-                                     starter_workitem.activity.id,
-                                     starter_workitem.id))
         return subflow
 
 
@@ -658,6 +651,8 @@ class ScriptWorkItem(object):
 
 @zope.interface.implementer(interfaces.IWorkItem)
 class SubflowWorkItem(object):
+    processFactory = None
+
     def __init__(self, process, activity, subflow, execution):
         self.process = process
         self.activity = activity

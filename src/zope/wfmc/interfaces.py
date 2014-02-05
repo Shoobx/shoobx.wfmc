@@ -50,7 +50,7 @@ class IIntegration(interface.Interface):
         select an appropriate work-item type.
         """
 
-    def createSubflowWorkItem(process, activity, subflow):
+    def createSubflowWorkItem(process, activity, subflow, execution):
         """Create a subflow work item.
 
         The subflow id is used to lookup the sub-process to be executed.

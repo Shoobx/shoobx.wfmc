@@ -101,8 +101,6 @@ Make sure process is finished now::
     True
     >>> proc.activities
     {}
-    >>> proc.startedSubflows
-    []
 
 Variable from inner subflow should be visible in main flow namespace::
 
