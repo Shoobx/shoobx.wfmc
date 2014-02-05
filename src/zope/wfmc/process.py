@@ -403,6 +403,20 @@ class WorkflowData(persistent.Persistent):
     """
 
 
+class Sequence(object):
+    counter = 0
+
+    def __init__(self, counter=0):
+        self.counter = counter
+
+    def next(self):
+        self.counter += 1
+        return self.counter
+
+    def current(self):
+        return self.counter
+
+
 class Process(persistent.Persistent):
 
     interface.implements(interfaces.IProcess)
@@ -420,7 +434,7 @@ class Process(persistent.Persistent):
         self.context = context
         self.activities = {}
         self.finishedActivities = {}
-        self.nextActivityId = 0
+        self.activityIdSequence = Sequence()
         self.workflowRelevantData = self.WorkflowDataFactory()
         self.applicationRelevantData = self.WorkflowDataFactory()
         self.startedSubflows = []
@@ -521,8 +535,7 @@ class Process(persistent.Persistent):
                 if next is None:
                     next = self.ActivityFactory(self, activity_definition)
                     next.createWorkItems()
-                    self.nextActivityId += 1
-                    next.id = self.nextActivityId
+                    next.id = self.activityIdSequence.next()
 
                 zope.event.notify(Transition(activity, next))
                 self.activities[next.id] = next
@@ -541,7 +554,7 @@ class Process(persistent.Persistent):
         subflow = subflow_pd(self.context)
         subflow.activities = self.activities
         subflow.finishedActivities = self.finishedActivities
-        subflow.nextActivityId = self.nextActivityId  # TODO: convert to counter
+        subflow.activityIdSequence = self.activityIdSequence
         subflow.workflowRelevantData = self.workflowRelevantData
         subflow.applicationRelevantData = self.applicationRelevantData
         subflow.startedSubflows = self.startedSubflows
