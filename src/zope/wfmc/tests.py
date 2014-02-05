@@ -273,7 +273,7 @@ def test_process_abort():
 def test_suite():
     suite = unittest.TestSuite()
     for doctestfile in ['README.txt', 'xpdl.txt',
-                        'xpdl-2.1.txt']:
+                        'xpdl-2.1.txt', 'subflow.txt']:
         suite.addTest(doctest.DocFileSuite(
             doctestfile,
             setUp=setUp, tearDown=tearDown,

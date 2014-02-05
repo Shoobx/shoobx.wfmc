@@ -20,9 +20,14 @@ from zope import interface
 SYNCHRONOUS = 'SYNCHR'
 ASYNCHRONOUS = 'ASYNCHR'
 
+START_EVENT = "start"
+END_EVENT = "end"
+
+
 class IExtendedAttributesContainer(interface.Interface):
     """Container for extended attributes"""
     attributes = interface.Attribute("Extended attribute dictionary")
+
 
 class IIntegration(interface.Interface):
     """Integration of a workflow definition with an application environment
