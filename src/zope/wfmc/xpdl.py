@@ -20,8 +20,7 @@ import xml.sax.xmlreader
 import xml.sax.handler
 
 import zope.wfmc.process
-from zope.wfmc.process import ActivityDefinition
-from zope.wfmc.interfaces import IExtendedAttributesContainer, SYNCHRONOUS
+from zope.wfmc import interfaces
 
 xpdlns10 = "http://www.wfmc.org/2002/XPDL1.0"
 xpdlns21 = "http://www.wfmc.org/2008/XPDL2.1"
@@ -49,7 +48,6 @@ class Package(dict):
     def __init__(self):
         self.applications = {}
         self.participants = {}
-
 
     def defineApplications(self, **applications):
         for id, application in applications.items():
@@ -154,7 +152,6 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
         'INOUT': zope.wfmc.process.InputOutputParameter,
         }
 
-
     def FormalParameter(self, attrs):
         mode = attrs.get((None, 'Mode'), 'IN')
         id = attrs[(None, 'Id')]
@@ -246,13 +243,12 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     end_handlers[(xpdlns21, 'TaskApplication')] = tool
 
     def SubFlow(self, attrs):
-        return SubFlow(attrs[(None, 'Id')], attrs[(None, 'Execution')])
+        return SubFlow(attrs[(None, 'Id')], attrs.get((None, 'Execution')))
     start_handlers[(xpdlns10, 'SubFlow')] = SubFlow
     start_handlers[(xpdlns21, 'SubFlow')] = SubFlow
 
     def subflow(self, subflow):
-        self.stack[-1].addSubFlow(
-            subflow.id, subflow.execution, subflow.parameters)
+        self.stack[-1].addSubflow(subflow.id, subflow.execution)
     end_handlers[(xpdlns10, 'SubFlow')] = subflow
     end_handlers[(xpdlns21, 'SubFlow')] = subflow
 
@@ -260,6 +256,20 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
         self.stack[-1].addScript(self.text)
     end_handlers[(xpdlns10, 'Script')] = script
     end_handlers[(xpdlns21, 'Script')] = script
+
+    def StartEvent(self, attrs):
+        ad = self.stack[-1]
+        assert isinstance(ad, zope.wfmc.process.ActivityDefinition)
+        ad.event = interfaces.START_EVENT
+    start_handlers[(xpdlns10, 'StartEvent')] = StartEvent
+    start_handlers[(xpdlns21, 'StartEvent')] = StartEvent
+
+    def EndEvent(self, attrs):
+        ad = self.stack[-1]
+        assert isinstance(ad, zope.wfmc.process.ActivityDefinition)
+        ad.event = interfaces.END_EVENT
+    start_handlers[(xpdlns10, 'EndEvent')] = EndEvent
+    start_handlers[(xpdlns21, 'EndEvent')] = EndEvent
 
     def actualparameter(self, ignored):
         self.stack[-1].parameters += (self.text,)
@@ -269,7 +279,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     def performer(self, ignored):
         activity = self.stack[-1]
 
-        if not isinstance(activity, ActivityDefinition):
+        if not isinstance(activity, zope.wfmc.process.ActivityDefinition):
             # We are not parsing activity yet (probably this is a performer
             # in a pool)
             return
@@ -298,10 +308,8 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     start_handlers[(xpdlns10, 'TransitionRef')] = TransitionRef
     start_handlers[(xpdlns21, 'TransitionRef')] = TransitionRef
 
-
     # Activity definitions
     ######################################################################
-
     def Transition(self, attrs):
         id = attrs[(None, 'Id')]
         name = attrs.get((None, 'Name'))
@@ -342,7 +350,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
 
     def ExtendedAttributes(self, attrs):
         parent = self.stack[-1]
-        if IExtendedAttributesContainer.providedBy(parent):
+        if interfaces.IExtendedAttributesContainer.providedBy(parent):
             return parent.attributes
 
         return {}  # dummy dict that will be discarded
@@ -375,11 +383,12 @@ class Tool(object):
 
 class SubFlow(object):
     parameters = ()
-    execution = SYNCHRONOUS
+    execution = interfaces.SYNCHRONOUS
 
-    def __init__(self, id, execution):
+    def __init__(self, id, execution=None):
         self.id = id
-        self.execution = execution
+        if execution is not None:
+            self.execution = execution
 
 
 def read(file):
@@ -391,4 +400,3 @@ def read(file):
     parser.setFeature(xml.sax.handler.feature_namespaces, True)
     parser.parse(src)
     return package
-

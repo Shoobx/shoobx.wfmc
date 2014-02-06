@@ -17,7 +17,7 @@
 $Id$
 """
 
-from zope.wfmc import interfaces
+from zope.wfmc import interfaces, process
 from zope import interface
 
 
@@ -30,10 +30,16 @@ class AttributeIntegration:
 
     interface.implements(interfaces.IIntegration)
 
-    def createParticipant(self, activity, process, performer):
+    def createParticipant(self, activity, proc, performer):
         factory = getattr(self, performer + 'Participant')
-        return factory(activity, process)
+        return factory(activity, proc)
 
-    def createWorkItem(self, participant, process, activity, application):
+    def createWorkItem(self, participant, proc, activity, application):
         factory = getattr(self, application + 'WorkItem')
-        return factory(participant, process, activity)
+        return factory(participant, proc, activity)
+
+    def createScriptWorkItem(self, proc, activity, code):
+        return process.ScriptWorkItem(proc, activity, code)
+
+    def createSubflowWorkItem(self, proc, activity, subflow, execution):
+        return process.SubflowWorkItem(proc, activity, subflow, execution)

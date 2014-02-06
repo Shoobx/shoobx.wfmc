@@ -20,9 +20,14 @@ from zope import interface
 SYNCHRONOUS = 'SYNCHR'
 ASYNCHRONOUS = 'ASYNCHR'
 
+START_EVENT = "start"
+END_EVENT = "end"
+
+
 class IExtendedAttributesContainer(interface.Interface):
     """Container for extended attributes"""
     attributes = interface.Attribute("Extended attribute dictionary")
+
 
 class IIntegration(interface.Interface):
     """Integration of a workflow definition with an application environment
@@ -45,7 +50,7 @@ class IIntegration(interface.Interface):
         select an appropriate work-item type.
         """
 
-    def createSubflowWorkItem(process, activity, subflow):
+    def createSubflowWorkItem(process, activity, subflow, execution):
         """Create a subflow work item.
 
         The subflow id is used to lookup the sub-process to be executed.

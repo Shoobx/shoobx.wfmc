@@ -13,6 +13,8 @@
 ##############################################################################
 """Processes
 """
+import logging
+
 import persistent
 import zope.cachedescriptors.property
 import zope.event
@@ -21,8 +23,12 @@ from zope import component, interface
 
 from zope.wfmc import interfaces
 
+log = logging.getLogger(__name__)
+
+
 def always_true(data):
     return True
+
 
 class TransitionDefinition(object):
 
@@ -144,6 +150,7 @@ class ProcessDefinition(object):
         except AttributeError:
             pass
 
+
 class ActivityDefinition(object):
 
     interface.implements(interfaces.IActivityDefinition,
@@ -162,6 +169,7 @@ class ActivityDefinition(object):
         self.andJoinSetting = self.andSplitSetting = False
         self.description = None
         self.attributes = OrderedDict()
+        self.event = None
 
     def andSplit(self, setting):
         self.andSplitSetting = setting
@@ -175,13 +183,13 @@ class ActivityDefinition(object):
         if len(formal) != len(actual):
             raise TypeError("Wrong number of parameters => "
                             "Actual=%s, Formal=%s for Application %s with id=%s"
-                            %(actual, formal, app, app.id))
+                            % (actual, formal, app, app.id))
         self.applications += ((application, formal, tuple(actual)), )
 
-    def addSubFlow(self, subflow, execution, actual=()):
+    def addSubflow(self, subflow, execution):
         # Lookup of formal parameters must be delayed, since the subflow might
         # not yet be loaded.
-        self.subflows += ((subflow, execution, None, tuple(actual)), )
+        self.subflows += ((subflow, execution, (), ()), )
 
     def addScript(self, code):
         self.scripts += (code,)
@@ -213,8 +221,9 @@ class ActivityDefinition(object):
 
 
 class Activity(persistent.Persistent):
-
     interface.implements(interfaces.IActivity)
+
+    incoming = ()
 
     def __init__(self, process, definition):
         self.process = process
@@ -223,50 +232,67 @@ class Activity(persistent.Persistent):
         self.finishedWorkitems = {}
 
     def createWorkItems(self):
-        integration = self.process.definition.integration
-        definition = self.definition
-        participant = None
         workitems = {}
 
-        if definition.applications or definition.subflows or definition.scripts:
-
-            participant = integration.createParticipant(
-                self, self.process, definition.performer)
-
-            i = 0
-
-            # Instantiate Applications
-            for application, formal, actual in definition.applications:
-                workitem = integration.createWorkItem(
-                    participant, self.process, self, application)
-                i += 1
-                workitem.id = i
-                workitems[i] = workitem, application, formal, actual
-
-            # Instantiate Subflows
-            for subflow, execution, formal, actual in definition.subflows:
-                workitem = integration.createSubFlowWorkItem(
-                    self.process, self, subflow, execution)
-                i += 1
-                workitem.id = i
-                workitems[i] = workitem, subflow, formal, actual
-
-            # Script
-            for code in definition.scripts:
-                workitem = integration.createScriptWorkItem(
-                    self.process, self, code)
-                i += 1
-                workitem.id = i
-                workitems[i] = workitem, "__script__", (), ()
+        if self.definition.applications:
+            workitems = self.createApplicationWorkItems()
+        elif self.definition.subflows:
+            workitems = self.createSubflowWorkItems()
+        elif self.definition.scripts:
+            workitems = self.createScriptWorkItems()
 
         self.workitems = workitems
+
+    def createApplicationWorkItems(self):
+        integration = self.process.definition.integration
+        workitems = {}
+
+        participant = integration.createParticipant(
+            self, self.process, self.definition.performer)
+        i = 0
+        # Instantiate Applications
+        for application, formal, actual in self.definition.applications:
+            workitem = integration.createWorkItem(
+                participant, self.process, self, application)
+            i += 1
+            workitem.id = i
+            workitems[i] = workitem, application, formal, actual
+
+        return workitems
+
+    def createScriptWorkItems(self):
+        integration = self.process.definition.integration
+        workitems = {}
+
+        i = 0
+        for code in self.definition.scripts:
+            workitem = integration.createScriptWorkItem(
+                self.process, self, code)
+            i += 1
+            workitem.id = i
+            workitems[i] = workitem, "__script__", (), ()
+
+        return workitems
+
+    def createSubflowWorkItems(self):
+        integration = self.process.definition.integration
+        workitems = {}
+        i = 0
+        # Instantiate Subflows
+        for subflow, execution, formal, actual in self.definition.subflows:
+            workitem = integration.createSubflowWorkItem(
+                self.process, self, subflow, execution)
+            i += 1
+            workitem.id = i
+            workitems[i] = workitem, subflow, formal, actual
+
+        return workitems
 
     def definition(self):
         return self.process.definition.activities[
             self.activity_definition_identifier]
     definition = property(definition)
 
-    incoming = ()
     def start(self, transition):
         # Start the activity, if we've had enough incoming transitions
 
@@ -340,6 +366,9 @@ class Activity(persistent.Persistent):
             self.finish()
 
     def finish(self):
+        proc = self.process
+        del proc.activities[self.id]
+        proc.finishedActivities[self.id] = self
         zope.event.notify(ActivityFinished(self))
 
         transitions = getValidOutgoingTransitions(self.process, self.definition)
@@ -374,6 +403,20 @@ class WorkflowData(persistent.Persistent):
     """
 
 
+class Sequence(object):
+    counter = 0
+
+    def __init__(self, counter=0):
+        self.counter = counter
+
+    def next(self):
+        self.counter += 1
+        return self.counter
+
+    def current(self):
+        return self.counter
+
+
 class Process(persistent.Persistent):
 
     interface.implements(interfaces.IProcess)
@@ -381,12 +424,17 @@ class Process(persistent.Persistent):
     ActivityFactory = Activity
     WorkflowDataFactory = WorkflowData
 
+    isStarted = False
+    isFinished = False
+    starterActivityId = None
+    starterWorkitemId = None
+
     def __init__(self, definition, start, context=None):
         self.process_definition_identifier = definition.id
         self.context = context
         self.activities = {}
         self.finishedActivities = {}
-        self.nextActivityId = 0
+        self.activityIdSequence = Sequence()
         self.workflowRelevantData = self.WorkflowDataFactory()
         self.applicationRelevantData = self.WorkflowDataFactory()
 
@@ -402,7 +450,7 @@ class Process(persistent.Persistent):
             )
 
     def start(self, *arguments):
-        if self.activities:
+        if self.isStarted:
             raise TypeError("Already started")
 
         definition = self.definition
@@ -433,6 +481,7 @@ class Process(persistent.Persistent):
             raise TypeError("Too many arguments. Expected %s. got %s" %
                             (len(inputparams), len(arguments)))
 
+        self.isStarted = True
         zope.event.notify(ProcessStarted(self))
         self.transition(None, (self.startTransition, ))
 
@@ -454,7 +503,14 @@ class Process(persistent.Persistent):
         return outputs
 
     def _finish(self):
-        zope.event.notify(ProcessFinished(self))
+        self.isFinished = True
+        if self.starterActivityId:
+            # Subflow finished, continue with main flow
+            starter = self.activities[self.starterActivityId]
+            wi, _, _, _ = starter.workitems[self.starterWorkitemId]
+            starter.workItemFinished(wi)
+        else:
+            zope.event.notify(ProcessFinished(self))
 
     def abort(self):
         for idx, activity in self.activities.items():
@@ -481,23 +537,34 @@ class Process(persistent.Persistent):
                 if next is None:
                     next = self.ActivityFactory(self, activity_definition)
                     next.createWorkItems()
-                    self.nextActivityId += 1
-                    next.id = self.nextActivityId
+                    next.id = self.activityIdSequence.next()
 
                 zope.event.notify(Transition(activity, next))
                 self.activities[next.id] = next
                 next.start(transition)
-
-        if activity is not None:
-            del self.activities[activity.id]
-            self.finishedActivities[activity.id] = activity
-            if not self.activities:
-                self._finish()
+        else:
+            self._finish()
 
         self._p_changed = True
 
     def __repr__(self):
         return "Process(%r)" % self.process_definition_identifier
+
+    def initSubflow(self, subflow_pd_id, starter_activity_id,
+                    starter_workitem_id, proc_factory=None):
+        subflow_pd = component.getUtility(interfaces.IProcessDefinition,
+                                          subflow_pd_id)
+        subflow = subflow_pd(self.context, factory=proc_factory)
+        subflow.activities = self.activities
+        subflow.finishedActivities = self.finishedActivities
+        subflow.activityIdSequence = self.activityIdSequence
+        subflow.workflowRelevantData = self.workflowRelevantData
+        subflow.applicationRelevantData = self.applicationRelevantData
+
+        subflow.starterActivityId = starter_activity_id
+        subflow.starterWorkitemId = starter_workitem_id
+
+        return subflow
 
 
 class ProcessStarted:
@@ -562,10 +629,12 @@ def getValidOutgoingTransitions(process, activity_definition, strict=True):
 
     if not transitions:
         # no condition was met, choose 'otherwise' transitions
-        return otherwises
+        transitions = otherwises
+
     return transitions
 
 
+@zope.interface.implementer(interfaces.IWorkItem)
 class ScriptWorkItem(object):
     "Executes the script and stores all changed workflow-relevant attributes."
 
@@ -586,10 +655,27 @@ class ScriptWorkItem(object):
         self.activity.workItemFinished(self)
 
 
+@zope.interface.implementer(interfaces.IWorkItem)
+class SubflowWorkItem(object):
+    processFactory = None
+
+    def __init__(self, process, activity, subflow, execution):
+        self.process = process
+        self.activity = activity
+        self.subflow = subflow
+        self.execution = execution
+
+    def start(self):
+        subproc = self.process.initSubflow(self.subflow,
+                                           self.activity.id, self.id,
+                                           proc_factory=self.processFactory)
+        subproc.start()
+
+
 class WorkItemFinished(object):
 
     def __init__(self, workitem, application, parameters, results):
-        self.workitem =  workitem
+        self.workitem = workitem
         self.application = application
         self.parameters = parameters
         self.results = results
@@ -597,15 +683,17 @@ class WorkItemFinished(object):
     def __repr__(self):
         return "WorkItemFinished(%r)" % self.application
 
+
 class WorkItemAborted:
 
     def __init__(self, workitem, application, parameters):
-        self.workitem =  workitem
+        self.workitem = workitem
         self.application = application
         self.parameters = parameters
 
     def __repr__(self):
         return "WorkItemAborted(%r)" % self.application
+
 
 class Transition:
 

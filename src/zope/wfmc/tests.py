@@ -272,18 +272,12 @@ def test_process_abort():
 
 def test_suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocFileSuite(
-        'README.txt',
-        setUp=setUp, tearDown=tearDown,
-        optionflags=doctest.NORMALIZE_WHITESPACE))
-    suite.addTest(doctest.DocFileSuite(
-        'xpdl.txt',
-        setUp=setUp, tearDown=tearDown,
-        optionflags=doctest.NORMALIZE_WHITESPACE))
-    suite.addTest(doctest.DocFileSuite(
-        'xpdl-2.1.txt',
-        setUp=setUp, tearDown=tearDown,
-        optionflags=doctest.NORMALIZE_WHITESPACE))
+    for doctestfile in ['README.txt', 'xpdl.txt',
+                        'xpdl-2.1.txt', 'subflow.txt']:
+        suite.addTest(doctest.DocFileSuite(
+            doctestfile,
+            setUp=setUp, tearDown=tearDown,
+            optionflags=doctest.NORMALIZE_WHITESPACE | doctest.REPORT_NDIFF))
     suite.addTest(doctest.DocTestSuite(
         setUp=setUp, tearDown=testing.tearDown))
     return suite
