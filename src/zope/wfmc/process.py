@@ -317,16 +317,13 @@ class Activity(persistent.Persistent):
         zope.event.notify(ActivityStarted(self))
 
         if self.workitems:
-            evaluator = interfaces.IPythonExpressionEvaluator(self.process)
+            evaluator = getEvaluator(self.process)
             for workitem, app, formal, actual in self.workitems.values():
-                args = []
-                for parameter, name in zip(formal, actual):
-                    if parameter.input:
-                        __traceback_info__ = (
-                            workitem, self.activity_definition_identifier,
-                            parameter)
-                        value = evaluator.evaluate(name)
-                        args.append(value)
+                __traceback_info__ = (
+                    workitem, self.activity_definition_identifier)
+
+                inputs = evaluateInputs(self.process, formal, actual, evaluator)
+                args = [a for n, a in inputs]
 
                 __traceback_info__ = (self.activity_definition_identifier,
                                       workitem, args)
@@ -588,6 +585,7 @@ class ProcessFinished:
     def __repr__(self):
         return "ProcessFinished(%r)" % self.process
 
+
 class ProcessAborted:
     interface.implements(interfaces.IProcessAborted)
 
@@ -596,6 +594,32 @@ class ProcessAborted:
 
     def __repr__(self):
         return "ProcessAborted(%r)" % self.process
+
+
+def getEvaluator(process):
+    """Return expression evaluator object for given proceess"""
+    return interfaces.IPythonExpressionEvaluator(process)
+
+
+def evaluateInputs(process, formal, actual, evaluator, strict=True):
+    """Evaluate input parameters for the process or activity
+
+    Return list of pairs: (name, value) for each input parameter
+    """
+    args = []
+    for parameter, expr in zip(formal, actual):
+        if parameter.input:
+            __traceback_info__ = (parameter, expr)
+            try:
+                value = evaluator.evaluate(expr)
+            except:
+                if strict:
+                    raise
+                else:
+                    continue
+            args.append((parameter.__name__, value))
+
+    return args
 
 
 def getValidOutgoingTransitions(process, activity_definition, strict=True):
@@ -737,6 +761,7 @@ class ActivityFinished:
     def __repr__(self):
         return "ActivityFinished(%r)" % self.activity
 
+
 class ActivityAborted:
 
     def __init__(self, activity):
@@ -745,6 +770,7 @@ class ActivityAborted:
     def __repr__(self):
         return "ActivityAborted(%r)" % self.activity
 
+
 class ActivityStarted:
 
     def __init__(self, activity):
@@ -752,6 +778,7 @@ class ActivityStarted:
 
     def __repr__(self):
         return "ActivityStarted(%r)" % self.activity
+
 
 class Parameter(object):
 
@@ -766,12 +793,12 @@ class Parameter(object):
     def __repr__(self):
         return "%s(%r)" % (self.__class__.__name__, self.__name__)
 
-class OutputParameter(Parameter):
 
+class OutputParameter(Parameter):
     output = True
 
-class InputParameter(Parameter):
 
+class InputParameter(Parameter):
     input = True
 
 class InputOutputParameter(InputParameter, OutputParameter):
