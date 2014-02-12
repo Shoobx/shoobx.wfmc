@@ -6,8 +6,7 @@ CHANGES
 ------------------
 
 - Support for synchronious execution of WFMC subflows. Subflows are executed as
-  part of main process and share all of its state, including activities and
-  workflow variables.
+  part of main process, however have their separate state (workflow variables).
 
 - The simplistic Python ``evaluate(expr, locals)`` function has been replaced
   by the `PythonExpressionEvaluator` component, which is an adapter from
