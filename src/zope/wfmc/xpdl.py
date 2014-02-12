@@ -248,7 +248,8 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     start_handlers[(xpdlns21, 'SubFlow')] = SubFlow
 
     def subflow(self, subflow):
-        self.stack[-1].addSubflow(subflow.id, subflow.execution)
+        self.stack[-1].addSubflow(subflow.id, subflow.execution,
+                                  subflow.parameters)
     end_handlers[(xpdlns10, 'SubFlow')] = subflow
     end_handlers[(xpdlns21, 'SubFlow')] = subflow
 

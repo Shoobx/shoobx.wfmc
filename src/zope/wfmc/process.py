@@ -186,10 +186,10 @@ class ActivityDefinition(object):
                             % (actual, formal, app, app.id))
         self.applications += ((application, formal, tuple(actual)), )
 
-    def addSubflow(self, subflow, execution):
+    def addSubflow(self, subflow, execution, parameters):
         # Lookup of formal parameters must be delayed, since the subflow might
         # not yet be loaded.
-        self.subflows += ((subflow, execution, (), ()), )
+        self.subflows += ((subflow, execution, parameters),)
 
     def addScript(self, code):
         self.scripts += (code,)
@@ -279,7 +279,12 @@ class Activity(persistent.Persistent):
         workitems = {}
         i = 0
         # Instantiate Subflows
-        for subflow, execution, formal, actual in self.definition.subflows:
+        for subflow, execution, actual in self.definition.subflows:
+            # Figre out formal parameters. At this point, process definition
+            # has to be available.
+            subflow_pd = getProcessDefinition(subflow)
+            formal = subflow_pd.parameters
+
             workitem = integration.createSubflowWorkItem(
                 self.process, self, subflow, execution)
             i += 1
@@ -303,11 +308,11 @@ class Activity(persistent.Persistent):
                 raise interfaces.ProcessError(
                     "Repeated incoming %s with id='%s' "
                     "while waiting for and completion"
-                    %(transition, transition.id))
+                    % (transition, transition.id))
             self.incoming += (transition, )
 
             if len(self.incoming) < len(definition.incoming):
-                return # not enough incoming yet
+                return  # not enough incoming yet
 
         zope.event.notify(ActivityStarted(self))
 
@@ -437,6 +442,7 @@ class Process(persistent.Persistent):
         self.activityIdSequence = Sequence()
         self.workflowRelevantData = self.WorkflowDataFactory()
         self.applicationRelevantData = self.WorkflowDataFactory()
+        self.subflows = []
 
     @property
     def startTransition(self):
@@ -444,10 +450,7 @@ class Process(persistent.Persistent):
 
     @property
     def definition(self):
-        return component.getUtility(
-            interfaces.IProcessDefinition,
-            self.process_definition_identifier,
-            )
+        return getProcessDefinition(self.process_definition_identifier)
 
     def start(self, *arguments):
         if self.isStarted:
@@ -508,7 +511,7 @@ class Process(persistent.Persistent):
             # Subflow finished, continue with main flow
             starter = self.activities[self.starterActivityId]
             wi, _, _, _ = starter.workitems[self.starterWorkitemId]
-            starter.workItemFinished(wi)
+            starter.workItemFinished(wi, *self.outputs())
         else:
             zope.event.notify(ProcessFinished(self))
 
@@ -552,18 +555,17 @@ class Process(persistent.Persistent):
 
     def initSubflow(self, subflow_pd_id, starter_activity_id,
                     starter_workitem_id, proc_factory=None):
-        subflow_pd = component.getUtility(interfaces.IProcessDefinition,
-                                          subflow_pd_id)
+        subflow_pd = getProcessDefinition(subflow_pd_id)
         subflow = subflow_pd(self.context, factory=proc_factory)
         subflow.activities = self.activities
         subflow.finishedActivities = self.finishedActivities
         subflow.activityIdSequence = self.activityIdSequence
-        subflow.workflowRelevantData = self.workflowRelevantData
-        subflow.applicationRelevantData = self.applicationRelevantData
+        subflow.subflows = self.subflows
 
         subflow.starterActivityId = starter_activity_id
         subflow.starterWorkitemId = starter_workitem_id
 
+        self.subflows.append(subflow)
         return subflow
 
 
@@ -575,6 +577,7 @@ class ProcessStarted:
 
     def __repr__(self):
         return "ProcessStarted(%r)" % self.process
+
 
 class ProcessFinished:
     interface.implements(interfaces.IProcessFinished)
@@ -665,11 +668,11 @@ class SubflowWorkItem(object):
         self.subflow = subflow
         self.execution = execution
 
-    def start(self):
+    def start(self, *args):
         subproc = self.process.initSubflow(self.subflow,
                                            self.activity.id, self.id,
                                            proc_factory=self.processFactory)
-        subproc.start()
+        subproc.start(*args)
 
 
 class WorkItemFinished(object):
@@ -856,3 +859,8 @@ class PythonExpressionEvaluator(object):
         exec code in ALLOWED_BUILTINS, result
         for name, value in result:
             pass
+
+
+def getProcessDefinition(name):
+    """Return process definition with given name"""
+    return component.getUtility(interfaces.IProcessDefinition, name)

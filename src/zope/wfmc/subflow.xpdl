@@ -86,10 +86,17 @@
         </xpdl:Pool>
     </xpdl:Pools>
     <xpdl:WorkflowProcesses>
-        <xpdl:WorkflowProcess Id="mainflow" Name="Main Flow">
+        <xpdl:WorkflowProcess AccessLevel="PUBLIC" Id="mainflow" Name="Main Flow">
             <xpdl:ProcessHeader>
                 <xpdl:Created>2014-02-04 10:34:42</xpdl:Created>
             </xpdl:ProcessHeader>
+            <xpdl:DataFields>
+                <xpdl:DataField Id="subflow_result" IsArray="false" Name="Subflow Result">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="STRING"/>
+                    </xpdl:DataType>
+                </xpdl:DataField>
+            </xpdl:DataFields>
             <xpdl:Activities>
                 <xpdl:Activity Id="mainflow_start">
                     <xpdl:Event>
@@ -122,7 +129,12 @@
                 </xpdl:Activity>
                 <xpdl:Activity Id="mainflow_run_subflow" Name="Run subflow">
                     <xpdl:Implementation>
-                        <xpdl:SubFlow Execution="SYNCHR" Id="subflow"/>
+                        <xpdl:SubFlow Execution="SYNCHR" Id="subflow">
+                            <xpdl:ActualParameters>
+                                <xpdl:ActualParameter>"Hello Parameter"</xpdl:ActualParameter>
+                                <xpdl:ActualParameter>subflow_result</xpdl:ActualParameter>
+                            </xpdl:ActualParameters>
+                        </xpdl:SubFlow>
                     </xpdl:Implementation>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,106,106" Height="60" IsVisible="true" LaneId="subflow_demo_pool1_lan1" ToolId="JaWE" Width="90">
@@ -161,7 +173,7 @@
                 </xpdl:Activity>
                 <xpdl:Activity Id="mainflow_run_innerflow" Name="Run innerflow from main flow">
                     <xpdl:Implementation>
-                        <xpdl:SubFlow Id="innerflow"/>
+                        <xpdl:SubFlow Execution="SYNCHR" Id="innerflow"/>
                     </xpdl:Implementation>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,106,106" Height="60" IsVisible="true" LaneId="subflow_demo_pool1_lan1" ToolId="JaWE" Width="90">
@@ -198,10 +210,22 @@
                 </xpdl:Transition>
             </xpdl:Transitions>
         </xpdl:WorkflowProcess>
-        <xpdl:WorkflowProcess Id="subflow" Name="Sub Flow">
+        <xpdl:WorkflowProcess AccessLevel="PUBLIC" Id="subflow" Name="Sub Flow">
             <xpdl:ProcessHeader>
                 <xpdl:Created>2014-02-04 10:35:00</xpdl:Created>
             </xpdl:ProcessHeader>
+            <xpdl:FormalParameters>
+                <xpdl:FormalParameter Id="message" IsArray="false" Mode="IN" Name="Message">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="STRING"/>
+                    </xpdl:DataType>
+                </xpdl:FormalParameter>
+                <xpdl:FormalParameter Id="result" IsArray="false" Mode="OUT" Name="Result">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="STRING"/>
+                    </xpdl:DataType>
+                </xpdl:FormalParameter>
+            </xpdl:FormalParameters>
             <xpdl:Activities>
                 <xpdl:Activity Id="subflow_start">
                     <xpdl:Event>
@@ -235,9 +259,10 @@
                 <xpdl:Activity Id="subflow_second" Name="Second Activity">
                     <xpdl:Implementation>
                         <xpdl:Task>
-                            <xpdl:TaskApplication Id="output">
+                            <xpdl:TaskApplication Id="input">
                                 <xpdl:ActualParameters>
-                                    <xpdl:ActualParameter>"Second subflow activity"</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>message</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>result</xpdl:ActualParameter>
                                 </xpdl:ActualParameters>
                             </xpdl:TaskApplication>
                         </xpdl:Task>
@@ -263,7 +288,7 @@
                 </xpdl:Activity>
                 <xpdl:Activity Id="subflow_run_innerflow" Name="Run innerflow from subflow">
                     <xpdl:Implementation>
-                        <xpdl:SubFlow Id="innerflow"/>
+                        <xpdl:SubFlow Execution="SYNCHR" Id="innerflow"/>
                     </xpdl:Implementation>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,106,106" Height="60" IsVisible="true" LaneId="subflow_demo_pool2_lan1" ToolId="JaWE" Width="90">
@@ -295,7 +320,7 @@
                 </xpdl:Transition>
             </xpdl:Transitions>
         </xpdl:WorkflowProcess>
-        <xpdl:WorkflowProcess Id="innerflow" Name="Inner Subflow">
+        <xpdl:WorkflowProcess AccessLevel="PUBLIC" Id="innerflow" Name="Inner Subflow">
             <xpdl:ProcessHeader>
                 <xpdl:Created>2014-02-04 10:45:50</xpdl:Created>
             </xpdl:ProcessHeader>

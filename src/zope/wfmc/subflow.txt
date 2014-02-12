@@ -1,5 +1,5 @@
 ===============
-Subflow support
+gSubflow support
 ===============
 
 Here we demonstrate and test subflow support in zope.wfmc. Subflows referenced
@@ -87,7 +87,14 @@ Now we can create and execute our process::
 
     >>> wi, _, _, _ = lastactivity.workitems.values()[0]
     >>> lastactivity.workItemFinished(wi, "from-the-deep")
-    OUTPUT: Second subflow activity
+    INPUT: Hello Parameter
+
+    >>> lastactivity = proc.activities[max(proc.activities.keys())]
+    >>> lastactivity.activity_definition_identifier
+    'subflow_second'
+
+    >>> wi, _, _, _ = lastactivity.workitems.values()[0]
+    >>> lastactivity.workItemFinished(wi, "completed")
     INPUT: Inner subflow activity
 
     >>> lastactivity = proc.activities[max(proc.activities.keys())]
@@ -102,7 +109,17 @@ Make sure process is finished now::
     >>> proc.activities
     {}
 
-Variable from inner subflow should be visible in main flow namespace::
+All subflows are registered in main flow
 
-    >>> proc.workflowRelevantData.value
-    'from-the-deep-2'
+    >>> sorted(proc.subflows)
+    [Process(u'subflow'), Process(u'innerflow'), Process(u'innerflow')]
+
+Variable from inner subflow should not be visible in main flow namespace::
+
+    >>> hasattr(proc.workflowRelevantData, "value")
+    False
+
+Subflow output variable, however, is written to main flow context:
+
+    >>> proc.workflowRelevantData.subflow_result
+    'completed'
