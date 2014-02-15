@@ -496,7 +496,7 @@ class Process(persistent.Persistent):
                 elif parameter.initialValue is not None:
                     value = evaluator.evaluate(parameter.initialValue)
                 else:
-                    __traceback_info__ = (self, parameters)
+                    __traceback_info__ = (self, parameter)
                     raise ValueError('Output parameter not available.')
                 outputs.append(value)
 
