@@ -428,6 +428,7 @@ class Process(persistent.Persistent):
 
     isStarted = False
     isFinished = False
+    isAborted = False
     starterActivityId = None
     starterWorkitemId = None
 
@@ -517,6 +518,7 @@ class Process(persistent.Persistent):
             activity.abort()
         for idx, activity in self.finishedActivities.items():
             activity.revert()
+        self.isAborted = True
         zope.event.notify(ProcessAborted(self))
 
     def transition(self, activity, transitions):

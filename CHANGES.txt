@@ -46,6 +46,8 @@ CHANGES
 
     + All finished activities are cleaned up.
 
+	+ isAborted flag is set on a process.
+
 - Support for reading XPDL-2.1 added
 
 3.5.0 (2009-07-24)
