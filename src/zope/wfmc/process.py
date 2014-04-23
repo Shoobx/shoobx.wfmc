@@ -378,6 +378,9 @@ class Activity(persistent.Persistent):
         self.process.transition(self, transitions)
 
     def abort(self):
+        # Revert all finished workitems first
+        self.revert()
+
         # Abort all workitems.
         for workitem, app, formal, actual in self.workitems.values():
             if interfaces.IAbortWorkItem.providedBy(workitem):
