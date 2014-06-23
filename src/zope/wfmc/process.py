@@ -337,6 +337,9 @@ class Activity(persistent.Persistent):
 
                 __traceback_info__ = (self.activity_definition_identifier,
                                       workitem, args)
+
+                zope.event.notify(WorkItemStarting(workitem, app, actual))
+
                 workitem.start(*args)
 
         else:
@@ -740,6 +743,18 @@ class WorkItemFinished(object):
 
     def __repr__(self):
         return "WorkItemFinished(%r)" % self.application
+
+
+class WorkItemStarting(object):
+    """Event emitted just before starting workitem
+    """
+    def __init__(self, workitem, application, parameters):
+        self.workitem = workitem
+        self.application = application
+        self.parameters = parameters
+
+    def __repr__(self):
+        return "WorkItemStarting(%r)" % self.application
 
 
 class WorkItemAborted:
