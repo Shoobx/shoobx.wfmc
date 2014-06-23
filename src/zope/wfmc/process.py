@@ -230,10 +230,10 @@ class Activity(persistent.Persistent):
         self.activity_definition_identifier = definition.id
         self.workitems = None
         self.finishedWorkitems = {}
-        wait_prop = "_wait_for_join"+self.activity_definition_identifier
-        if not hasattr(self.process.applicationRelevantData, wait_prop):
+        should_wait = "_wait_for_join"+self.activity_definition_identifier
+        if not hasattr(self.process.applicationRelevantData, should_wait):
             # False when we don't want to wait at add-joints
-            setattr(self.process.applicationRelevantData, wait_prop, True)
+            setattr(self.process.applicationRelevantData, should_wait, True)
 
     def createWorkItems(self):
         workitems = {}
@@ -314,8 +314,8 @@ class Activity(persistent.Persistent):
                     "while waiting for and completion"
                     % (transition, transition.id))
             self.incoming += (transition, )
-            wait_prop = "_wait_for_join"+self.activity_definition_identifier
-            if getattr(self.process.applicationRelevantData, wait_prop) and \
+            should_wait = "_wait_for_join"+self.activity_definition_identifier
+            if getattr(self.process.applicationRelevantData, should_wait) and \
                     len(self.incoming) < len(definition.incoming):
                 # _wait_for_join tells us whether or not we need to wait
                 # for enough transitions at an add-joint, specifically for
@@ -390,10 +390,6 @@ class Activity(persistent.Persistent):
 
         self.process.transition(self, transitions)
 
-        wait_prop = "_wait_for_join"+self.activity_definition_identifier
-        setattr(self.process.applicationRelevantData, wait_prop, False)
-
-
     def abort(self):
         # Revert all finished workitems first
         self.revert()
@@ -411,19 +407,12 @@ class Activity(persistent.Persistent):
         # Revert all finished workitems.
         for workitem, app, formal, actual in self.finishedWorkitems.values():
             if interfaces.IRevertableWorkItem.providedBy(workitem):
-                # Only revert activities in this lane's
-                if workitem.activity.definition.performer == self.definition.performer:
-                    workitem.revert()
+                workitem.revert()
 
-        # If we revert through a split, we need to
-        #   1) make sure we wait at merge (i.e. flip _wait_for_join)
-        #   2) revert everything in the other lanes
-        if self.definition.andSplitSetting:
-            setattr(self.process.applicationRelevantData, "_wait_for_join"+self.activity_definition_identifier, True)
-            for workitem, app, formal, actual in self.finishedWorkitems.values():
-                if interfaces.IRevertableWorkItem.providedBy(workitem):
-                    if workitem.activity.definition.performer != self.definition.performer:
-                        workitem.revert()
+        # Join activites have a special type of revert
+        if self.definition.andJoinSetting:
+            should_wait = "_wait_for_join"+self.activity_definition_identifier
+            setattr(self.process.applicationRelevantData, should_wait, False)
 
     def __repr__(self):
         return "Activity(%r)" % (
