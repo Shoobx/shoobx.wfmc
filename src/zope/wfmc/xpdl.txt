@@ -220,6 +220,7 @@ Now, let's try out our process.  We'll follow the same steps we did in
     Transition(Activity(u'Publication.start'),
                Activity(u'Publication.prepare'))
     ActivityStarted(Activity(u'Publication.prepare'))
+    WorkItemStarting(u'prepare')
 
     >>> item = authors['bob'].work_list.pop()
     >>> item.finish("I give my pledge, as an American\n"
@@ -230,9 +231,11 @@ Now, let's try out our process.  We'll follow the same steps we did in
     Transition(Activity(u'Publication.prepare'),
                Activity(u'Publication.tech1'))
     ActivityStarted(Activity(u'Publication.tech1'))
+    WorkItemStarting(u'tech_review')
     Transition(Activity(u'Publication.prepare'),
                Activity(u'Publication.tech2'))
     ActivityStarted(Activity(u'Publication.tech2'))
+    WorkItemStarting(u'tech_review')
 
     >>> item = tech1.work_list.pop()
     >>> print item.getDoc()
@@ -253,12 +256,14 @@ Now, let's try out our process.  We'll follow the same steps we did in
     Transition(Activity(u'Publication.tech2'),
                Activity(u'Publication.review'))
     ActivityStarted(Activity(u'Publication.review'))
+    WorkItemStarting(u'ed_review')
     WorkItemFinished(u'ed_review')
     ActivityFinished(Activity(u'Publication.review'))
     Author `bob` selected
     Transition(Activity(u'Publication.review'),
                Activity(u'Publication.prepare'))
     ActivityStarted(Activity(u'Publication.prepare'))
+    WorkItemStarting(u'prepare')
 
     >>> item = authors['bob'].work_list.pop()
     >>> item.summary()
@@ -278,9 +283,11 @@ Now, let's try out our process.  We'll follow the same steps we did in
     Transition(Activity(u'Publication.prepare'),
                Activity(u'Publication.tech1'))
     ActivityStarted(Activity(u'Publication.tech1'))
+    WorkItemStarting(u'tech_review')
     Transition(Activity(u'Publication.prepare'),
                Activity(u'Publication.tech2'))
     ActivityStarted(Activity(u'Publication.tech2'))
+    WorkItemStarting(u'tech_review')
 
     >>> item = tech1.work_list.pop()
     >>> item.finish(True, [])
@@ -296,6 +303,7 @@ Now, let's try out our process.  We'll follow the same steps we did in
     Transition(Activity(u'Publication.tech2'),
                Activity(u'Publication.review'))
     ActivityStarted(Activity(u'Publication.review'))
+    WorkItemStarting(u'ed_review')
 
     >>> item = reviewer.work_list.pop()
     >>> print item.getDoc()
@@ -310,6 +318,7 @@ Now, let's try out our process.  We'll follow the same steps we did in
     Transition(Activity(u'Publication.review'),
                Activity(u'Publication.final'))
     ActivityStarted(Activity(u'Publication.final'))
+    WorkItemStarting(u'final')
 
     >>> item = authors['bob'].work_list.pop()
     >>> item.summary()
@@ -328,6 +337,7 @@ Now, let's try out our process.  We'll follow the same steps we did in
     Transition(Activity(u'Publication.final'),
                Activity(u'Publication.rfinal'))
     ActivityStarted(Activity(u'Publication.rfinal'))
+    WorkItemStarting(u'rfinal')
 
     >>> item = reviewer.work_list.pop()
     >>> print item.getDoc()
@@ -341,6 +351,7 @@ Now, let's try out our process.  We'll follow the same steps we did in
     Transition(Activity(u'Publication.rfinal'),
                Activity(u'Publication.publish'))
     ActivityStarted(Activity(u'Publication.publish'))
+    WorkItemStarting(u'publish')
     Published
     WorkItemFinished(u'publish')
     ActivityFinished(Activity(u'Publication.publish'))
