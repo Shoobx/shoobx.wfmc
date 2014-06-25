@@ -394,6 +394,11 @@ class Activity(persistent.Persistent):
         # Revert all finished workitems first
         self.revert()
 
+        # Join activites abortion should result in waiting next time
+        if self.definition.andJoinSetting:
+            should_wait = "_wait_for_join"+self.activity_definition_identifier
+            setattr(self.process.applicationRelevantData, should_wait, True)
+
         # Abort all workitems.
         for workitem, app, formal, actual in self.workitems.values():
             if interfaces.IAbortWorkItem.providedBy(workitem):
@@ -409,7 +414,8 @@ class Activity(persistent.Persistent):
             if interfaces.IRevertableWorkItem.providedBy(workitem):
                 workitem.revert()
 
-        # Join activites have a special type of revert
+        # Join activites should not have to wait next time you visit them
+        # after a true revert
         if self.definition.andJoinSetting:
             should_wait = "_wait_for_join"+self.activity_definition_identifier
             setattr(self.process.applicationRelevantData, should_wait, False)
