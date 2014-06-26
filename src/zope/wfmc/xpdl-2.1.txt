@@ -34,7 +34,10 @@ so that we can see what's going on:
 and we'll register the process definition as a utility:
 
     >>> import zope.component
-    >>> zope.component.provideUtility(pd, name=pd.id)
+    >>> from zope.wfmc.process import StaticProcessDefinitionFactory
+    >>> pdfactory = StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+    >>> pdfactory.register(pd)
 
 and we'll define and register participant and application adapters:
 

@@ -53,7 +53,10 @@ utility. This is necessary so that process instances can find their
 definitions.  In addition, the utility name must match the process id:
 
     >>> import zope.component
-    >>> zope.component.provideUtility(pd, name=pd.id)
+    >>> from zope.wfmc.process import StaticProcessDefinitionFactory
+    >>> pdfactory = StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+    >>> pdfactory.register(pd)
 
 Now, with this definition, we can execute our workflow.  We haven't
 defined any work yet, but we can see the workflow execute.  We'll see
@@ -101,10 +104,7 @@ approves the content for publication, but to `reject` if the reviewer
 rejects the content for publication.  We can use a condition for this:
 
     >>> pd = process.ProcessDefinition('sample')
-    >>> zope.component.provideUtility(pd, name=pd.id)
-    Unregistered event:
-    UtilityRegistration(<BaseGlobalComponents base>, IProcessDefinition,
-                        'sample', ProcessDefinition('sample'), None, u'')
+    >>> pdfactory.register(pd)
 
     >>> pd.defineActivities(
     ...     author = process.ActivityDefinition(),
@@ -343,10 +343,7 @@ transitions.  We'll reuse our integration object from the previous
 example by passing it to the definition constructor:
 
     >>> pd = process.ProcessDefinition('sample', integration)
-    >>> zope.component.provideUtility(pd, name=pd.id)
-    Unregistered event:
-    UtilityRegistration(<BaseGlobalComponents base>, IProcessDefinition,
-                        'sample', ProcessDefinition('sample'), None, u'')
+    >>> pdfactory.register(pd)
 
     >>> pd.defineActivities(
     ...     author = process.ActivityDefinition(),
@@ -423,10 +420,7 @@ redefine the process:
 
 
     >>> pd = process.ProcessDefinition('sample', integration)
-    >>> zope.component.provideUtility(pd, name=pd.id)
-    Unregistered event:
-    UtilityRegistration(<BaseGlobalComponents base>, IProcessDefinition,
-                        'sample', ProcessDefinition('sample'), None, u'')
+    >>> pdfactory.register(pd)
 
     >>> pd.defineActivities(
     ...     author = process.ActivityDefinition(),
@@ -618,7 +612,7 @@ integration object:
 
     >>> Publication = process.ProcessDefinition('Publication')
     >>> Publication.integration = integration
-    >>> zope.component.provideUtility(Publication, name=Publication.id)
+    >>> pdfactory.register(Publication)
 
     >>> Publication.defineActivities(
     ...     start   = process.ActivityDefinition("Start"),

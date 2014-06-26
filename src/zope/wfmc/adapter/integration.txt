@@ -9,8 +9,13 @@ component is implemented by the integration module:
 
 To demonstrate how this works, we'll use the simple wfmc example process:
 
+    >>> from zope.wfmc.process import StaticProcessDefinitionFactory
+    >>> pdfactory = StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+
     >>> pd = process.ProcessDefinition('sample', adapter.integration)
-    >>> zope.component.provideUtility(pd, name=pd.id)
+    >>> pdfactory.register(pd)
+
     >>> pd.defineActivities(
     ...     author = process.ActivityDefinition(),
     ...     review = process.ActivityDefinition(),

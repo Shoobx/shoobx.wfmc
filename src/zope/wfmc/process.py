@@ -946,4 +946,8 @@ class PythonExpressionEvaluator(object):
 
 def getProcessDefinition(name):
     """Return process definition with given name"""
-    return component.getUtility(interfaces.IProcessDefinition, name)
+    factory = component.getUtility(interfaces.IProcessDefinitionFactory)
+    pd = factory.get(name)
+    if pd is None:
+        raise RuntimeError("Process with name %s is not found" % name)
+    return pd

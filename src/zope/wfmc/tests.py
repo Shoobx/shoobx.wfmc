@@ -22,14 +22,17 @@ from zope.testing import doctest
 
 from zope.wfmc import interfaces, process
 
+
 def tearDown(test):
     testing.tearDown(test)
     zope.event.subscribers.pop()
+
 
 def setUp(test):
     test.globs['this_directory'] = os.path.dirname(__file__)
     testing.setUp(test)
     provideAdapter(process.PythonExpressionEvaluator)
+
 
 @zope.interface.implementer(
     interfaces.IAbortWorkItem, interfaces.IRevertableWorkItem)
@@ -62,7 +65,10 @@ def test_multiple_input_parameters():
     >>> from zope.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
-    >>> component.provideUtility(pd, name=pd.id)
+
+    >>> pdfactory = process.StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+    >>> pdfactory.register(pd)
 
     >>> pd.defineParameters(
     ...     process.InputParameter('x'),
@@ -124,7 +130,10 @@ def test_pickling():
     >>> from zope.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
-    >>> component.provideUtility(pd, name=pd.id)
+
+    >>> pdfactory = process.StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+    >>> pdfactory.register(pd)
 
     >>> pd.defineActivities(
     ...    eek = process.ActivityDefinition(),
@@ -155,7 +164,10 @@ def test_inputoutput():
     >>> from zope.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
-    >>> component.provideUtility(pd, name=pd.id)
+
+    >>> pdfactory = process.StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+    >>> pdfactory.register(pd)
 
     >>> pd.defineParameters(
     ...     process.InputParameter('x'),
@@ -208,7 +220,11 @@ def test_wrong_number_process_args_error_message():
     >>> from zope.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
-    >>> component.provideUtility(pd, name=pd.id)
+
+    >>> pdfactory = process.StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+    >>> pdfactory.register(pd)
+
     >>> pd.defineActivities(
     ...    eek = process.ActivityDefinition(),
     ...    ook = process.ActivityDefinition(),
@@ -227,7 +243,10 @@ def test_process_abort():
     >>> from zope.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
-    >>> component.provideUtility(pd, name=pd.id)
+
+    >>> pdfactory = process.StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+    >>> pdfactory.register(pd)
 
     >>> pd.defineActivities(
     ...    eek = process.ActivityDefinition(),

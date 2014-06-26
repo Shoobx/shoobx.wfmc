@@ -65,11 +65,15 @@ Set integration for all definitions::
     >>> for pd in package.values():
     ...     pd.integration = integration
 
-Register all processes as utilities::
+Register all processes in static factory::
 
     >>> import zope.component
+    >>> from zope.wfmc.process import StaticProcessDefinitionFactory
+    >>> pdfactory = StaticProcessDefinitionFactory()
     >>> for pd in package.values():
-    ...     zope.component.provideUtility(pd, name=pd.id)
+    ...     pdfactory.register(pd)
+
+    >>> zope.component.provideUtility(pdfactory)
 
 Now we can create and execute our process::
 
