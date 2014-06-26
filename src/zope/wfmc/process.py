@@ -30,6 +30,21 @@ def always_true(data):
     return True
 
 
+class StaticProcessDefinitionFactory(object):
+    interface.implements(interfaces.IProcessDefinitionFactory)
+
+    def __init__(self):
+        self.definitions = {}
+
+    def get(self, name):
+        """See IProcessDefinitionFactory.get()
+        """
+        return self.definitions.get(name)
+
+    def register(self, pd):
+        self.definitions[pd.id] = pd
+
+
 class TransitionDefinition(object):
 
     interface.implements(interfaces.ITransitionDefinition)

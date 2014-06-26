@@ -150,6 +150,18 @@ class IProcessDefinition(IExtendedAttributesContainer):
 
         """
 
+
+class IProcessDefinitionFactory(interface.Interface):
+    """Object to manufacture IProcessDefinition objects by process definition
+    name
+    """
+    def get(name):
+        """Return process definition by given name
+
+        Return None if process definition cannot be found by given name
+        """
+
+
 class IActivityDefinition(interface.Interface):
     """Activity definition
     """
