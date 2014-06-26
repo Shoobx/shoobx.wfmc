@@ -5,8 +5,13 @@ CHANGES
 4.0.0 (unreleased)
 ------------------
 
-- Support for synchronious execution of WFMC subflows. Subflows are executed as
-  part of main process, however have their separate state (workflow variables).
+- Use IProcessDefinitionFactory to retrieve process definitions instead of
+  named utilities. This additional layer of indirection allows to generate
+  definitions dynamically.
+
+- Support for synchronious execution of WFMC subflows. Subflows are executed
+  as part of main process, however have their separate state (workflow
+  variables).
 
 - The simplistic Python ``evaluate(expr, locals)`` function has been replaced
   by the `PythonExpressionEvaluator` component, which is an adapter from
