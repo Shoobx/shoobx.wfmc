@@ -338,6 +338,13 @@ class Activity(persistent.Persistent):
                 # move forward through it again, and don't expect the other
                 # transition to happen again
                 return  # not enough incoming yet
+            if not getattr(self.process.applicationRelevantData, should_wait) and \
+                    len(self.incoming) + 1 < len(definition.incoming):
+                # If we think we don't have to wait, but our transition isn't the
+                # last one we need to continue, it is a false positive and we should
+                # return. An example case is 3+ transitions, and only 1 is waiting to
+                # go when we move into it.
+                return
 
         zope.event.notify(ActivityStarted(self))
 
