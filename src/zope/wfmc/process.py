@@ -246,10 +246,10 @@ class Activity(persistent.Persistent):
         self.activity_definition_identifier = definition.id
         self.workitems = None
         self.finishedWorkitems = {}
-        should_wait = "_wait_for_join"+self.activity_definition_identifier
-        if not hasattr(self.process.applicationRelevantData, should_wait):
-            # False when we don't want to wait at add-joints
-            setattr(self.process.applicationRelevantData, should_wait, True)
+        if hasattr(self, "definition") and \
+                self.definition.andJoinSetting and \
+                not self.process.has_join_revert_data(self.definition):
+            self.process.set_join_revert_data(self.definition, 0)
 
     def createWorkItems(self):
         workitems = {}
@@ -330,22 +330,14 @@ class Activity(persistent.Persistent):
                     "while waiting for and completion"
                     % (transition, transition.id))
             self.incoming += (transition, )
-            should_wait = "_wait_for_join"+self.activity_definition_identifier
-            if getattr(self.process.applicationRelevantData, should_wait) and \
+            if self.process.get_join_revert_data(self.definition) + \
                     len(self.incoming) < len(definition.incoming):
-                # _wait_for_join tells us whether or not we need to wait
+                # Tells us whether or not we need to wait
                 # for enough transitions at an add-joint, specifically for
                 # the case where we revert back through the joint and want to
                 # move forward through it again, and don't expect the other
                 # transition to happen again
                 return  # not enough incoming yet
-            if not getattr(self.process.applicationRelevantData, should_wait) and \
-                    len(self.incoming) + 1 < len(definition.incoming):
-                # If we think we don't have to wait, but our transition isn't the
-                # last one we need to continue, it is a false positive and we should
-                # return. An example case is 3+ transitions, and only 1 is waiting to
-                # go when we move into it.
-                return
 
         zope.event.notify(ActivityStarted(self))
 
@@ -413,14 +405,16 @@ class Activity(persistent.Persistent):
 
         self.process.transition(self, transitions)
 
+        if self.definition.andJoinSetting:
+            self.process.set_join_revert_data(self.definition, 0)
+
     def abort(self):
         # Revert all finished workitems first
         self.revert()
 
         # Join activites abortion should result in waiting next time
         if self.definition.andJoinSetting:
-            should_wait = "_wait_for_join"+self.activity_definition_identifier
-            setattr(self.process.applicationRelevantData, should_wait, True)
+            self.process.set_join_revert_data(self.definition, 0)
 
         # Abort all workitems.
         for workitem, app, formal, actual in self.workitems.values():
@@ -440,8 +434,8 @@ class Activity(persistent.Persistent):
         # Join activites should not have to wait next time you visit them
         # after a true revert
         if self.definition.andJoinSetting:
-            should_wait = "_wait_for_join"+self.activity_definition_identifier
-            setattr(self.process.applicationRelevantData, should_wait, False)
+            new_num = self.process.get_join_revert_data(self.definition) + 1
+            self.process.set_join_revert_data(self.definition, new_num)
 
     def __repr__(self):
         return "Activity(%r)" % (
@@ -616,6 +610,24 @@ class Process(persistent.Persistent):
 
         self.subflows.append(subflow)
         return subflow
+
+    def get_join_revert_data(self, act_def):
+        if act_def.andJoinSetting:
+            join_reverts = "join_reverts_"+act_def.id
+            return getattr(self.applicationRelevantData, join_reverts)
+        else:
+            raise TypeError("The activity %s is not an andJoin." % act_def.id)
+
+    def set_join_revert_data(self, act_def, value):
+        if act_def.andJoinSetting:
+            join_reverts = "join_reverts_"+act_def.id
+            setattr(self.applicationRelevantData, join_reverts, value)
+        else:
+            raise TypeError("The activity %s is not an andJoin." % act_def.id)
+
+    def has_join_revert_data(self, act_def):
+        join_reverts = "join_reverts_"+act_def.id
+        return hasattr(self.applicationRelevantData, join_reverts)
 
 
 class ProcessStarted:
