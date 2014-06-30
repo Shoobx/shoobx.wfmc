@@ -72,6 +72,7 @@ class IProcessDefinition(IExtendedAttributesContainer):
     """
 
     id = interface.Attribute("Process-definition identifier")
+    name = interface.Attribute("Process-definition name (as specified in XPDL)")
 
     __name__ = interface.Attribute("Name")
 

@@ -75,6 +75,7 @@ class ProcessDefinition(object):
 
     def __init__(self, id, integration=None):
         self.id = id
+        self.name = id
         self.integration = integration
         self.activities = {}
         self.transitions = []
