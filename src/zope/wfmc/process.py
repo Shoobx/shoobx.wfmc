@@ -423,7 +423,6 @@ class Activity(persistent.Persistent):
                 zope.event.notify(WorkItemAborted(workitem, app, actual))
         # Remove itself from the process activities list.
         del self.process.activities[self.id]
-        zope.event.notify(ActivityAborted(self))
 
     def revert(self):
         # Revert all finished workitems.
@@ -436,6 +435,7 @@ class Activity(persistent.Persistent):
         if self.definition.andJoinSetting:
             new_num = self.process.get_join_revert_data(self.definition) + 1
             self.process.set_join_revert_data(self.definition, new_num)
+        zope.event.notify(ActivityReverted(self))
 
     def __repr__(self):
         return "Activity(%r)" % (
@@ -847,13 +847,13 @@ class ActivityFinished:
         return "ActivityFinished(%r)" % self.activity
 
 
-class ActivityAborted:
+class ActivityReverted:
 
     def __init__(self, activity):
         self.activity = activity
 
     def __repr__(self):
-        return "ActivityAborted(%r)" % self.activity
+        return "ActivityReverted(%r)" % self.activity
 
 
 class ActivityStarted:
