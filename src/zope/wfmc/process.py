@@ -558,9 +558,11 @@ class Process(persistent.Persistent):
             zope.event.notify(ProcessFinished(self))
 
     def abort(self):
-        for idx, activity in self.activities.items():
+        for activity in sorted(self.activities.values(),
+                               key=Process.chronological_key):
             activity.abort()
-        for idx, activity in self.finishedActivities.items():
+        for activity in sorted(self.finishedActivities.values(),
+                               key=Process.chronological_key):
             activity.revert()
         self.isAborted = True
         zope.event.notify(ProcessAborted(self))
@@ -628,6 +630,13 @@ class Process(persistent.Persistent):
     def has_join_revert_data(self, act_def):
         join_reverts = "join_reverts_"+act_def.id
         return hasattr(self.applicationRelevantData, join_reverts)
+
+    @staticmethod
+    def chronological_key(activity):
+        """
+        Returns the key for sorting activities chronologically in a list
+        """
+        return activity.id
 
 
 class ProcessStarted:
