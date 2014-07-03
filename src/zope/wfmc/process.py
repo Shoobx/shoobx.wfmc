@@ -616,7 +616,10 @@ class Process(persistent.Persistent):
     def get_join_revert_data(self, act_def):
         if act_def.andJoinSetting:
             join_reverts = "join_reverts_"+act_def.id
-            return getattr(self.applicationRelevantData, join_reverts)
+            if hasattr(self.applicationRelevantData, join_reverts):
+                return getattr(self.applicationRelevantData, join_reverts)
+            else:
+                return None
         else:
             raise TypeError("The activity %s is not an andJoin." % act_def.id)
 
