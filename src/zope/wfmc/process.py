@@ -25,6 +25,9 @@ from zope.wfmc import interfaces
 
 log = logging.getLogger(__name__)
 
+WFRD_PREFIX = "WFRD_REVERT_"
+DEL_MARKER = "WFRD_DEL_MARK_"
+
 
 def always_true(data):
     return True
@@ -384,6 +387,15 @@ class Activity(persistent.Persistent):
             if parameter.output:
                 v = res[0]
                 res = res[1:]
+                # Remember the old value to restore in case of revert
+                try:
+                    old_val = getattr(self.process.workflowRelevantData, name)
+                except AttributeError:
+                    old_val = DEL_MARKER
+                if v != old_val:
+                    setattr(self.process.applicationRelevantData,
+                            WFRD_PREFIX+str(self.id)+"_"+name,
+                            old_val)
                 setattr(self.process.workflowRelevantData, name, v)
 
         if res:
@@ -425,10 +437,22 @@ class Activity(persistent.Persistent):
         del self.process.activities[self.id]
 
     def revert(self):
+
         # Revert all finished workitems.
         for workitem, app, formal, actual in self.finishedWorkitems.values():
             if interfaces.IRevertableWorkItem.providedBy(workitem):
                 workitem.revert()
+
+            # Restore workflowRelevantData
+            wf_revert_names = [name for name in dir(self.process.applicationRelevantData)
+                               if name.startswith(WFRD_PREFIX+str(self.id)+"_")]
+            for name in wf_revert_names:
+                old_val = getattr(self.process.applicationRelevantData, name)
+                wfname = name.lstrip(WFRD_PREFIX+str(self.id)+"_")
+                if old_val == DEL_MARKER:
+                    delattr(self.process.workflowRelevantData, wfname)
+                else:
+                    setattr(self.process.workflowRelevantData, wfname, old_val)
 
         # Join activites should not have to wait next time you visit them
         # after a true revert
