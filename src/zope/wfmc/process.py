@@ -89,6 +89,25 @@ class ProcessDefinition(object):
         self.attributes = OrderedDict()
         self.description = None
 
+    def getAllActivities(self):
+        """
+        Gets all activities, including subflows
+        """
+        result = self.activities.copy()
+        for idx, act in self.activities.iteritems():
+            if act.subflows:
+                sf = self.obtainSubflow(act)
+                result.update(sf.definition.getAllActivities())
+        return result
+
+    def obtainSubflow(self, activityDefinition):
+        """ Make a subflow stub from the subflows of `activityDefinition`
+        """
+        if activityDefinition.subflows:
+            subflow_name, execution, actual = activityDefinition.subflows[0]
+            subflow_pd = getProcessDefinition(subflow_name)
+            return subflow_pd(factory=Process)
+
     def __repr__(self):
         return "ProcessDefinition(%r)" % self.id
 
