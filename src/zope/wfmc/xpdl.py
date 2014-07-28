@@ -48,6 +48,7 @@ class Package(dict):
     def __init__(self):
         self.applications = {}
         self.participants = {}
+        self.script = None
 
     def defineApplications(self, **applications):
         for id, application in applications.items():
@@ -58,6 +59,9 @@ class Package(dict):
         for id, participant in participants.items():
             participant.id = id
             self.participants[id] = participant
+
+    def addScript(self, script):
+        self.script = script
 
 
 class XPDLHandler(xml.sax.handler.ContentHandler):
