@@ -384,8 +384,10 @@ class Activity(persistent.Persistent):
             self.finish()
 
     def workItemDiscarded(self, work_item):
-        self.workitems.pop(work_item.id)
+        unused, app, formal, actual = self.workitems.pop(work_item.id)
         self._p_changed = True
+        zope.event.notify(WorkItemDiscarded(work_item, app, actual))
+
         if not self.workitems:
             self.finish()
 
@@ -853,6 +855,16 @@ class WorkItemAborted:
 
     def __repr__(self):
         return "WorkItemAborted(%r)" % self.application
+
+
+class WorkItemDiscarded(object):
+    def __init__(self, workitem, application, parameters):
+        self.workitem = workitem
+        self.application = application
+        self.parameters = parameters
+
+    def __repr__(self):
+        return "WorkItemDiscarded(%r)" % self.application
 
 
 class Transition:
