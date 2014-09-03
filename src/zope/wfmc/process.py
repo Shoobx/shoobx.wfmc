@@ -383,7 +383,7 @@ class Activity(persistent.Persistent):
             # Since we don't have any work items, we're done
             self.finish()
 
-    def workItemDiscardard(self, work_item):
+    def workItemDiscarded(self, work_item):
         self.workitems.pop(work_item.id)
         self._p_changed = True
         if not self.workitems:
