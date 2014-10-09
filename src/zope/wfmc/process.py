@@ -273,6 +273,22 @@ class Activity(persistent.Persistent):
                 not self.process.has_join_revert_data(self.definition):
             self.process.set_join_revert_data(self.definition, 0)
 
+    @property
+    def activity_definition_identifier_path(self):
+        path = (self.process.process_definition_identifier + '.' +
+                self.activity_definition_identifier)
+        # We are only handling subflows.
+        if self.process.starterActivityId is not None:
+            try:
+                starterActivity = self.process.activities[
+                    self.process.starterActivityId]
+            except KeyError:
+                starterActivity = self.process.finishedActivities[
+                    self.process.starterActivityId]
+            path = (starterActivity.activity_definition_identifier_path +
+                    '.' + path)
+        return path
+
     def createWorkItems(self):
         workitems = {}
 
@@ -344,7 +360,6 @@ class Activity(persistent.Persistent):
         # Start the activity, if we've had enough incoming transitions
 
         definition = self.definition
-
         if definition.andJoinSetting:
             if transition in self.incoming:
                 raise interfaces.ProcessError(
