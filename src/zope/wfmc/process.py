@@ -423,6 +423,13 @@ class Activity(persistent.Persistent):
             if parameter.output:
                 v = res[0]
                 res = res[1:]
+
+                if not name:
+                    log.warning("Output parameter {param} of {activity} "
+                                "is not bound to workflow variables".format(
+                                    param=parameter, activity=self))
+                    continue
+
                 # Remember the old value to restore in case of revert
                 try:
                     old_val = getattr(self.process.workflowRelevantData, name)
