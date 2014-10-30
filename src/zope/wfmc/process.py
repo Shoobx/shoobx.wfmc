@@ -779,27 +779,6 @@ def evaluateInputs(process, formal, actual, evaluator, strict=True):
                     continue
             args.append((parameter.__name__, value))
 
-    # XXX: assume that new inputs are appended to the end
-    # when they are missing add the default or initial value
-    # to the end
-    if len(formal) > len(actual):
-        for i in range(len(actual), len(formal)):
-            parameter = formal[i]
-            if parameter.input:
-                arg = getattr(parameter, 'initialValue', None)
-                if arg is None:
-                    arg = getattr(parameter, 'default', None)
-                try:
-                    value = evaluator.evaluate(arg)
-                except:
-                    if strict:
-                        raise
-                    else:
-                        continue
-                log.warning('Actual parameter missing adding default '
-                            'value for formal param %s' % parameter.__name__)
-                args.append((parameter.__name, value))
-
     return args
 
 
