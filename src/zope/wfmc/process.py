@@ -411,6 +411,21 @@ class Activity(persistent.Persistent):
         self.finishedWorkitems[work_item.id] = entry
         self._p_changed = True
         res = results
+        # XXX: going forward by convention add new output parameters
+        # to the end of the list. Then when they are missing we 
+        # append the default value instead.
+        if len(formal) > len(actual):
+            for i in range(len(actual), len(formal)):
+                parameter = formal[i]
+                if parameter.output:
+                    arg = getattr(parameter, 'initialValue', None)
+                    if arg is None:
+                        arg = getattr(parameter, 'default', None)
+                    log.warning('Actual output parameter missing adding '
+                                'default value for formal param %s' %
+                                parameter.__name__)
+                    actual.append(str(arg))
+
         outputs = [(param, name) for param, name in zip(formal, actual)
                    if param.output]
         if len(res) != len(outputs):
@@ -763,6 +778,27 @@ def evaluateInputs(process, formal, actual, evaluator, strict=True):
                 else:
                     continue
             args.append((parameter.__name__, value))
+
+    # XXX: assume that new inputs are appended to the end
+    # when they are missing add the default or initial value
+    # to the end
+    if len(formal) > len(actual):
+        for i in range(len(actual), len(formal)):
+            parameter = formal[i]
+            if parameter.input:
+                arg = getattr(parameter, 'initialValue', None)
+                if arg is None:
+                    arg = getattr(parameter, 'default', None)
+                try:
+                    value = evaluator.evaluate(arg)
+                except:
+                    if strict:
+                        raise
+                    else:
+                        continue
+                log.warning('Actual parameter missing adding default '
+                            'value for formal param %s' % parameter.__name__)
+                args.append((parameter.__name, value))
 
     return args
 
