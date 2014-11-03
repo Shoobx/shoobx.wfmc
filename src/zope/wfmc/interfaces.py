@@ -360,7 +360,7 @@ class IWorkItem(interface.Interface):
 
         """)
 
-    def start(*arguments):
+    def start(arguments):
         """Start the work.
         """
 
