@@ -254,7 +254,7 @@ Now we'll define our work-items. First we'll define some classes:
     ...         self.participant = participant
     ...         work_list.append(self)
     ...
-    ...     def start(self):
+    ...     def start(self, args):
     ...         pass
     ...
     ...     def finish(self):
@@ -265,12 +265,12 @@ Now we'll define our work-items. First we'll define some classes:
     ...         self.participant.activity.workItemFinished(self, publish)
 
     >>> class Publish(ApplicationBase):
-    ...     def start(self):
+    ...     def start(self, args):
     ...         print "Published"
     ...         self.finish()
 
     >>> class Reject(ApplicationBase):
-    ...     def start(self):
+    ...     def start(self, args):
     ...         print "Rejected"
     ...         self.finish()
 
@@ -795,7 +795,7 @@ Now we'll create our applications. Let's start with our author:
     ...         self.activity = participant.activity
     ...         participant.user.work_list.append(self)
     ...
-    ...     def start(self):
+    ...     def start(self, args):
     ...         pass
     ...
     ...     def finish(self):
@@ -846,7 +846,11 @@ Here, we provided a method to access the original document.
 
     >>> class Review(TechReview):
     ...
-    ...     def start(self, publish1, changes1, publish2, changes2):
+    ...     def start(self, args):
+    ...         publish1 = args['publish1']
+    ...         publish2 = args['publish2']
+    ...         changes1 = args['tech_changes1']
+    ...         changes2 = args['tech_changes2']
     ...         if not (publish1 and publish2):
     ...             # Reject if either tech reviewer rejects
     ...             self.activity.workItemFinished(

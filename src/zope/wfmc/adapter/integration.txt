@@ -105,7 +105,7 @@ And finally, we can define adapters that implement our application:
     ...         self.participant = participant
     ...         work_list.append(self)
     ...
-    ...     def start(self):
+    ...     def start(self, args):
     ...         pass
     ...
     ...     def finish(self):
@@ -123,14 +123,14 @@ And finally, we can define adapters that implement our application:
     >>> zope.component.provideAdapter(Review, name=".review")
 
     >>> class Publish(ApplicationBase):
-    ...     def start(self):
+    ...     def start(self, args):
     ...         print "Published"
     ...         self.finish()
 
     >>> zope.component.provideAdapter(Publish, name=".publish")
 
     >>> class Reject(ApplicationBase):
-    ...     def start(self):
+    ...     def start(self, args):
     ...         print "Rejected"
     ...         self.finish()
 

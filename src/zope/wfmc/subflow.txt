@@ -30,8 +30,8 @@ Define WorkItems used by the process::
     ...         self.process = process
     ...         self.activity = activity
     ...
-    ...     def start(self, *args):
-    ...         print "OUTPUT:", args[0]
+    ...     def start(self, args):
+    ...         print "OUTPUT:", args['message']
     ...         self.activity.workItemFinished(self)
 
     >>> @zope.interface.implementer(interfaces.IWorkItem)
@@ -42,8 +42,8 @@ Define WorkItems used by the process::
     ...         self.process = process
     ...         self.activity = activity
     ...
-    ...     def start(self, *args):
-    ...         print "INPUT:", args[0]
+    ...     def start(self, args):
+    ...         print "INPUT:", args['message']
 
 Define integration object::
 

@@ -98,7 +98,7 @@ and we'll define and register participant and application adapters:
     ...         self.activity = participant.activity
     ...         participant.user.work_list.append(self)
     ...
-    ...     def start(self):
+    ...     def start(self, args):
     ...         pass
     ...
     ...     def finish(self):
@@ -136,7 +136,11 @@ and we'll define and register participant and application adapters:
 
     >>> class Review(TechReview):
     ...
-    ...     def start(self, publish1, changes1, publish2, changes2):
+    ...     def start(self, args):
+    ...         publish1 = args['publish1']
+    ...         publish2 = args['publish2']
+    ...         changes1 = args['tech_changes1']
+    ...         changes2 = args['tech_changes2']
     ...         if not (publish1 and publish2):
     ...             # Reject if either tech reviewer rejects
     ...             self.activity.workItemFinished(
@@ -184,7 +188,7 @@ and we'll define and register participant and application adapters:
     ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...
-    ...     def start(self):
+    ...     def start(self, args):
     ...         print "Published"
     ...         self.finish()
     ...
@@ -195,7 +199,7 @@ and we'll define and register participant and application adapters:
     >>> integration.publishWorkItem = Publish
 
     >>> class Reject(Publish):
-    ...     def start(self):
+    ...     def start(self, args):
     ...         print "Rejected"
     ...         self.finish()
 

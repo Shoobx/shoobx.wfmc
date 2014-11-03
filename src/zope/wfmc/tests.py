@@ -43,7 +43,7 @@ class WorkItemStub(object):
         self.process = process
         self.activity = activity
 
-    def start(self, *args):
+    def start(self, args):
         self.args = args
         print 'Workitem %i for activity %r started.' % (
             self.id, self.activity.definition.id)
@@ -114,7 +114,8 @@ def test_multiple_input_parameters():
     ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...
-    ...     def start(self, x, y):
+    ...     def start(self, args):
+    ...         x = args['x']; y=args['y']
     ...         print x, y
 
 
@@ -202,7 +203,8 @@ def test_inputoutput():
     ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...
-    ...     def start(self, x):
+    ...     def start(self, args):
+    ...         x = args['x']
     ...         self.participant.activity.workItemFinished(self, x+1)
 
 
