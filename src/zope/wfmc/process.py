@@ -385,13 +385,14 @@ class Activity(persistent.Persistent):
                     workitem, self.activity_definition_identifier)
 
                 inputs = evaluateInputs(self.process, formal, actual, evaluator)
-                args = {n: a for n, a in inputs}
+                args = [a for n, a in inputs]
 
                 __traceback_info__ = (self.activity_definition_identifier,
                                       workitem, args)
 
                 zope.event.notify(WorkItemStarting(workitem, app, actual))
-                workitem.start(args)
+
+                workitem.start(*args)
 
         else:
             # Since we don't have any work items, we're done
@@ -833,7 +834,7 @@ class ScriptWorkItem(object):
         evaluator = interfaces.IPythonExpressionEvaluator(self.process)
         evaluator.execute(self.code)
 
-    def start(self, args):
+    def start(self):
         self.execute()
         self.finish()
 
@@ -851,13 +852,11 @@ class SubflowWorkItem(object):
         self.subflow = subflow
         self.execution = execution
 
-    def start(self, args):
+    def start(self, *args):
         subproc = self.process.initSubflow(self.subflow,
                                            self.activity.id, self.id,
                                            proc_factory=self.processFactory)
-        pd = subproc.definition
-        tupArgs = [args.get(p.__name__, None) for p in pd.parameters if p.input]
-        subproc.start(*tupArgs)
+        subproc.start(*args)
 
 
 class WorkItemFinished(object):
