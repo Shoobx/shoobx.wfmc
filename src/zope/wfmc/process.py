@@ -14,7 +14,7 @@
 """Processes
 """
 import logging
-
+import copy
 import persistent
 import zope.cachedescriptors.property
 import zope.event
