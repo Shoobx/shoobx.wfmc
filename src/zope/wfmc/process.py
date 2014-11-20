@@ -14,7 +14,6 @@
 """Processes
 """
 import logging
-import copy
 
 import persistent
 import zope.cachedescriptors.property
@@ -359,6 +358,7 @@ class Activity(persistent.Persistent):
 
     def start(self, transition):
         # Start the activity, if we've had enough incoming transitions
+
         definition = self.definition
         if definition.andJoinSetting:
             if transition in self.incoming:
@@ -770,15 +770,7 @@ def evaluateInputs(process, formal, actual, evaluator, strict=True):
         if parameter.input:
             __traceback_info__ = (parameter, expr)
             try:
-                wfrd = copy.deepcopy(process.workflowRelevantData)
                 value = evaluator.evaluate(expr)
-                if not wfrd == process.workflowRelevantData and strict:
-                    raise ValueError("The workflow relevant data has been "
-                              "mutated when a parameter was evaluated. "
-                              "This can be very dangerous -- it makes "
-                              "it possible for incomplete reverts that "
-                              "leave processes in illegal states. {}\n".format(
-                              actual))
             except:
                 if strict:
                     raise
