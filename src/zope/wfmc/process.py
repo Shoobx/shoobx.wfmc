@@ -770,17 +770,7 @@ def evaluateInputs(process, formal, actual, evaluator, strict=True):
         if parameter.input:
             __traceback_info__ = (parameter, expr)
             try:
-                wfrd = copy.deepcopy(process.workflowRelevantData.__getstate__())
                 value = evaluator.evaluate(expr)
-                if not wfrd == copy.deepcopy(
-                        process.workflowRelevantData.__getstate__()) \
-                        and strict:
-                    # Very dangerous -- makes it possible for
-                    # incomplete reverts that leave processes in illegal states
-                    log.error(
-                        "The workflow relevant data has been mutated when a "
-                        "parameter was evaluated. \nActual Parameter: {}\n"
-                        .format(actual))
             except:
                 if strict:
                     raise
