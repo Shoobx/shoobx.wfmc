@@ -90,7 +90,7 @@ Now we can create and execute our process::
     'innerflow_first'
 
     >>> wi, _, _, _ = lastactivity.workitems.values()[0]
-    >>> lastactivity.workItemFinished(wi, "from-the-deep")
+    >>> lastactivity.workItemFinished(wi, {'result': "from-the-deep"})
     INPUT: Hello Parameter
 
     >>> lastactivity = proc.activities[max(proc.activities.keys())]
@@ -98,12 +98,12 @@ Now we can create and execute our process::
     'subflow_second'
 
     >>> wi, _, _, _ = lastactivity.workitems.values()[0]
-    >>> lastactivity.workItemFinished(wi, "completed")
+    >>> lastactivity.workItemFinished(wi, {'result': "completed"})
     INPUT: Inner subflow activity
 
     >>> lastactivity = proc.activities[max(proc.activities.keys())]
     >>> wi, _, _, _ = lastactivity.workitems.values()[0]
-    >>> lastactivity.workItemFinished(wi, "from-the-deep-2")
+    >>> lastactivity.workItemFinished(wi, {'result': "from-the-deep-2"})
     OUTPUT: Second mainflow activity
 
 Make sure process is finished now::

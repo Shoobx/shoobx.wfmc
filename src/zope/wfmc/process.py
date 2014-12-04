@@ -405,38 +405,21 @@ class Activity(persistent.Persistent):
         if not self.workitems:
             self.finish()
 
-    def workItemFinished(self, work_item, *results):
+    def workItemFinished(self, work_item, results=None):
         unused, app, formal, actual = entry = self.workitems.pop(work_item.id)
         self.finishedWorkitems[work_item.id] = entry
         self._p_changed = True
-        res = results
-        # XXX: going forward by convention add new output parameters
-        # to the end of the list. Then when they are missing we 
-        # append the default value instead.
-        if len(formal) > len(actual):
-            for i in range(len(actual), len(formal)):
-                parameter = formal[i]
-                if parameter.output:
-                    arg = getattr(parameter, 'initialValue', None)
-                    if arg is None:
-                        arg = getattr(parameter, 'default', None)
-                    log.warning('Actual output parameter missing adding '
-                                'default value for formal param %s' %
-                                parameter.__name__)
-                    actual.append(str(arg))
-
-        outputs = [(param, name) for param, name in zip(formal, actual)
-                   if param.output]
-        if len(res) != len(outputs):
-            formalnames = tuple([p.__name__ for p, a in outputs])
-            raise TypeError("Not enough parameters returned by work "
-                            "item. Expected: %s, got: %s" % (formalnames,
-                                                             results))
+        args = results
+        if not results:
+            args = {}
+        
+        res = []
 
         for parameter, name in zip(formal, actual):
             if parameter.output:
-                v = res[0]
-                res = res[1:]
+                __traceback_info__ = args, parameter
+                v = args.get(parameter.__name__)
+                res.append(v)
 
                 if not name:
                     log.warning("Output parameter {param} of {activity} "
@@ -455,11 +438,8 @@ class Activity(persistent.Persistent):
                             old_val)
                 setattr(self.process.workflowRelevantData, name, v)
 
-        if res:
-            raise TypeError("Too many results")
-
         zope.event.notify(WorkItemFinished(
-            work_item, app, actual, results))
+            work_item, app, actual, res))
 
         if not self.workitems:
             self.finish()
@@ -612,7 +592,7 @@ class Process(persistent.Persistent):
         self.transition(None, (self.startTransition, ))
 
     def outputs(self):
-        outputs = []
+        outputs = {}
         evaluator = interfaces.IPythonExpressionEvaluator(self)
         for parameter in self.definition.parameters:
             if parameter.output:
@@ -624,7 +604,7 @@ class Process(persistent.Persistent):
                 else:
                     __traceback_info__ = (self, parameter)
                     raise ValueError('Output parameter not available.')
-                outputs.append(value)
+                outputs[parameter.__name__] = value
 
         return outputs
 
@@ -634,7 +614,7 @@ class Process(persistent.Persistent):
             # Subflow finished, continue with main flow
             starter = self.activities[self.starterActivityId]
             wi, _, _, _ = starter.workitems[self.starterWorkitemId]
-            starter.workItemFinished(wi, *self.outputs())
+            starter.workItemFinished(wi, self.outputs())
         else:
             zope.event.notify(ProcessFinished(self))
 

@@ -205,7 +205,7 @@ def test_inputoutput():
     ...
     ...     def start(self, args):
     ...         x = args['x']
-    ...         self.participant.activity.workItemFinished(self, x+1)
+    ...         self.participant.activity.workItemFinished(self, {'x': x+1 })
 
 
     >>> integration.eekWorkItem = Eek
