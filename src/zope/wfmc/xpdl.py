@@ -77,6 +77,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     ActivityDefinitionFactory = zope.wfmc.process.ActivityDefinition
     TransitionDefinitionFactory = zope.wfmc.process.TransitionDefinition
     TextCondition = zope.wfmc.process.TextCondition
+    TextException = zope.wfmc.process.TextException
 
     def __init__(self, package):
         self.package = package
@@ -352,6 +353,27 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
         self.stack[-1].condition = condition
     end_handlers[(xpdlns10, 'Condition')] = condition
     end_handlers[(xpdlns21, 'Condition')] = condition
+
+    def Exception(self, attrs):
+        tp = attrs.get((None, 'Type'), 'EXCEPTION')
+        transdef = self.stack[-1]
+        assert isinstance(transdef, self.TransitionDefinitionFactory)
+
+        transdef.type = tp
+        condition = self.TextCondition(tp)
+        return condition
+    start_handlers[(xpdlns10, 'Exception')] = Exception
+    start_handlers[(xpdlns21, 'Exception')] = Exception
+
+    def exception(self, exception):
+        assert isinstance(self.stack[-1],
+                          self.TransitionDefinitionFactory)
+
+        text = self.text
+        exception.set_source('(%s)' % text)
+        self.stack[-1].exception = exception
+    end_handlers[(xpdlns10, 'Exception')] = exception
+    end_handlers[(xpdlns21, 'Exception')] = exception
 
     def ExtendedAttributes(self, attrs):
         parent = self.stack[-1]

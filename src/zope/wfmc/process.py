@@ -894,6 +894,7 @@ class Transition:
     def __repr__(self):
         return "Transition(%r, %r)" % (self.from_, self.to)
 
+
 class TextCondition:
 
     def __init__(self, type='CONDITION', source=''):
@@ -915,6 +916,30 @@ class TextCondition:
     def __call__(self, process, data={}):
         evaluator = interfaces.IPythonExpressionEvaluator(process)
         return evaluator.evaluate(self.source, data)
+
+
+class TextException:
+
+    def __init__(self, type='EXCEPTION', source=''):
+        self.type = type
+        self.otherwise = type in ('OTHERWISE', )
+
+        if source:
+            self.set_source(source)
+
+    def set_source(self, source):
+        self.source = source
+        # make sure that we can compile the source
+        compile(source, '<string>', 'eval')
+
+    def __getstate__(self):
+        return {'source': self.source,
+                'type': self.type}
+
+    def __call__(self, process, data={}):
+        evaluator = interfaces.IPythonExpressionEvaluator(process)
+        return evaluator.evaluate(self.source, data)
+
 
 class ActivityFinished:
 
