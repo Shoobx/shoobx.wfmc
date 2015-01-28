@@ -208,6 +208,7 @@ class ActivityDefinition(object):
         self.description = None
         self.attributes = OrderedDict()
         self.event = None
+        self.deadline = None
 
     def andSplit(self, setting):
         self.andSplitSetting = setting
@@ -255,7 +256,7 @@ class ActivityDefinition(object):
             self.outgoing = self.transition_outgoing
 
     def __repr__(self):
-        return "<ActivityDefinition %r>" %self.__name__
+        return "<ActivityDefinition %r>" % self.__name__
 
 
 class Activity(persistent.Persistent):

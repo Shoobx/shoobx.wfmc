@@ -2,16 +2,16 @@
 Deadline support
 ===============
 
-Here we demonstrate and test deadline support in zope.wfmc. Subflows referenced
-in xpdl are executed in context of the main (calling) process and share all the
-context with main process, including workflow variables and parameters.
-Subflows are executed by special type of activity: "Sub-flow".
+Here we demonstrate and test deadline support in zope.wfmc. Currently, only
+SYNCHRONOUSE deadlines are supported. When the deadline condition is met,
+the activity is put into its process's finishedActivities, but workitems are
+left untouched. Then the appropriate exception transition is followed.
 
 Directory with this file contains sample process using subflows::
 
     >>> import os
     >>> from zope.wfmc import xpdl
-    >>> sample_process = os.path.join(this_directory, "subflow.xpdl")
+    >>> sample_process = os.path.join(this_directory, "deadline.xpdl")
     >>> with open(sample_process) as f:
     ...     package = xpdl.read(f)
 
@@ -31,8 +31,7 @@ Define WorkItems used by the process::
     ...         self.activity = activity
     ...
     ...     def start(self, args):
-    ...         print "OUTPUT:", args['message']
-    ...         self.activity.workItemFinished(self)
+    ...         print "START:", args['message']
 
     >>> @zope.interface.implementer(interfaces.IWorkItem)
     ... class InputWorkItem(object):
@@ -43,7 +42,7 @@ Define WorkItems used by the process::
     ...         self.activity = activity
     ...
     ...     def start(self, args):
-    ...         print "INPUT:", args['message']
+    ...         print "START:", args['message']
 
 Define integration object::
 
@@ -78,52 +77,8 @@ Register all processes in static factory::
 Now we can create and execute our process::
 
     >>> context = None
-    >>> mainproc_def = package['mainflow']
+    >>> mainproc_def = package['deadline']
     >>> proc = mainproc_def(context)
     >>> proc.start()
-    OUTPUT: First mainflow activity
-    OUTPUT: First subflow activity
-    INPUT: Inner subflow activity
-
-    >>> lastactivity = proc.activities[max(proc.activities.keys())]
-    >>> lastactivity.activity_definition_identifier
-    'innerflow_first'
-
-    >>> wi, _, _, _ = lastactivity.workitems.values()[0]
-    >>> lastactivity.workItemFinished(wi, {'result': "from-the-deep"})
-    INPUT: Hello Parameter
-
-    >>> lastactivity = proc.activities[max(proc.activities.keys())]
-    >>> lastactivity.activity_definition_identifier
-    'subflow_second'
-
-    >>> wi, _, _, _ = lastactivity.workitems.values()[0]
-    >>> lastactivity.workItemFinished(wi, {'result': "completed"})
-    INPUT: Inner subflow activity
-
-    >>> lastactivity = proc.activities[max(proc.activities.keys())]
-    >>> wi, _, _, _ = lastactivity.workitems.values()[0]
-    >>> lastactivity.workItemFinished(wi, {'result': "from-the-deep-2"})
-    OUTPUT: Second mainflow activity
-
-Make sure process is finished now::
-
-    >>> proc.isFinished
-    True
-    >>> proc.activities
-    {}
-
-All subflows are registered in main flow
-
-    >>> sorted(proc.subflows, key=lambda p: p.definition.id)
-    [Process(u'innerflow'), Process(u'innerflow'), Process(u'subflow')]
-
-Variable from inner subflow should not be visible in main flow namespace::
-
-    >>> hasattr(proc.workflowRelevantData, "value")
-    False
-
-Subflow output variable, however, is written to main flow context:
-
-    >>> proc.workflowRelevantData.subflow_result
-    'completed'
+    START: First subflow activity
+    >>> raise NotImplementedError('Still some testing left to do!')
