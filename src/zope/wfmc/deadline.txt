@@ -81,4 +81,25 @@ Now we can create and execute our process::
     >>> proc = mainproc_def(context)
     >>> proc.start()
     START: First subflow activity
-    >>> raise NotImplementedError('Still some testing left to do!')
+
+We should be on an activity with a deadline
+    >>> deadlineActivity = proc.activities.values()[0]
+    >>> deadlineActivity.definition.deadline is not None
+    True
+
+
+Wait for the deadline to pass
+    >>> import time
+    >>> time.sleep(10)
+
+We should have followed the exception transition
+    >>> deadlineActivity not in proc.activities.values()
+    True
+    >>> deadlineActivity in proc.finishedActivies.values()
+    True
+    >>> len(deadlineActivity.workitems) > 0
+    True
+    >>> len(deadlineActivity.finishedWorkitems)
+    0
+    >>> proc.activities.values()[0].definition.id
+    'exception'
