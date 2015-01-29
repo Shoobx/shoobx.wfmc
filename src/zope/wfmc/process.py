@@ -37,10 +37,18 @@ def always_true(data):
 
 
 def defaultDeadlineTimer(process, activity, timestamp):
-    threading.Timer(
+    timer = threading.Timer(
         (timestamp - datetime.datetime.now()).seconds,
         process.deadlinePassedHandler,
-        args=[activity]).start()
+        args=[activity]
+    )
+    activity.deadlineTimer = timer
+    timer.start()
+
+
+def defaultDeadlineCanceller(process, activity):
+    if activity.deadlineTimer:
+        activity.deadlineTimer.cancel()
 
 
 class StaticProcessDefinitionFactory(object):
@@ -273,12 +281,14 @@ class Activity(persistent.Persistent):
     interface.implements(interfaces.IActivity)
 
     incoming = ()
+    deadlineTimer = None
 
     def __init__(self, process, definition):
         self.process = process
         self.activity_definition_identifier = definition.id
         self.workitems = None
         self.finishedWorkitems = {}
+        self.definition = definition
         if hasattr(self, "definition") and \
                 self.definition.andJoinSetting and \
                 not self.process.has_join_revert_data(self.definition):
@@ -368,11 +378,6 @@ class Activity(persistent.Persistent):
             workitems[i] = workitem, subflow, formal, actual
 
         return workitems
-
-    def definition(self):
-        return self.process.definition.activities[
-            self.activity_definition_identifier]
-    definition = property(definition)
 
     def start(self, transition):
         # Start the activity, if we've had enough incoming transitions
@@ -472,6 +477,8 @@ class Activity(persistent.Persistent):
 
         self.process.transition(self, transitions)
 
+        Process.deadlineCanceller(self.process, self)
+
         if self.definition.andJoinSetting:
             self.process.set_join_revert_data(self.definition, 0)
 
@@ -556,6 +563,7 @@ class Process(persistent.Persistent):
     starterWorkitemId = None
 
     deadlineTimer = defaultDeadlineTimer
+    deadlineCanceller = defaultDeadlineCanceller
 
     def __init__(self, definition, start, context=None):
         self.process_definition_identifier = definition.id
@@ -730,7 +738,7 @@ class Process(persistent.Persistent):
 
     def deadlinePassedHandler(self, activity):
         # TODO: Is this threadsafe?
-        del self.activities[activity.id]
+        activity.abort()
         self.finishedActivities[activity.id] = activity
 
         transitions = getValidOutgoingTransitions(self, activity.definition,
