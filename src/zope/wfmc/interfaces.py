@@ -64,6 +64,7 @@ class IIntegration(interface.Interface):
         script.
         """
 
+
 class IProcessDefinition(IExtendedAttributesContainer):
     """Process definition
 
@@ -250,6 +251,11 @@ class IProcess(interface.Interface):
         process.deadlinePassedHandler when the timestamp has passed. This
         function is meant to be over-written in different implementations of
         the engine.
+        """
+
+    def deadlineCanceller(self, activity):
+        """Cancels the deadline timer created by deadlineTimer. This method
+        is called on activity.finish calls.
         """
 
     def deadlinePassedHandler(self, activity):

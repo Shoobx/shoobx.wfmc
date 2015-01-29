@@ -104,3 +104,31 @@ We should have followed the exception transition
     0
     >>> proc.activities.values()[0].definition.id
     'exception'
+
+Finish normally
+    >>> proc.activities.values()[0].finish()
+    START: Third activity
+    >>> proc.activities.values()[0].finish()
+    >>> proc.isFinished
+    True
+
+Do it again without the sleep
+    >>> proc = mainproc_def(context)
+    >>> proc.start()
+    START: First activity
+    >>> deadlineActivity = proc.activities.values()[0]
+    >>> deadlineActivity.definition.deadline is not None
+    True
+    >>> proc.activities.values()[0].finish()
+    START: Second activity
+
+    >>> deadlineActivity not in proc.activities.values()
+    True
+    >>> deadlineActivity in proc.finishedActivities.values()
+    True
+
+    >>> proc.activities.values()[0].finish()
+    START: Third activity
+    >>> proc.activities.values()[0].finish()
+    >>> proc.isFinished
+    True
