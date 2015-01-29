@@ -16,6 +16,8 @@
 import logging
 import copy
 import persistent
+import datetime
+from datetime import timedelta
 import zope.cachedescriptors.property
 import zope.event
 from collections import OrderedDict
@@ -31,6 +33,12 @@ DEL_MARKER = "WFRD_DEL_MARK_"
 
 def always_true(data):
     return True
+
+
+def deadlineHandler(timestamp):
+    print 'Handling deadline timestamp: ', timestamp
+    import pdb;pdb.set_trace()
+    pass
 
 
 class StaticProcessDefinitionFactory(object):
@@ -264,6 +272,8 @@ class Activity(persistent.Persistent):
 
     incoming = ()
 
+    deadlineHandler = deadlineHandler
+
     def __init__(self, process, definition):
         self.process = process
         self.activity_definition_identifier = definition.id
@@ -273,6 +283,13 @@ class Activity(persistent.Persistent):
                 self.definition.andJoinSetting and \
                 not self.process.has_join_revert_data(self.definition):
             self.process.set_join_revert_data(self.definition, 0)
+
+        if self.definition.deadline is not None:
+            evaluator = interfaces.IPythonExpressionEvaluator(self.process)
+            elapsed = evaluator.evaluate(self.definition.deadline.duration,
+                                         {'timedelta': timedelta})
+            deadline_time = datetime.datetime.now() + elapsed
+            self.deadlineHandler(deadline_time)
 
     @property
     def activity_definition_identifier_path(self):

@@ -105,8 +105,7 @@
                         <xpdl:Performer>administrator</xpdl:Performer>
                     </xpdl:Performers>
                     <xpdl:Deadline Execution="SYNCHR">
-                        <xpdl:DeadlineDuration>import datetime
-        datetime.timedelta(seconds=10)</xpdl:DeadlineDuration>
+                        <xpdl:DeadlineDuration>timedelta(seconds=10)</xpdl:DeadlineDuration>
                         <xpdl:ExceptionName/>
                     </xpdl:Deadline>
                     <xpdl:TransitionRestrictions>
