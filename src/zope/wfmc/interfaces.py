@@ -245,6 +245,18 @@ class IProcess(interface.Interface):
         """
         )
 
+    def deadlineTimer(self, activity, timestamp):
+        """A function that will time the event of the deadline. it should call
+        process.deadlinePassedHandler when the timestamp has passed. This
+        function is meant to be over-written in different implementations of
+        the engine.
+        """
+
+    def deadlinePassedHandler(self, activity):
+        """Called by a deadlineTimer when the time is up. Puts the activity
+        in finishedActivities and executes the appropriate transition
+        """
+
     def start(self, *arguments):
         """Start the process with the given parameters.
         """

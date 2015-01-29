@@ -25,7 +25,8 @@ from zope.wfmc import interfaces, process
 
 def tearDown(test):
     testing.tearDown(test)
-    zope.event.subscribers.pop()
+    if zope.event.subscribers:
+        zope.event.subscribers.pop()
 
 
 def setUp(test):

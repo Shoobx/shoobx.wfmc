@@ -14,6 +14,7 @@
 """Processes
 """
 import logging
+import threading
 import copy
 import persistent
 import datetime
@@ -35,10 +36,11 @@ def always_true(data):
     return True
 
 
-def deadlineHandler(timestamp):
-    print 'Handling deadline timestamp: ', timestamp
-    import pdb;pdb.set_trace()
-    pass
+def defaultDeadlineTimer(process, activity, timestamp):
+    threading.Timer(
+        (timestamp - datetime.datetime.now()).seconds,
+        process.deadlinePassedHandler,
+        args=[activity]).start()
 
 
 class StaticProcessDefinitionFactory(object):
@@ -272,8 +274,6 @@ class Activity(persistent.Persistent):
 
     incoming = ()
 
-    deadlineHandler = deadlineHandler
-
     def __init__(self, process, definition):
         self.process = process
         self.activity_definition_identifier = definition.id
@@ -289,7 +289,7 @@ class Activity(persistent.Persistent):
             elapsed = evaluator.evaluate(self.definition.deadline.duration,
                                          {'timedelta': timedelta})
             deadline_time = datetime.datetime.now() + elapsed
-            self.deadlineHandler(deadline_time)
+            self.process.deadlineTimer(self, deadline_time)
 
     @property
     def activity_definition_identifier_path(self):
@@ -555,6 +555,8 @@ class Process(persistent.Persistent):
     starterActivityId = None
     starterWorkitemId = None
 
+    deadlineTimer = defaultDeadlineTimer
+
     def __init__(self, definition, start, context=None):
         self.process_definition_identifier = definition.id
         self.context = context
@@ -665,7 +667,11 @@ class Process(persistent.Persistent):
 
                 if next is None:
                     next = self.ActivityFactory(self, activity_definition)
-                    next.createWorkItems()
+                    try:
+                        next.createWorkItems()
+                    except:
+                        import pdb;pdb.set_trace()
+                        next.createWorkItems()
                     next.id = self.activityIdSequence.next()
 
                 zope.event.notify(Transition(activity, next))
@@ -721,6 +727,19 @@ class Process(persistent.Persistent):
         Returns the key for sorting activities chronologically in a list
         """
         return activity.id
+
+    def deadlinePassedHandler(self, activity):
+        # TODO: Is this threadsafe?
+        del self.activities[activity.id]
+        self.finishedActivities[activity.id] = activity
+
+        transitions = getValidOutgoingTransitions(self, activity.definition,
+                                                  exception=True)
+
+        self.transition(activity, transitions)
+
+        if activity.definition.andJoinSetting:
+            self.set_join_revert_data(activity.definition, 0)
 
 
 class ProcessStarted:
@@ -779,7 +798,8 @@ def evaluateInputs(process, formal, actual, evaluator, strict=True):
     return args
 
 
-def getValidOutgoingTransitions(process, activity_definition, strict=True):
+def getValidOutgoingTransitions(process, activity_definition,
+                                strict=True, exception=False):
     """Return list of valid outgoing transitions from given activity_definition
     in given process.
 
@@ -793,6 +813,17 @@ def getValidOutgoingTransitions(process, activity_definition, strict=True):
     """
     transitions = []
     otherwises = []
+
+    if exception:
+        # TODO: Need support for exception Name specification
+        for transition in activity_definition.outgoing:
+            if transition.condition.type == u'DEFAULTEXCEPTION':
+                return [transition]
+        else:
+            raise interfaces.ProcessError(
+                'The activity_definition {} exited with an exception, but no '
+                'exception transition was found.'.format(activity_definition)
+            )
 
     for transition in activity_definition.outgoing:
         if transition.otherwise:
@@ -820,7 +851,8 @@ def getValidOutgoingTransitions(process, activity_definition, strict=True):
 
 @zope.interface.implementer(interfaces.IWorkItem)
 class ScriptWorkItem(object):
-    "Executes the script and stores all changed workflow-relevant attributes."
+    """Executes the script and stores all changed workflow-relevant
+    attributes."""
 
     def __init__(self, process, activity, code):
         self.process = process

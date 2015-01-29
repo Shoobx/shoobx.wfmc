@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<xpdl:Package xmlns:xpdl="http://www.wfmc.org/2008/XPDL2.1" xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="subflow_demo" Name="Subflow Demo" xsi:schemaLocation="http://www.wfmc.org/2008/XPDL2.1 http://www.wfmc.org/standards/docs/bpmnxpdl_31.xsd">
+<xpdl:Package xmlns:xpdl="http://www.wfmc.org/2008/XPDL2.1" xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="deadline_demo" Name="Deadline Demo" xsi:schemaLocation="http://www.wfmc.org/2008/XPDL2.1 http://www.wfmc.org/standards/docs/bpmnxpdl_31.xsd">
     <xpdl:PackageHeader>
         <xpdl:XPDLVersion>2.1</xpdl:XPDLVersion>
         <xpdl:Vendor>(c) Together Teamsolutions Co., Ltd.</xpdl:Vendor>
@@ -96,7 +96,7 @@
                         <xpdl:Task>
                             <xpdl:TaskApplication Id="output">
                                 <xpdl:ActualParameters>
-                                    <xpdl:ActualParameter>"First subflow activity"</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>"First activity"</xpdl:ActualParameter>
                                 </xpdl:ActualParameters>
                             </xpdl:TaskApplication>
                         </xpdl:Task>
@@ -105,7 +105,7 @@
                         <xpdl:Performer>administrator</xpdl:Performer>
                     </xpdl:Performers>
                     <xpdl:Deadline Execution="SYNCHR">
-                        <xpdl:DeadlineDuration>timedelta(seconds=10)</xpdl:DeadlineDuration>
+                        <xpdl:DeadlineDuration>timedelta(seconds=3)</xpdl:DeadlineDuration>
                         <xpdl:ExceptionName/>
                     </xpdl:Deadline>
                     <xpdl:TransitionRestrictions>
@@ -132,13 +132,13 @@
                         <xpdl:Task>
                             <xpdl:TaskApplication Id="output">
                                 <xpdl:ActualParameters>
-                                    <xpdl:ActualParameter>"Exception subflow activity"</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>"Exception activity"</xpdl:ActualParameter>
                                 </xpdl:ActualParameters>
                             </xpdl:TaskApplication>
                         </xpdl:Task>
                     </xpdl:Implementation>
                     <xpdl:Performers>
-                        <xpdl:Performer>system</xpdl:Performer>
+                        <xpdl:Performer>administrator</xpdl:Performer>
                     </xpdl:Performers>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="187,247,190" Height="60" IsVisible="true" LaneId="samples_pool5_lan31" ToolId="JaWE" Width="90">
@@ -151,7 +151,7 @@
                         <xpdl:Task>
                             <xpdl:TaskApplication Id="output">
                                 <xpdl:ActualParameters>
-                                    <xpdl:ActualParameter>"Second subflow activity"</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>"Second activity"</xpdl:ActualParameter>
                                 </xpdl:ActualParameters>
                             </xpdl:TaskApplication>
                         </xpdl:Task>
@@ -183,7 +183,7 @@
                         <xpdl:Task>
                             <xpdl:TaskApplication Id="output">
                                 <xpdl:ActualParameters>
-                                    <xpdl:ActualParameter>"Third subflow activity"</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>"Third activity"</xpdl:ActualParameter>
                                 </xpdl:ActualParameters>
                             </xpdl:TaskApplication>
                         </xpdl:Task>
