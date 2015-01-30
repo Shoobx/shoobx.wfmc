@@ -297,8 +297,13 @@ class Activity(persistent.Persistent):
 
         if self.definition.deadline is not None:
             evaluator = interfaces.IPythonExpressionEvaluator(self.process)
-            elapsed = evaluator.evaluate(self.definition.deadline.duration,
-                                         {'timedelta': timedelta})
+            try:
+                elapsed = evaluator.evaluate(self.definition.deadline.duration,
+                                             {'timedelta': timedelta})
+            except exception as e:
+                raise RuntimeError(
+                    'Evaluating the deadline duration failed '
+                    'for activity {}. Error: {}'.format(definition.id, e))
             deadline_time = datetime.datetime.now() + elapsed
             self.process.deadlineTimer(self, deadline_time)
         self.createWorkItems()
@@ -483,15 +488,15 @@ class Activity(persistent.Persistent):
         transitions = getValidOutgoingTransitions(self.process, self.definition)
 
         self.process.transition(self, transitions)
-
-        Process.deadlineCanceller(self.process, self)
+        if self.definition.deadline:
+            self.process.deadlineCanceller(self)
 
         if self.definition.andJoinSetting:
             self.process.set_join_revert_data(self.definition, 0)
 
-    def abort(self):
+    def abort(self, cancelDeadlineTimer=True):
         # Revert all finished workitems first
-        self.revert()
+        self.revert(cancelDeadlineTimer=cancelDeadlineTimer)
 
         # Join activites abortion should result in waiting next time
         if self.definition.andJoinSetting:
@@ -505,7 +510,7 @@ class Activity(persistent.Persistent):
         # Remove itself from the process activities list.
         del self.process.activities[self.id]
 
-    def revert(self):
+    def revert(self, cancelDeadlineTimer=True):
 
         # Revert all finished workitems.
         for workitem, app, formal, actual in self.finishedWorkitems.values():
@@ -522,6 +527,11 @@ class Activity(persistent.Persistent):
                     delattr(self.process.workflowRelevantData, wfname)
                 else:
                     setattr(self.process.workflowRelevantData, wfname, old_val)
+
+        if cancelDeadlineTimer:
+            if self.definition.deadline:
+                self.process.deadlineCanceller(self)
+
 
         # Join activites should not have to wait next time you visit them
         # after a true revert
@@ -739,7 +749,7 @@ class Process(persistent.Persistent):
 
     def deadlinePassedHandler(self, activity):
         # TODO: Is this threadsafe?
-        activity.abort()
+        activity.abort(cancelDeadlineTimer=False)
         self.finishedActivities[activity.id] = activity
 
         transitions = getValidOutgoingTransitions(self, activity.definition,
