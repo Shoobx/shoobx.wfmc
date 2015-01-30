@@ -288,7 +288,6 @@ class Activity(persistent.Persistent):
         self.activity_definition_identifier = definition.id
         self.workitems = None
         self.finishedWorkitems = {}
-        self.definition = definition
         if hasattr(self, "definition") and \
                 self.definition.andJoinSetting and \
                 not self.process.has_join_revert_data(self.definition):
