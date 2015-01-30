@@ -286,8 +286,10 @@ class Activity(persistent.Persistent):
     def __init__(self, process, definition):
         self.process = process
         self.activity_definition_identifier = definition.id
-        self.workitems = None
+        self.workitems = {}
         self.finishedWorkitems = {}
+
+        self.id = self.process.activityIdSequence.next()
         if hasattr(self, "definition") and \
                 self.definition.andJoinSetting and \
                 not self.process.has_join_revert_data(self.definition):
@@ -299,6 +301,7 @@ class Activity(persistent.Persistent):
                                          {'timedelta': timedelta})
             deadline_time = datetime.datetime.now() + elapsed
             self.process.deadlineTimer(self, deadline_time)
+        self.createWorkItems()
 
     @property
     def activity_definition_identifier_path(self):
@@ -679,12 +682,6 @@ class Process(persistent.Persistent):
 
                 if next is None:
                     next = self.ActivityFactory(self, activity_definition)
-                    try:
-                        next.createWorkItems()
-                    except:
-                        import pdb;pdb.set_trace()
-                        next.createWorkItems()
-                    next.id = self.activityIdSequence.next()
 
                 zope.event.notify(Transition(activity, next))
                 self.activities[next.id] = next
