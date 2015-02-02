@@ -64,6 +64,14 @@ class Package(dict):
         self.script = script
 
 
+class DeadlineDefinition(object):
+
+    def __init__(self, duration, exceptionName=None, execution='SYNCHR'):
+        self.duration = duration
+        self.exceptionName = exceptionName
+        self.execution = execution
+
+
 class XPDLHandler(xml.sax.handler.ContentHandler):
 
     start_handlers = {}
@@ -77,7 +85,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     ActivityDefinitionFactory = zope.wfmc.process.ActivityDefinition
     TransitionDefinitionFactory = zope.wfmc.process.TransitionDefinition
     TextCondition = zope.wfmc.process.TextCondition
-    TextException = zope.wfmc.process.TextException
+    DeadlineDefinitionFactory = DeadlineDefinition
 
     def __init__(self, package):
         self.package = package
@@ -294,22 +302,22 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     end_handlers[(xpdlns21, 'Performer')] = performer
 
     def startDeadline(self, attrs):
-        execution = attrs.get((None, u'Execution'))
-        activity = self.stack[-1]
-        activity.deadline = Deadline(None, exceptionName=None,
-                                     execution=execution)
+        execution = attrs.get((None, u'Execution')) or u'SYNCHR'
+        actdef = self.stack[-1]
+        actdef.deadlines.append(DeadlineDefinition(None, exceptionName=None,
+                                                   execution=execution))
     start_handlers[(xpdlns10, 'Deadline')] = startDeadline
     start_handlers[(xpdlns21, 'Deadline')] = startDeadline
 
-    def deadlineDuration(self, activity):
+    def deadlineDuration(self, actdef):
         duration = self.text.strip()
-        activity.deadline.duration = duration
+        actdef.deadlines[-1].duration = duration
     end_handlers[(xpdlns10, 'DeadlineDuration')] = deadlineDuration
     end_handlers[(xpdlns21, 'DeadlineDuration')] = deadlineDuration
 
-    def exceptionName(self, activity):
+    def exceptionName(self, actdef):
         exceptionName = self.text.strip()
-        activity.deadline.exceptionName = exceptionName
+        actdef.deadlines[-1].exceptionName = exceptionName
     end_handlers[(xpdlns10, 'exceptionName')] = exceptionName
     end_handlers[(xpdlns21, 'exceptionName')] = exceptionName
 
@@ -404,14 +412,6 @@ class Tool(object):
 
     def __init__(self, id):
         self.id = id
-
-
-class Deadline(object):
-
-    def __init__(self, duration, exceptionName=None, execution='SYNCHR'):
-        self.duration = duration
-        self.execution = execution
-        self.exceptionName = exceptionName
 
 
 class SubFlow(object):

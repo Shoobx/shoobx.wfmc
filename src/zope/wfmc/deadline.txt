@@ -47,7 +47,6 @@ Define WorkItems used by the process::
 Define integration object::
 
     >>> from zope.wfmc.attributeintegration import AttributeIntegration
-
     >>> class Integration(AttributeIntegration):
     ...     def administratorParticipant(self, activity, process):
     ...         return "admin"
@@ -84,8 +83,8 @@ Now we can create and execute our process::
 
 We should be on an activity with a deadline
     >>> deadlineActivity = proc.activities.values()[0]
-    >>> deadlineActivity.definition.deadline is not None
-    True
+    >>> len(deadlineActivity.definition.deadlines)
+    1
 
 
 Wait for the deadline to pass (assumes a 3 second deadline
@@ -117,8 +116,8 @@ Do it again without the sleep
     >>> proc.start()
     START: First activity
     >>> deadlineActivity = proc.activities.values()[0]
-    >>> deadlineActivity.definition.deadline is not None
-    True
+    >>> len(deadlineActivity.definition.deadlines)
+    1
     >>> proc.activities.values()[0].finish()
     START: Second activity
 

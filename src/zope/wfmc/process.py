@@ -36,19 +36,20 @@ def always_true(data):
     return True
 
 
-def defaultDeadlineTimer(process, activity, timestamp):
+def defaultDeadlineTimer(process, deadline):
+    timestamp = deadline.deadline_time
     timer = threading.Timer(
         (timestamp - datetime.datetime.now()).seconds,
         process.deadlinePassedHandler,
-        args=[activity]
+        args=[deadline]
     )
-    activity.deadlineTimer = timer
+    deadline.deadlineTimer = timer
     timer.start()
 
 
-def defaultDeadlineCanceller(process, activity):
-    if activity.deadlineTimer:
-        activity.deadlineTimer.cancel()
+def defaultDeadlineCanceller(process, deadline):
+    if deadline.deadlineTimer:
+        deadline.deadlineTimer.cancel()
 
 
 class StaticProcessDefinitionFactory(object):
@@ -226,7 +227,7 @@ class ActivityDefinition(object):
         self.description = None
         self.attributes = OrderedDict()
         self.event = None
-        self.deadline = None
+        self.deadlines = []
 
     def andSplit(self, setting):
         self.andSplitSetting = setting
@@ -277,6 +278,13 @@ class ActivityDefinition(object):
         return "<ActivityDefinition %r>" % self.__name__
 
 
+class Deadline(object):
+    def __init__(self, activity, deadline_time, deadlinedef):
+        self.activity = activity
+        self.deadline_time = deadline_time
+        self.definition = deadlinedef
+
+
 class Activity(persistent.Persistent):
     interface.implements(interfaces.IActivity)
 
@@ -295,17 +303,21 @@ class Activity(persistent.Persistent):
                 not self.process.has_join_revert_data(self.definition):
             self.process.set_join_revert_data(self.definition, 0)
 
-        if self.definition.deadline is not None:
+        self.deadlines = []
+        for deadlinedef in self.definition.deadlines:
             evaluator = interfaces.IPythonExpressionEvaluator(self.process)
             try:
-                elapsed = evaluator.evaluate(self.definition.deadline.duration,
+                elapsed = evaluator.evaluate(deadlinedef.duration,
                                              {'timedelta': timedelta})
             except Exception as e:
                 raise RuntimeError(
                     'Evaluating the deadline duration failed '
                     'for activity {}. Error: {}'.format(definition.id, e))
             deadline_time = datetime.datetime.now() + elapsed
-            self.process.deadlineTimer(self, deadline_time)
+
+            deadline = Deadline(self, deadline_time, deadlinedef)
+            self.deadlines.append(deadline)
+            self.process.deadlineTimer(deadline)
         self.createWorkItems()
 
     @property
@@ -488,8 +500,8 @@ class Activity(persistent.Persistent):
         transitions = getValidOutgoingTransitions(self.process, self.definition)
 
         self.process.transition(self, transitions)
-        if self.definition.deadline:
-            self.process.deadlineCanceller(self)
+        for deadline in self.deadlines:
+            self.process.deadlineCanceller(deadline)
 
         if self.definition.andJoinSetting:
             self.process.set_join_revert_data(self.definition, 0)
@@ -529,9 +541,8 @@ class Activity(persistent.Persistent):
                     setattr(self.process.workflowRelevantData, wfname, old_val)
 
         if cancelDeadlineTimer:
-            if self.definition.deadline:
-                self.process.deadlineCanceller(self)
-
+            for deadline in self.deadlines:
+                self.process.deadlineCanceller(deadline)
 
         # Join activites should not have to wait next time you visit them
         # after a true revert
@@ -747,8 +758,9 @@ class Process(persistent.Persistent):
         """
         return activity.id
 
-    def deadlinePassedHandler(self, activity):
+    def deadlinePassedHandler(self, deadline):
         # TODO: Is this threadsafe?
+        activity = deadline.activity
         activity.abort(cancelDeadlineTimer=False)
         self.finishedActivities[activity.id] = activity
 
@@ -967,29 +979,6 @@ class Transition:
 class TextCondition:
 
     def __init__(self, type='CONDITION', source=''):
-        self.type = type
-        self.otherwise = type in ('OTHERWISE', )
-
-        if source:
-            self.set_source(source)
-
-    def set_source(self, source):
-        self.source = source
-        # make sure that we can compile the source
-        compile(source, '<string>', 'eval')
-
-    def __getstate__(self):
-        return {'source': self.source,
-                'type': self.type}
-
-    def __call__(self, process, data={}):
-        evaluator = interfaces.IPythonExpressionEvaluator(process)
-        return evaluator.evaluate(self.source, data)
-
-
-class TextException:
-
-    def __init__(self, type='EXCEPTION', source=''):
         self.type = type
         self.otherwise = type in ('OTHERWISE', )
 
