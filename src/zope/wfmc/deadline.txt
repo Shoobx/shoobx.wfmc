@@ -87,9 +87,11 @@ We should be on an activity with a deadline
     1
 
 
-Wait for the deadline to pass (assumes a 3 second deadline
-    >>> import time
-    >>> time.sleep(5)
+Wait for the deadline to pass
+    >>> import datetime, time
+    >>> deadline = proc.activities.values()[0].deadlines[0]
+    >>> while datetime.datetime.now() < deadline.deadline_time:
+    ...     time.sleep(0.1)
     START: Exception activity
 
 We should have followed the exception transition
@@ -111,7 +113,7 @@ Finish normally
     >>> proc.isFinished
     True
 
-Do it again without the sleep
+Do it again without the wait
     >>> proc = mainproc_def(context)
     >>> proc.start()
     START: First activity
