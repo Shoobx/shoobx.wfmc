@@ -283,6 +283,9 @@ class Deadline(object):
         self.activity = activity
         self.deadline_time = deadline_time
         self.definition = deadlinedef
+        if deadlinedef.execution != u'SYNCHR':
+            raise NotImplementedError('Only Synchronous (SYNCHR) deadlines '
+                                      'are supported at this point.')
 
 
 class Activity(persistent.Persistent):
@@ -760,6 +763,9 @@ class Process(persistent.Persistent):
 
     def deadlinePassedHandler(self, deadline):
         # TODO: Is this threadsafe?
+        if deadline.definition.execution != u'SYNCHR':
+            raise NotImplementedError('Only Synchronous (SYNCHR) deadlines are '
+                                      'supported at this piont.')
         activity = deadline.activity
         activity.abort(cancelDeadlineTimer=False)
         self.finishedActivities[activity.id] = activity
