@@ -310,13 +310,26 @@ class Activity(persistent.Persistent):
         for deadlinedef in self.definition.deadlines:
             evaluator = interfaces.IPythonExpressionEvaluator(self.process)
             try:
-                elapsed = evaluator.evaluate(deadlinedef.duration,
-                                             {'timedelta': timedelta})
+                evaled = evaluator.evaluate(deadlinedef.duration,
+                                             {'timedelta': timedelta,
+                                              'datetime': datetime})
             except Exception as e:
                 raise RuntimeError(
                     'Evaluating the deadline duration failed '
                     'for activity {}. Error: {}'.format(definition.id, e))
-            deadline_time = datetime.datetime.now() + elapsed
+
+            if isinstance(evaled, timedelta):
+                deadline_time = datetime.datetime.now() + evaled
+            elif isinstance(evaled, datetime.datetime):
+                deadline_time = evaled
+            elif isinstance(evaled, int):
+                deadline_time = datetime.datetime.now() + \
+                    timedelta(seconds=evaled)
+            else:
+                raise ValueError(
+                    'Deadline time was not a timedelta, datetime, or integer '
+                    'number of seconds.\n{}'.format(evaled)
+                )
 
             deadline = Deadline(self, deadline_time, deadlinedef)
             self.deadlines.append(deadline)
