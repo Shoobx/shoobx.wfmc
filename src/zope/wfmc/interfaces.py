@@ -223,6 +223,7 @@ class ITransitionDefinition(interface.Interface):
     condition = interface.Attribute(
         "A Transition condition expression based on relevant data field.")
 
+
 class IProcess(interface.Interface):
     """Process instance
     """
@@ -246,28 +247,28 @@ class IProcess(interface.Interface):
         """
         )
 
-    def deadlineTimer(self, activity, timestamp):
+    def deadlineTimer(deadline):
         """A function that will time the event of the deadline. it should call
         process.deadlinePassedHandler when the timestamp has passed. This
         function is meant to be over-written in different implementations of
         the engine.
         """
 
-    def deadlineCanceller(self, activity):
+    def deadlineCanceller(deadine):
         """Cancels the deadline timer created by deadlineTimer. This method
         is called on activity.finish calls.
         """
 
-    def deadlinePassedHandler(self, activity):
+    def deadlinePassedHandler(deadline):
         """Called by a deadlineTimer when the time is up. Puts the activity
         in finishedActivities and executes the appropriate transition
         """
 
-    def start(self, *arguments):
+    def start(*arguments):
         """Start the process with the given parameters.
         """
 
-    def abort(self):
+    def abort():
         """Abort the process.
 
         All current activities should be properly aborted as well.
@@ -281,6 +282,7 @@ class IProcessContext(interface.Interface):
     def processFinished(process, *results):
         """Receive notification of process completion, with results
         """
+
 
 class IActivity(interface.Interface):
     """Activity instance
@@ -341,6 +343,7 @@ class IApplicationDefinition(interface.Interface):
     parameters = interface.Attribute(
         "A sequence of parameter definitions")
 
+
 class IParameterDefinition(interface.Interface):
     """Parameter definition
     """
@@ -351,9 +354,11 @@ class IParameterDefinition(interface.Interface):
 
     output = interface.Attribute("Is this an output parameter?")
 
+
 class IParticipantDefinition(interface.Interface):
     """Participant definition
     """
+
 
 class IParticipant(interface.Interface):
     """Workflow participant
@@ -363,9 +368,11 @@ class IParticipant(interface.Interface):
 
     description = interface.Attribute("Description")
 
+
 class IDataFieldDefinition(interface.Interface):
     """Participant definition
     """
+
 
 class IWorkItem(interface.Interface):
     """Work item
@@ -382,6 +389,7 @@ class IWorkItem(interface.Interface):
         """Start the work.
         """
 
+
 class IAbortWorkItem(IWorkItem):
     """A work item that can be aborted."""
 
@@ -397,13 +405,16 @@ class IRevertableWorkItem(IWorkItem):
         """Undo the work done by the workitem.
         """
 
+
 class InvalidProcessDefinition(Exception):
     """A process definition isn't valid in some way.
     """
 
+
 class ProcessError(Exception):
     """An error occurred in execution of a process.
     """
+
 
 class IProcessStarted(interface.Interface):
     """A process has begun executing.
@@ -411,11 +422,13 @@ class IProcessStarted(interface.Interface):
 
     process = interface.Attribute("The process")
 
+
 class IProcessFinished(interface.Interface):
     """A process has finished executing.
     """
 
     process = interface.Attribute("The process")
+
 
 class IProcessAborted(interface.Interface):
     """A process has been aborted.
