@@ -300,7 +300,7 @@ class Activity(persistent.Persistent):
             try:
                 elapsed = evaluator.evaluate(self.definition.deadline.duration,
                                              {'timedelta': timedelta})
-            except exception as e:
+            except Exception as e:
                 raise RuntimeError(
                     'Evaluating the deadline duration failed '
                     'for activity {}. Error: {}'.format(definition.id, e))
