@@ -65,11 +65,26 @@ class Package(dict):
 
 
 class DeadlineDefinition(object):
+    defs_by_act = {}
 
-    def __init__(self, duration, exceptionName=None, execution='SYNCHR'):
+    def __init__(self, duration, act_def_id, exceptionName=None,
+                 execution='SYNCHR'):
         self.duration = duration
         self.exceptionName = exceptionName
         self.execution = execution
+
+        # The definition ID must be the list index, since there is no other
+        # uniquely identifying information (0 for the first, etc.)
+        current = self.defs_by_act.get(act_def_id)
+        if current is None:
+            self.defs_by_act[act_def_id] = 0
+            self.id = 0
+        else:
+            raise NotImplementedError(
+                'Current implementation only supports one deadline per activity'
+            )
+            self.defs_by_act[act_def_id] += 1
+            self.id = self.defs_by_act[act_def_id]
 
 
 class XPDLHandler(xml.sax.handler.ContentHandler):
@@ -304,8 +319,8 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     def startDeadline(self, attrs):
         execution = attrs.get((None, u'Execution')) or u'SYNCHR'
         actdef = self.stack[-1]
-        actdef.deadlines.append(DeadlineDefinition(None, exceptionName=None,
-                                                   execution=execution))
+        actdef.deadlines.append(self.DeadlineDefinitionFactory(
+            None, actdef.id, exceptionName=None, execution=execution))
     start_handlers[(xpdlns10, 'Deadline')] = startDeadline
     start_handlers[(xpdlns21, 'Deadline')] = startDeadline
 

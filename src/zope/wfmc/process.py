@@ -290,6 +290,7 @@ class Deadline(object):
 
 class Activity(persistent.Persistent):
     interface.implements(interfaces.IActivity)
+    DeadlineFactory = Deadline
 
     incoming = ()
     deadlineTimer = None
@@ -311,8 +312,8 @@ class Activity(persistent.Persistent):
             evaluator = interfaces.IPythonExpressionEvaluator(self.process)
             try:
                 evaled = evaluator.evaluate(deadlinedef.duration,
-                                             {'timedelta': timedelta,
-                                              'datetime': datetime})
+                                            {'timedelta': timedelta,
+                                             'datetime': datetime})
             except Exception as e:
                 raise RuntimeError(
                     'Evaluating the deadline duration failed '
@@ -331,7 +332,7 @@ class Activity(persistent.Persistent):
                     'number of seconds.\n{}'.format(evaled)
                 )
 
-            deadline = Deadline(self, deadline_time, deadlinedef)
+            deadline = self.DeadlineFactory(self, deadline_time, deadlinedef)
             self.deadlines.append(deadline)
             self.process.deadlineTimer(deadline)
         self.createWorkItems()
@@ -783,8 +784,10 @@ class Process(persistent.Persistent):
         activity.abort(cancelDeadlineTimer=False)
         self.finishedActivities[activity.id] = activity
 
-        transitions = getValidOutgoingTransitions(self, activity.definition,
-                                                  exception=True)
+        transitions = getValidOutgoingTransitions(
+            self, activity.definition,
+            exception=True
+        )
 
         self.transition(activity, transitions)
 
