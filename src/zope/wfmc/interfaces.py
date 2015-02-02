@@ -256,12 +256,7 @@ class IProcess(interface.Interface):
 
     def deadlineCanceller(deadine):
         """Cancels the deadline timer created by deadlineTimer. This method
-        is called on activity.finish calls.
-        """
-
-    def deadlinePassedHandler(deadline):
-        """Called by a deadlineTimer when the time is up. Puts the activity
-        in finishedActivities and executes the appropriate transition
+        is called on activity.finish calls, as well as activity.revert.
         """
 
     def start(*arguments):
