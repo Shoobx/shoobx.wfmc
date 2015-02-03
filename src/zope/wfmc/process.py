@@ -86,7 +86,7 @@ class TransitionDefinition(object):
         return self.type in ('OTHERWISE', )
 
     def __repr__(self):
-        return "TransitionDefinition(from=%r, to=%r)" %(self.from_, self.to)
+        return "TransitionDefinition(from=%r, to=%r)" % (self.from_, self.to)
 
 
 class ProcessDefinition(object):
@@ -783,7 +783,6 @@ class Process(persistent.Persistent):
         activity = deadline.activity
         activity.abort(cancelDeadlineTimer=False)
         self.finishedActivities[activity.id] = activity
-
         transitions = getValidOutgoingTransitions(
             self, activity.definition,
             exception=True
@@ -870,7 +869,7 @@ def getValidOutgoingTransitions(process, activity_definition,
     if exception:
         # TODO: Need support for exception Name specification
         for transition in activity_definition.outgoing:
-            if transition.condition.type == u'DEFAULTEXCEPTION':
+            if transition.type == u'DEFAULTEXCEPTION':
                 return [transition]
         else:
             raise interfaces.ProcessError(
