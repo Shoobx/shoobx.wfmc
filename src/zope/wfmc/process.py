@@ -620,6 +620,7 @@ class Process(persistent.Persistent):
     def __init__(self, definition, start, context=None):
         self.process_definition_identifier = definition.id
         self.context = context
+        self._definiton = definition
         self.activities = {}
         self.finishedActivities = {}
         self.activityIdSequence = Sequence()
@@ -633,7 +634,10 @@ class Process(persistent.Persistent):
 
     @property
     def definition(self):
-        return getProcessDefinition(self.process_definition_identifier)
+        try:
+            return getProcessDefinition(self.process_definition_identifier)
+        except zope.component.interfaces.ComponentLookupError:
+            return self._definiton
 
     def start(self, *arguments):
         if self.isStarted:
