@@ -301,6 +301,10 @@ class Activity(persistent.Persistent):
         self.workitems = {}
         self.finishedWorkitems = {}
 
+        # Didn't want to change the getter, but do want it set from the
+        # constructor
+        self._definition = definition
+
         self.id = self.process.activityIdSequence.next()
         if hasattr(self, "definition") and \
                 self.definition.andJoinSetting and \
@@ -383,8 +387,11 @@ class Activity(persistent.Persistent):
         return workitems
 
     def definition(self):
-        return self.process.definition.activities[
-            self.activity_definition_identifier]
+        try:
+            return self.process.definition.activities[
+                self.activity_definition_identifier]
+        except KeyError:
+            return self._definition
     definition = property(definition)
 
     def createScriptWorkItems(self):
