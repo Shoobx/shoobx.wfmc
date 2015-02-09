@@ -314,6 +314,10 @@ class Activity(persistent.Persistent):
         self.deadlines = []
         for deadlinedef in self.definition.deadlines:
             evaluator = interfaces.IPythonExpressionEvaluator(self.process)
+            if not deadlinedef.duration:
+                log.error('There is an empty deadline time in '
+                          '{} for activity {}.'.format(process, definition.id))
+                continue
             try:
                 evaled = evaluator.evaluate(deadlinedef.duration,
                                             {'timedelta': timedelta,
@@ -322,6 +326,11 @@ class Activity(persistent.Persistent):
                 raise RuntimeError(
                     'Evaluating the deadline duration failed '
                     'for activity {}. Error: {}'.format(definition.id, e))
+
+            if evaled is None:
+                log.error('There is an empty deadline time in '
+                          '{} for activity {}.'.format(process, definition.id))
+                continue
 
             if isinstance(evaled, timedelta):
                 deadline_time = datetime.datetime.now() + evaled

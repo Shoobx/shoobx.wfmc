@@ -140,6 +140,10 @@
                     <xpdl:Performers>
                         <xpdl:Performer>administrator</xpdl:Performer>
                     </xpdl:Performers>
+                    <xpdl:Deadline Execution="SYNCHR">
+                        <xpdl:DeadlineDuration>None</xpdl:DeadlineDuration>
+                        <xpdl:ExceptionName/>
+                    </xpdl:Deadline>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="187,247,190" Height="60" IsVisible="true" LaneId="samples_pool5_lan31" ToolId="JaWE" Width="90">
                             <xpdl:Coordinates XCoordinate="315" YCoordinate="50"/>
@@ -159,6 +163,10 @@
                     <xpdl:Performers>
                         <xpdl:Performer>administrator</xpdl:Performer>
                     </xpdl:Performers>
+                    <xpdl:Deadline Execution="SYNCHR">
+                        <xpdl:DeadlineDuration/>
+                        <xpdl:ExceptionName/>
+                    </xpdl:Deadline>
                     <xpdl:ExtendedAttributes>
                         <xpdl:ExtendedAttribute Name="wizard" Value="main"/>
                     </xpdl:ExtendedAttributes>
