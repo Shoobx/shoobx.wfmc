@@ -696,7 +696,9 @@ class Process(persistent.Persistent):
                     value = evaluator.evaluate(parameter.initialValue)
                 else:
                     __traceback_info__ = (self, parameter)
-                    raise ValueError('Output parameter not available.')
+                    raise ValueError('Process finished, and there is an output '
+                                     'parameter with no value in workflow vars '
+                                     'and no initial value.')
                 outputs[parameter.__name__] = value
 
         return outputs
