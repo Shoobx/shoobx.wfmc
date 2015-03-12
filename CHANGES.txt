@@ -5,6 +5,9 @@ CHANGES
 4.0.0 (unreleased)
 ------------------
 
+- Raise an exception on duplicate `ExtendedAttribute` `Name` in a single
+  `ExtendedAttributes` container
+
 - Use IProcessDefinitionFactory to retrieve process definitions instead of
   named utilities. This additional layer of indirection allows to generate
   definitions dynamically.

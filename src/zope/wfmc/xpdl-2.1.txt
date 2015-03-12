@@ -138,16 +138,16 @@ and we'll define and register participant and application adapters:
     ...         changes1 = args['tech_changes1']
     ...         changes2 = args['tech_changes2']
     ...         if not (publish1 and publish2):
-    ...             output = {'publish': False, 
-    ...                       'tech_changes': changes1 + changes2, 
+    ...             output = {'publish': False,
+    ...                       'tech_changes': changes1 + changes2,
     ...                       'ed_changes': ()}
     ...             # Reject if either tech reviewer rejects
     ...             self.activity.workItemFinished(
     ...                 self, output)
     ...
     ...         if changes1 or changes2:
-    ...             output = {'publish': True, 
-    ...                       'tech_changes': changes1 + changes2, 
+    ...             output = {'publish': True,
+    ...                       'tech_changes': changes1 + changes2,
     ...                       'ed_changes': ()}
     ...             # we won't do anyting if there are tech changes
     ...             self.activity.workItemFinished(
@@ -447,3 +447,17 @@ Extended attributes are stored in ActivityDefinition.attributes dictionary
     OrderedDict([(u'ParticipantID', u'author'),
                  (u'XOffset', u'110'),
                  (u'YOffset', u'20')])
+
+Edge cases
+-----------
+
+Just in case there are duplicate ExtendedAttribute Names for a single
+ExtendedAttributes container, raise an error.
+Having two ExtendedAttribute elements is nonsense.
+
+    >>> fname = 'publication-2.1-duplicate-ExtendedAttribute.xpdl'
+    >>> package = xpdl.read(open(os.path.join(this_directory, fname))) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    HandlerError: u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system'"
+    File ".../src/zope/wfmc/publication-2.1-duplicate-ExtendedAttribute.xpdl", line 240. in ExtendedAttribute

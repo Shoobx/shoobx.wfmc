@@ -1,0 +1,667 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xpdl:Package xmlns:xpdl="http://www.wfmc.org/2008/XPDL2.1" xmlns="http://www.wfmc.org/2008/XPDL2.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="Publication" xsi:schemaLocation="http://www.wfmc.org/2008/XPDL2.1 http://www.wfmc.org/standards/docs/bpmnxpdl_31.xsd">
+    <xpdl:PackageHeader>
+        <xpdl:XPDLVersion>1.0</xpdl:XPDLVersion>
+        <xpdl:Vendor>Together</xpdl:Vendor>
+        <xpdl:Created>2005-01-06 16:28:27</xpdl:Created>
+    </xpdl:PackageHeader>
+    <xpdl:RedefinableHeader PublicationStatus="UNDER_TEST"/>
+    <xpdl:ConformanceClass GraphConformance="NON_BLOCKED"/>
+    <xpdl:Participants>
+        <xpdl:Participant Id="System">
+            <xpdl:ParticipantType Type="SYSTEM"/>
+        </xpdl:Participant>
+    </xpdl:Participants>
+    <xpdl:Applications>
+        <xpdl:Application Id="prepare">
+            <xpdl:FormalParameters>
+                <xpdl:FormalParameter Id="publish" IsArray="false" Mode="OUT">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="BOOLEAN"/>
+                    </xpdl:DataType>
+                </xpdl:FormalParameter>
+            </xpdl:FormalParameters>
+        </xpdl:Application>
+        <xpdl:Application Id="publish"/>
+        <xpdl:Application Id="reject"/>
+    </xpdl:Applications>
+    <xpdl:Pools>
+        <xpdl:Pool BoundaryVisible="true" Id="Publication_pool1" MainPool="true" Name="Publication" Orientation="VERTICAL" Process="Publication">
+            <xpdl:Lanes>
+                <xpdl:Lane Id="Publication_pool1_lan1" Name="Author">
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="220,220,220" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:NodeGraphicsInfos>
+                    <xpdl:Performers>
+                        <xpdl:Performer>author</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Lane>
+                <xpdl:Lane Id="Publication_pool1_lan2" Name="Technical Reviewer 1">
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="240,240,240" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:NodeGraphicsInfos>
+                    <xpdl:Performers>
+                        <xpdl:Performer>tech1</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Lane>
+                <xpdl:Lane Id="Publication_pool1_lan3" Name="Technical Reviewer 2">
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="240,240,240" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:NodeGraphicsInfos>
+                    <xpdl:Performers>
+                        <xpdl:Performer>tech2</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Lane>
+                <xpdl:Lane Id="Publication_pool1_lan4" Name="Editorial Reviewer">
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="240,240,240" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:NodeGraphicsInfos>
+                    <xpdl:Performers>
+                        <xpdl:Performer>reviewer</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Lane>
+                <xpdl:Lane Id="Publication_pool1_lan5" Name="System">
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="40,145,195" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:NodeGraphicsInfos>
+                    <xpdl:Performers>
+                        <xpdl:Performer>System</xpdl:Performer>
+                    </xpdl:Performers>
+                </xpdl:Lane>
+                <xpdl:Lane Id="Publication_pool1_lan6" Name="Expression lane">
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,255,215" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Lane>
+            </xpdl:Lanes>
+            <xpdl:NodeGraphicsInfos>
+                <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,255,215" IsVisible="true" ToolId="JaWE"/>
+            </xpdl:NodeGraphicsInfos>
+        </xpdl:Pool>
+    </xpdl:Pools>
+    <xpdl:WorkflowProcesses>
+        <xpdl:WorkflowProcess AccessLevel="PUBLIC" Id="Publication" Name="Publication">
+            <xpdl:ProcessHeader DurationUnit="D">
+                <xpdl:Created>2005-01-06 16:29:02</xpdl:Created>
+                <xpdl:Description>This is the sample process</xpdl:Description>
+            </xpdl:ProcessHeader>
+            <xpdl:RedefinableHeader PublicationStatus="UNDER_TEST"/>
+            <xpdl:FormalParameters>
+                <xpdl:FormalParameter Id="author" IsArray="false" Mode="IN">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="STRING"/>
+                    </xpdl:DataType>
+                </xpdl:FormalParameter>
+                <xpdl:FormalParameter Id="publish" IsArray="false" Mode="OUT">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="BOOLEAN"/>
+                    </xpdl:DataType>
+                </xpdl:FormalParameter>
+            </xpdl:FormalParameters>
+            <xpdl:Participants>
+                <xpdl:Participant Id="author" Name="Author">
+                    <xpdl:ParticipantType Type="ROLE"/>
+                </xpdl:Participant>
+                <xpdl:Participant Id="tech1" Name="Technical Reviewer 1">
+                    <xpdl:ParticipantType Type="HUMAN"/>
+                    <xpdl:Description>He is a smart guy.</xpdl:Description>
+                </xpdl:Participant>
+                <xpdl:Participant Id="tech2" Name="Technical Reviewer 2">
+                    <xpdl:ParticipantType Type="HUMAN"/>
+                </xpdl:Participant>
+                <xpdl:Participant Id="reviewer" Name="Editorial Reviewer">
+                    <xpdl:ParticipantType Type="HUMAN"/>
+                </xpdl:Participant>
+            </xpdl:Participants>
+            <xpdl:Applications>
+                <xpdl:Application Id="prepare" Name="Prepare">
+                    <xpdl:Description>Prepare the initial draft</xpdl:Description>
+                </xpdl:Application>
+                <xpdl:Application Id="tech_review">
+                    <xpdl:FormalParameters>
+                        <xpdl:FormalParameter Id="publish" IsArray="false" Mode="OUT">
+                            <xpdl:DataType>
+                                <xpdl:BasicType Type="BOOLEAN"/>
+                            </xpdl:DataType>
+                        </xpdl:FormalParameter>
+                        <xpdl:FormalParameter Id="tech_changes" IsArray="false" Mode="OUT">
+                            <xpdl:DataType>
+                                <xpdl:BasicType Type="BOOLEAN"/>
+                            </xpdl:DataType>
+                        </xpdl:FormalParameter>
+                    </xpdl:FormalParameters>
+                </xpdl:Application>
+                <xpdl:Application Id="ed_review">
+                    <xpdl:FormalParameters>
+                        <xpdl:FormalParameter Id="publish1" IsArray="false" Mode="IN">
+                            <xpdl:DataType>
+                                <xpdl:BasicType Type="BOOLEAN"/>
+                            </xpdl:DataType>
+                        </xpdl:FormalParameter>
+                        <xpdl:FormalParameter Id="tech_changes1" IsArray="false" Mode="IN">
+                            <xpdl:DataType>
+                                <xpdl:BasicType Type="BOOLEAN"/>
+                            </xpdl:DataType>
+                        </xpdl:FormalParameter>
+                        <xpdl:FormalParameter Id="publish2" IsArray="false" Mode="IN">
+                            <xpdl:DataType>
+                                <xpdl:BasicType Type="BOOLEAN"/>
+                            </xpdl:DataType>
+                        </xpdl:FormalParameter>
+                        <xpdl:FormalParameter Id="tech_changes2" IsArray="false" Mode="IN">
+                            <xpdl:DataType>
+                                <xpdl:BasicType Type="BOOLEAN"/>
+                            </xpdl:DataType>
+                        </xpdl:FormalParameter>
+                        <xpdl:FormalParameter Id="publish" IsArray="false" Mode="OUT">
+                            <xpdl:DataType>
+                                <xpdl:BasicType Type="BOOLEAN"/>
+                            </xpdl:DataType>
+                        </xpdl:FormalParameter>
+                        <xpdl:FormalParameter Id="tech_changes" IsArray="false" Mode="OUT">
+                            <xpdl:DataType>
+                                <xpdl:BasicType Type="BOOLEAN"/>
+                            </xpdl:DataType>
+                        </xpdl:FormalParameter>
+                        <xpdl:FormalParameter Id="ed_changes" IsArray="false" Mode="OUT">
+                            <xpdl:DataType>
+                                <xpdl:BasicType Type="BOOLEAN"/>
+                            </xpdl:DataType>
+                        </xpdl:FormalParameter>
+                    </xpdl:FormalParameters>
+                </xpdl:Application>
+                <xpdl:Application Id="final"/>
+                <xpdl:Application Id="rfinal">
+                    <xpdl:FormalParameters>
+                        <xpdl:FormalParameter Id="ed_changes" IsArray="false" Mode="OUT">
+                            <xpdl:DataType>
+                                <xpdl:BasicType Type="BOOLEAN"/>
+                            </xpdl:DataType>
+                        </xpdl:FormalParameter>
+                    </xpdl:FormalParameters>
+                </xpdl:Application>
+            </xpdl:Applications>
+            <xpdl:DataFields>
+                <xpdl:DataField Id="publish" IsArray="false">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="BOOLEAN"/>
+                    </xpdl:DataType>
+                </xpdl:DataField>
+                <xpdl:DataField Id="tech_changes" IsArray="false">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="BOOLEAN"/>
+                    </xpdl:DataType>
+                </xpdl:DataField>
+                <xpdl:DataField Id="ed_changes" IsArray="false">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="BOOLEAN"/>
+                    </xpdl:DataType>
+                </xpdl:DataField>
+                <xpdl:DataField Id="publish1" IsArray="false">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="BOOLEAN"/>
+                    </xpdl:DataType>
+                </xpdl:DataField>
+                <xpdl:DataField Id="tech_changes1" IsArray="false">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="BOOLEAN"/>
+                    </xpdl:DataType>
+                </xpdl:DataField>
+                <xpdl:DataField Id="publish2" IsArray="false">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="BOOLEAN"/>
+                    </xpdl:DataType>
+                </xpdl:DataField>
+                <xpdl:DataField Id="tech_changes2" IsArray="false">
+                    <xpdl:DataType>
+                        <xpdl:BasicType Type="BOOLEAN"/>
+                    </xpdl:DataType>
+                </xpdl:DataField>
+            </xpdl:DataFields>
+            <xpdl:Activities>
+                <xpdl:Activity FinishMode="Automatic" Id="prepare" Name="Prepare" StartMode="Automatic">
+                    <xpdl:Implementation>
+                        <xpdl:Task>
+                            <xpdl:TaskApplication Id="prepare"/>
+                        </xpdl:Task>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>author</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Join Type="Exclusive"/>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="author"/>
+                        <xpdl:ExtendedAttribute Name="XOffset" Value="110"/>
+                        <xpdl:ExtendedAttribute Name="YOffset" Value="20"/>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="system"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,204,204" Height="60" IsVisible="true" LaneId="Publication_pool1_lan1" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="12" YCoordinate="230"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity FinishMode="Automatic" Id="tech1" Name="Technical Review 1" StartMode="Automatic">
+                    <xpdl:Description>This is the first Technical Review.</xpdl:Description>
+                    <xpdl:Implementation>
+                        <xpdl:Task>
+                            <xpdl:TaskApplication Id="tech_review">
+                                <xpdl:ActualParameters>
+                                    <xpdl:ActualParameter>publish1</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>tech_changes1</xpdl:ActualParameter>
+                                </xpdl:ActualParameters>
+                            </xpdl:TaskApplication>
+                        </xpdl:Task>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>tech1</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="tech1"/>
+                        <xpdl:ExtendedAttribute Name="XOffset" Value="210"/>
+                        <xpdl:ExtendedAttribute Name="YOffset" Value="30"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,204,204" Height="60" IsVisible="true" LaneId="Publication_pool1_lan2" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="29" YCoordinate="368"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity FinishMode="Automatic" Id="tech2" Name="Technical Review 2" StartMode="Automatic">
+                    <xpdl:Implementation>
+                        <xpdl:Task>
+                            <xpdl:TaskApplication Id="tech_review">
+                                <xpdl:ActualParameters>
+                                    <xpdl:ActualParameter>publish2</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>tech_changes2</xpdl:ActualParameter>
+                                </xpdl:ActualParameters>
+                            </xpdl:TaskApplication>
+                        </xpdl:Task>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>tech2</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="tech2"/>
+                        <xpdl:ExtendedAttribute Name="XOffset" Value="190"/>
+                        <xpdl:ExtendedAttribute Name="YOffset" Value="20"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,204,204" Height="60" IsVisible="true" LaneId="Publication_pool1_lan3" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="30" YCoordinate="274"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity FinishMode="Automatic" Id="review" Name="Editorial Review" StartMode="Automatic">
+                    <xpdl:Implementation>
+                        <xpdl:Task>
+                            <xpdl:TaskApplication Id="ed_review">
+                                <xpdl:ActualParameters>
+                                    <xpdl:ActualParameter>publish1</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>tech_changes1</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>publish2</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>tech_changes2</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>publish</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>tech_changes</xpdl:ActualParameter>
+                                    <xpdl:ActualParameter>ed_changes</xpdl:ActualParameter>
+                                </xpdl:ActualParameters>
+                            </xpdl:TaskApplication>
+                        </xpdl:Task>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>reviewer</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="reviewer"/>
+                        <xpdl:ExtendedAttribute Name="XOffset" Value="300"/>
+                        <xpdl:ExtendedAttribute Name="YOffset" Value="20"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,204,204" Height="60" IsVisible="true" LaneId="Publication_pool1_lan4" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="35" YCoordinate="387"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity FinishMode="Automatic" Id="final" Name="Final Preparation" StartMode="Automatic">
+                    <xpdl:Implementation>
+                        <xpdl:Task>
+                            <xpdl:TaskApplication Id="final"/>
+                        </xpdl:Task>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>author</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Join Type="Exclusive"/>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="author"/>
+                        <xpdl:ExtendedAttribute Name="XOffset" Value="370"/>
+                        <xpdl:ExtendedAttribute Name="YOffset" Value="30"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,204,204" Height="60" IsVisible="true" LaneId="Publication_pool1_lan1" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="23" YCoordinate="569"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity FinishMode="Automatic" Id="rfinal" Name="Review Final" StartMode="Automatic">
+                    <xpdl:Implementation>
+                        <xpdl:Task>
+                            <xpdl:TaskApplication Id="rfinal">
+                                <xpdl:ActualParameters>
+                                    <xpdl:ActualParameter>ed_changes</xpdl:ActualParameter>
+                                </xpdl:ActualParameters>
+                            </xpdl:TaskApplication>
+                        </xpdl:Task>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>reviewer</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="reviewer"/>
+                        <xpdl:ExtendedAttribute Name="XOffset" Value="440"/>
+                        <xpdl:ExtendedAttribute Name="YOffset" Value="20"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,204,204" Height="60" IsVisible="true" LaneId="Publication_pool1_lan4" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="40" YCoordinate="576"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity FinishMode="Automatic" Id="publish" Name="Publish" StartMode="Automatic">
+                    <xpdl:Implementation>
+                        <xpdl:Task>
+                            <xpdl:TaskApplication Id="publish"/>
+                        </xpdl:Task>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>System</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Join Type="Exclusive"/>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="System"/>
+                        <xpdl:ExtendedAttribute Name="XOffset" Value="540"/>
+                        <xpdl:ExtendedAttribute Name="YOffset" Value="20"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,204,204" Height="60" IsVisible="true" LaneId="Publication_pool1_lan5" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="146" YCoordinate="579"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity FinishMode="Automatic" Id="reject" Name="Reject" StartMode="Automatic">
+                    <xpdl:Implementation>
+                        <xpdl:Task>
+                            <xpdl:TaskApplication Id="reject"/>
+                        </xpdl:Task>
+                    </xpdl:Implementation>
+                    <xpdl:Performers>
+                        <xpdl:Performer>System</xpdl:Performer>
+                    </xpdl:Performers>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="System"/>
+                        <xpdl:ExtendedAttribute Name="XOffset" Value="540"/>
+                        <xpdl:ExtendedAttribute Name="YOffset" Value="80"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,204,204" Height="60" IsVisible="true" LaneId="Publication_pool1_lan5" ToolId="JaWE" Width="90">
+                            <xpdl:Coordinates XCoordinate="29" YCoordinate="582"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity Id="review1">
+                    <xpdl:Route GatewayType="Parallel"/>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Join Type="Parallel"/>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,229,124" Height="43" IsVisible="true" LaneId="Publication_pool1_lan4" ToolId="JaWE" Width="43">
+                            <xpdl:Coordinates XCoordinate="59" YCoordinate="308"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity Id="review2">
+                    <xpdl:Route GatewayType="Exclusive"/>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Split Type="Exclusive">
+                                <xpdl:TransitionRefs>
+                                    <xpdl:TransitionRef Id="Publication_Tra9"/>
+                                    <xpdl:TransitionRef Id="Publication_Tra8"/>
+                                    <xpdl:TransitionRef Id="Publication_Tra7"/>
+                                    <xpdl:TransitionRef Id="Publication_Tra10"/>
+                                </xpdl:TransitionRefs>
+                            </xpdl:Split>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,229,124" Height="43" IsVisible="true" LaneId="Publication_pool1_lan4" ToolId="JaWE" Width="43">
+                            <xpdl:Coordinates XCoordinate="55" YCoordinate="489"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity Id="rfinal1">
+                    <xpdl:Route GatewayType="Exclusive"/>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Split Type="Exclusive">
+                                <xpdl:TransitionRefs>
+                                    <xpdl:TransitionRef Id="Publication_Tra13"/>
+                                    <xpdl:TransitionRef Id="Publication_Tra12"/>
+                                </xpdl:TransitionRefs>
+                            </xpdl:Split>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,229,124" Height="43" IsVisible="true" LaneId="Publication_pool1_lan4" ToolId="JaWE" Width="43">
+                            <xpdl:Coordinates XCoordinate="61" YCoordinate="687"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity Id="start" Name="Start">
+                    <xpdl:Event>
+                        <xpdl:StartEvent Trigger="None"/>
+                    </xpdl:Event>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="102,204,51" Height="31" IsVisible="true" LaneId="Publication_pool1_lan1" ToolId="JaWE" Width="31">
+                            <xpdl:Coordinates XCoordinate="41" YCoordinate="52"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity Id="finish">
+                    <xpdl:Event>
+                        <xpdl:EndEvent Result="None"/>
+                    </xpdl:Event>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Join Type="Exclusive"/>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="236,120,98" Height="31" IsVisible="true" LaneId="Publication_pool1_lan5" ToolId="JaWE" Width="31">
+                            <xpdl:Coordinates XCoordinate="115" YCoordinate="748"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+                <xpdl:Activity Id="review0">
+                    <xpdl:Route GatewayType="Parallel"/>
+                    <xpdl:TransitionRestrictions>
+                        <xpdl:TransitionRestriction>
+                            <xpdl:Split Type="Parallel">
+                                <xpdl:TransitionRefs>
+                                    <xpdl:TransitionRef Id="Publication_Tra2"/>
+                                    <xpdl:TransitionRef Id="Publication_Tra3"/>
+                                </xpdl:TransitionRefs>
+                            </xpdl:Split>
+                        </xpdl:TransitionRestriction>
+                    </xpdl:TransitionRestrictions>
+                    <xpdl:NodeGraphicsInfos>
+                        <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,229,124" Height="43" IsVisible="true" LaneId="Publication_pool1_lan2" ToolId="JaWE" Width="43">
+                            <xpdl:Coordinates XCoordinate="51" YCoordinate="279"/>
+                        </xpdl:NodeGraphicsInfo>
+                    </xpdl:NodeGraphicsInfos>
+                </xpdl:Activity>
+            </xpdl:Activities>
+            <xpdl:Transitions>
+                <xpdl:Transition From="review0" Id="Publication_Tra2" Name="Transition to Tech Review 1" To="tech1">
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                        <xpdl:ExtendedAttribute Name="BreakPoint" Value="160;160;1"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="review0" Id="Publication_Tra3" Name="Transition to Tech Review 2" To="tech2">
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                        <xpdl:ExtendedAttribute Name="BreakPoint" Value="210;290;1"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="tech2" Id="Publication_Tra4" Name="Transition" To="review1">
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="tech1" Id="Publication_Tra5" Name="Transition" To="review1">
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="review2" Id="Publication_Tra7" Name="Transition" To="prepare">
+                    <xpdl:Condition Type="CONDITION">tech_changes</xpdl:Condition>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="SIMPLE_ROUTING_ORTHOGONAL" ToolId="JaWE">
+                            <xpdl:Coordinates XCoordinate="300" YCoordinate="547"/>
+                            <xpdl:Coordinates XCoordinate="300" YCoordinate="295"/>
+                        </xpdl:ConnectorGraphicsInfo>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="review2" Id="Publication_Tra8" Name="Transition" To="final">
+                    <xpdl:Condition Type="CONDITION">ed_changes<xpdl:Expression ScriptGrammar="python"/>
+                    </xpdl:Condition>
+                    <xpdl:Description>Use this transition if there are editorial changes required.</xpdl:Description>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="review2" Id="Publication_Tra9" Name="Transition" To="reject">
+                    <xpdl:Condition Type="CONDITION">not publish</xpdl:Condition>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="review2" Id="Publication_Tra10" Name="Transition" To="publish">
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="final" Id="Publication_Tra11" Name="Transition" To="rfinal">
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                        <xpdl:ExtendedAttribute Name="BreakPoint" Value="490;400;1"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="rfinal1" Id="Publication_Tra13" Name="Transition" To="publish">
+                    <xpdl:Condition Type="OTHERWISE"/>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_ORTHOGONAL" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="rfinal1" Id="Publication_Tra12" Name="Transition" To="final">
+                    <xpdl:Condition Type="CONDITION">ed_changes</xpdl:Condition>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="RoutingType" Value="NOROUTING"/>
+                        <xpdl:ExtendedAttribute Name="BreakPoint" Value="440;430;1"/>
+                    </xpdl:ExtendedAttributes>
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="review1" Id="Publication_tra1" Name="Transition" To="review">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="review" Id="Publication_tra2" Name="Transition" To="review2">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="rfinal" Id="Publication_tra3" Name="Transition" To="rfinal1">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="publish" Id="Publication_tra5" Name="Transition" To="finish">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_SPLINE" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="reject" Id="Publication_tra6" Name="Transition" To="finish">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_SPLINE" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="start" Id="Publication_tra4" Name="Transition" To="prepare">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_SPLINE" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+                <xpdl:Transition From="prepare" Id="Publication_tra7" Name="Transition" To="review0">
+                    <xpdl:ConnectorGraphicsInfos>
+                        <xpdl:ConnectorGraphicsInfo FillColor="0,0,0" IsVisible="true" Style="NO_ROUTING_SPLINE" ToolId="JaWE"/>
+                    </xpdl:ConnectorGraphicsInfos>
+                </xpdl:Transition>
+            </xpdl:Transitions>
+            <xpdl:ExtendedAttributes>
+                <xpdl:ExtendedAttribute Name="ParticipantVisualOrder" Value="tech1;tech2;author;reviewer;System;"/>
+            </xpdl:ExtendedAttributes>
+        </xpdl:WorkflowProcess>
+    </xpdl:WorkflowProcesses>
+    <xpdl:ExtendedAttributes>
+        <xpdl:ExtendedAttribute Name="EDITING_TOOL" Value="Together Workflow Editor"/>
+        <xpdl:ExtendedAttribute Name="EDITING_TOOL_VERSION" Value="4.8-1-20130204-2300-TAB-2.4-1"/>
+        <xpdl:ExtendedAttribute Name="JaWE_CONFIGURATION" Value="default"/>
+    </xpdl:ExtendedAttributes>
+</xpdl:Package>

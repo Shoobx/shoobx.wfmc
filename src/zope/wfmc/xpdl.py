@@ -403,6 +403,10 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
         container = self.stack[-1]
         name = attrs[(None, 'Name')]
         value = attrs.get((None, 'Value'))
+        if name in container:
+            raise KeyError(
+                "The Name '%s' is already used, uniqueness violated, "
+                "value: '%s'" % (name, value))
         container[name] = value
         return container, name
     start_handlers[(xpdlns10, 'ExtendedAttribute')] = ExtendedAttribute
