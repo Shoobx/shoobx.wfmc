@@ -6,6 +6,7 @@ Here we will demonstrate, that xpdl-2.1 files are also importable and works.
 For general description of how to work with XPDL files, refer xpdl.txt.
 
     >>> from zope.wfmc import xpdl
+    >>> xpdl.RAISE_ON_DUPLICATE_ERROR = True
     >>> import os
     >>> package = xpdl.read(open(os.path.join(this_directory,
     ...                                       'publication-2.1.xpdl')))
@@ -459,5 +460,5 @@ Having two ExtendedAttribute elements is nonsense.
     >>> package = xpdl.read(open(os.path.join(this_directory, fname))) # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    HandlerError: u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system'"
+    HandlerError: u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."
     File ".../src/zope/wfmc/publication-2.1-duplicate-ExtendedAttribute.xpdl", line 240. in ExtendedAttribute

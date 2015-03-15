@@ -14,6 +14,7 @@
 """XPDL reader for process definitions
 """
 
+import logging
 import sys
 import xml.sax
 import xml.sax.xmlreader
@@ -24,6 +25,10 @@ from zope.wfmc import interfaces
 
 xpdlns10 = "http://www.wfmc.org/2002/XPDL1.0"
 xpdlns21 = "http://www.wfmc.org/2008/XPDL2.1"
+
+RAISE_ON_DUPLICATE_ERROR = False
+
+log = logging.getLogger(__name__)
 
 
 class HandlerError(Exception):
@@ -404,9 +409,13 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
         name = attrs[(None, 'Name')]
         value = attrs.get((None, 'Value'))
         if name in container:
-            raise KeyError(
-                "The Name '%s' is already used, uniqueness violated, "
-                "value: '%s'" % (name, value))
+            msg = (u"The Name '{}' is already used, uniqueness violated, "
+                   u"value: '{}' see: {}.".format(
+                    name, value, self.package.id))
+            if RAISE_ON_DUPLICATE_ERROR:
+                raise KeyError(msg)
+            log.error(msg)
+
         container[name] = value
         return container, name
     start_handlers[(xpdlns10, 'ExtendedAttribute')] = ExtendedAttribute
