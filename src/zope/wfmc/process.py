@@ -486,7 +486,14 @@ class Activity(persistent.Persistent):
             self.finish()
 
     def workItemFinished(self, work_item, results=None):
-        unused, app, formal, actual = entry = self.workitems.pop(work_item.id)
+        try:
+            unused, app, formal, actual = entry = \
+                self.workitems.pop(work_item.id)
+        except KeyError:
+            raise KeyError(
+                'Tried to pop workitem id:{} from the workitems dict of {}. '
+                'Maybe it is already finished: {}'.format(
+                    work_item.id, self, self.finishedWorkitems))
         self.finishedWorkitems[work_item.id] = entry
         self._p_changed = True
         args = results
