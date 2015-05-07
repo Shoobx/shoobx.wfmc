@@ -499,7 +499,7 @@ class Activity(persistent.Persistent):
         args = results
         if not results:
             args = {}
-        
+
         res = []
 
         for parameter, name in zip(formal, actual):
@@ -562,6 +562,17 @@ class Activity(persistent.Persistent):
         # Remove itself from the process activities list.
         del self.process.activities[self.id]
 
+    def restoreWFRD(self):
+        wf_revert_names = [name for name in dir(self.process.applicationRelevantData)
+                           if name.startswith(WFRD_PREFIX+str(self.id)+"_")]
+        for name in wf_revert_names:
+            old_val = getattr(self.process.applicationRelevantData, name)
+            wfname = name.lstrip(WFRD_PREFIX+str(self.id)+"_")
+            if old_val == DEL_MARKER:
+                delattr(self.process.workflowRelevantData, wfname)
+            else:
+                setattr(self.process.workflowRelevantData, wfname, old_val)
+
     def revert(self, cancelDeadlineTimer=True):
 
         # Revert all finished workitems.
@@ -570,15 +581,7 @@ class Activity(persistent.Persistent):
                 workitem.revert()
 
             # Restore workflowRelevantData
-            wf_revert_names = [name for name in dir(self.process.applicationRelevantData)
-                               if name.startswith(WFRD_PREFIX+str(self.id)+"_")]
-            for name in wf_revert_names:
-                old_val = getattr(self.process.applicationRelevantData, name)
-                wfname = name.lstrip(WFRD_PREFIX+str(self.id)+"_")
-                if old_val == DEL_MARKER:
-                    delattr(self.process.workflowRelevantData, wfname)
-                else:
-                    setattr(self.process.workflowRelevantData, wfname, old_val)
+            self.restoreWFRD()
 
         if cancelDeadlineTimer:
             for deadline in self.deadlines:
