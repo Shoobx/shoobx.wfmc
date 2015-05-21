@@ -724,14 +724,14 @@ class Process(persistent.Persistent):
             zope.event.notify(ProcessFinished(self))
 
     def abort(self):
-        for activity in sorted(self.activities.values(),
+        allActivities = self.activities.values() + self.finishedActivities.values()
+        for activity in sorted(allActivities,
                                key=Process.chronological_key,
                                reverse=True):
-            activity.abort()
-        for activity in sorted(self.finishedActivities.values(),
-                               key=Process.chronological_key,
-                               reverse=True):
-            activity.revert()
+            if activity.id in self.activities:
+                activity.abort()
+            else:
+                activity.revert()
         self.isAborted = True
         zope.event.notify(ProcessAborted(self))
 
