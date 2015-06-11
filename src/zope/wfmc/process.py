@@ -869,6 +869,8 @@ def evaluateInputs(process, formal, actual, evaluator, strict=True):
     args = []
     for parameter, expr in zip(formal, actual):
         if parameter.input:
+            if expr is u'':
+                expr = getattr(parameter, 'initialValue', '')
             __traceback_info__ = (parameter, expr)
             try:
                 value = evaluator.evaluate(expr)
