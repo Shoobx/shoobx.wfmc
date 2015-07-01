@@ -315,7 +315,7 @@ class Activity(persistent.Persistent):
         for deadlinedef in self.definition.deadlines:
             evaluator = interfaces.IPythonExpressionEvaluator(self.process)
             if not deadlinedef.duration:
-                log.error('There is an empty deadline time in '
+                log.warn('There is an empty deadline time in '
                           '{} for activity {}.'.format(process, definition.id))
                 continue
             try:
