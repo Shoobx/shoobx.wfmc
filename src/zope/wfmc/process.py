@@ -328,7 +328,7 @@ class Activity(persistent.Persistent):
                     'for activity {}. Error: {}'.format(definition.id, e))
 
             if evaled is None:
-                log.error('There is an empty deadline time in '
+                log.warn('There is an empty deadline time in '
                           '{} for activity {}.'.format(process, definition.id))
                 continue
 
