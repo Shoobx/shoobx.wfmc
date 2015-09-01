@@ -320,6 +320,8 @@ class IActivity(interface.Interface):
         """Revert any effects of the activity.
 
         This method is used when the process is aborted manually.
+
+        Returns a list of workitems that were aborted.
         """
 
     def workItemFinished(work_item, *results):
