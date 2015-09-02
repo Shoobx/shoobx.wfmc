@@ -575,10 +575,12 @@ class Activity(persistent.Persistent):
 
     def revert(self, cancelDeadlineTimer=True):
 
+        reverted_workitems = []
         # Revert all finished workitems.
         for workitem, app, formal, actual in self.finishedWorkitems.values():
             if interfaces.IRevertableWorkItem.providedBy(workitem):
                 workitem.revert()
+                reverted_workitems.append(workitem)
 
             # Restore workflowRelevantData
             self.restoreWFRD()
@@ -593,6 +595,8 @@ class Activity(persistent.Persistent):
             new_num = self.process.get_join_revert_data(self.definition) + 1
             self.process.set_join_revert_data(self.definition, new_num)
         zope.event.notify(ActivityReverted(self))
+
+        return reverted_workitems
 
     def __repr__(self):
         return "Activity(%r)" % (
