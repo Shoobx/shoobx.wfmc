@@ -888,8 +888,8 @@ def evaluateInputs(process, formal, actual, evaluator, strict=True):
     return args
 
 
-def getValidOutgoingTransitions(process, activity_definition,
-                                strict=True, exception=False):
+def getValidOutgoingTransitions(process, activity_definition, exception=False,
+                                checker=None):
     """Return list of valid outgoing transitions from given activity_definition
     in given process.
 
@@ -900,7 +900,16 @@ def getValidOutgoingTransitions(process, activity_definition,
     If any exception is raised during evaluation of condition expressions,
     it will be rerised only if ``strict`` parameter is True. Otherwise, the
     condition will be treated as False.
+
+    A custom checker can be passed in if the caller wants more control over
+    what gets raised during evaluation of the condition. The checker should
+    take a transition and return a boolean if the transition is available.
     """
+    def defaultChecker(transition):
+        return transition.condition(process)
+
+    if checker is None:
+        checker = defaultChecker
     transitions = []
     otherwises = []
 
@@ -920,14 +929,7 @@ def getValidOutgoingTransitions(process, activity_definition,
             # do not consider 'otherwise' transitions just yet
             otherwises.append(transition)
             continue
-        try:
-            active = transition.condition(process)
-        except:
-            if strict:
-                raise
-            else:
-                active = False
-        if active:
+        if checker(transition):
             transitions.append(transition)
             if not activity_definition.andSplitSetting:
                 break  # xor split, want first one

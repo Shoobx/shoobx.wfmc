@@ -292,6 +292,70 @@ def test_process_abort():
     """
 
 
+def test_getValidOutgoingTransitions():
+    """
+
+    >>> from zope.wfmc import process
+    >>> pd = process.ProcessDefinition('sample')
+    >>> from zope import component, interface
+
+    >>> pdfactory = process.StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+    >>> pdfactory.register(pd)
+
+    >>> pd.defineActivities(
+    ...    eek = process.ActivityDefinition(),
+    ...    ook = process.ActivityDefinition(),
+    ...    )
+    >>> pd.defineTransitions(process.TransitionDefinition('eek', 'ook'))
+
+    >>> proc = pd()
+    >>> process.getValidOutgoingTransitions(proc, pd.activities['eek'])
+    [TransitionDefinition(from='eek', to='ook')]
+    """
+
+
+def test_getValidOutgoingTransitions_custom_checker():
+    """
+
+    >>> from zope.wfmc import process
+    >>> pd = process.ProcessDefinition('sample')
+    >>> from zope import component, interface
+
+    >>> pdfactory = process.StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+    >>> pdfactory.register(pd)
+
+    >>> pd.defineActivities(
+    ...    eek = process.ActivityDefinition(),
+    ...    ook = process.ActivityDefinition(),
+    ...    )
+    >>> def raiseCondition(data):
+    ...     raise Exception()
+    >>> pd.defineTransitions(process.TransitionDefinition('eek', 'ook',
+    ...                      condition=raiseCondition))
+    >>> proc = pd()
+    >>> process.getValidOutgoingTransitions(proc, pd.activities['eek'])
+    Traceback (most recent call last):
+      ...
+        raise Exception()
+    Exception
+
+    >>> def swallowExceptionsChecker(transition):
+    ...     try:
+    ...         transition.condition(proc)
+    ...     except:
+    ...         return [transition]
+    ...     return []
+    ...
+
+    >>> process.getValidOutgoingTransitions(
+    ...     proc, pd.activities['eek'], checker=swallowExceptionsChecker)
+    [TransitionDefinition(from='eek', to='ook')]
+
+    """
+
+
 def test_suite():
     suite = unittest.TestSuite()
     for doctestfile in ['README.txt', 'xpdl.txt',
