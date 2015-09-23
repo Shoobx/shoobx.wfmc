@@ -462,3 +462,11 @@ Having two ExtendedAttribute elements is nonsense.
     ...
     HandlerError: u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."
     File ".../src/zope/wfmc/publication-2.1-duplicate-ExtendedAttribute.xpdl", line 240. in ExtendedAttribute
+
+Sometimes we can't always raise an exception when this happens so instead
+we can record the parse error.
+    >>> xpdl.RAISE_ON_DUPLICATE_ERROR = False
+    >>> package = xpdl.read(open(os.path.join(this_directory, fname)))
+    >>> package.parseErrors
+    [u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."]
+    
