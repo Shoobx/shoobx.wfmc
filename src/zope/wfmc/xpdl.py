@@ -54,6 +54,7 @@ class Package(dict):
         self.applications = {}
         self.participants = {}
         self.script = None
+        self.parseErrors = []
 
     def defineApplications(self, **applications):
         for id, application in applications.items():
@@ -414,7 +415,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
                     name, value, self.package.id))
             if RAISE_ON_DUPLICATE_ERROR:
                 raise KeyError(msg)
-            log.error(msg)
+            self.package.parseErrors.append(msg)
 
         container[name] = value
         return container, name
