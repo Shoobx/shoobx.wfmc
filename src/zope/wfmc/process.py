@@ -824,7 +824,9 @@ class Process(persistent.Persistent):
             exception=True
         )
 
-        self.transition(activity, transitions)
+        # activity.process, since self could be parent flow and we need local
+        # flow in case of subflow
+        activity.process.transition(activity, transitions)
 
         if activity.definition.andJoinSetting:
             self.set_join_revert_data(activity.definition, 0)
