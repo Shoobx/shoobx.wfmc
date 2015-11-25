@@ -592,7 +592,11 @@ class Activity(persistent.Persistent):
         # Join activites should not have to wait next time you visit them
         # after a true revert
         if self.definition.andJoinSetting:
-            new_num = self.process.get_join_revert_data(self.definition) + 1
+            # the new activity must be one less then the number of in
+            # activities since the number of reverts can not be smaller
+            # then the 1 minus the number of in because the activity is
+            # removed from the map.
+            new_num = len(self.definition.incoming) - 1
             self.process.set_join_revert_data(self.definition, new_num)
         zope.event.notify(ActivityReverted(self))
 
