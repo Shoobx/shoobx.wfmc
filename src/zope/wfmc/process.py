@@ -425,7 +425,7 @@ class Activity(persistent.Persistent):
         for subflow, execution, actual in self.definition.subflows:
             # Figre out formal parameters. At this point, process definition
             # has to be available.
-            subflow_pd = getProcessDefinition(subflow)
+            subflow_pd = self.process.getSubflowProcessDefinition(subflow)
             formal = subflow_pd.parameters
 
             workitem = integration.createSubflowWorkItem(
@@ -772,9 +772,12 @@ class Process(persistent.Persistent):
     def __repr__(self):
         return "Process(%r)" % self.process_definition_identifier
 
-    def initSubflow(self, subflow_pd_id, starter_activity_id,
+    def getSubflowProcessDefinition(self, subflow_pd_name):
+        return getProcessDefinition(subflow_pd_name)
+
+    def initSubflow(self, subflow_pd_name, starter_activity_id,
                     starter_workitem_id, proc_factory=None):
-        subflow_pd = getProcessDefinition(subflow_pd_id)
+        subflow_pd = self.getSubflowProcessDefinition(subflow_pd_name)
         subflow = subflow_pd(self.context, factory=proc_factory)
         subflow.activities = self.activities
         subflow.finishedActivities = self.finishedActivities
