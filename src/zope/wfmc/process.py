@@ -753,6 +753,8 @@ class Process(persistent.Persistent):
                 if activity_definition.andJoinSetting:
                     # If it's an and-join, we want only one.
                     for i, a in self.activities.items():
+                        if a.process is not activity.process:
+                            continue
                         if a.activity_definition_identifier == transition.to:
                             # we already have the activity -- use it
                             next = a
