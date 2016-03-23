@@ -16,6 +16,7 @@
 __docformat__ = "reStructuredText"
 
 from zope import interface
+from zope.interface.common import mapping
 
 SYNCHRONOUS = 'SYNCHR'
 ASYNCHRONOUS = 'ASYNCHR'
@@ -247,6 +248,14 @@ class IProcess(interface.Interface):
         """
         )
 
+    activities = interface.Attribute(
+        """Instance of IActivityContainer.
+
+        Provides access to all activities, created for process (both finished
+        and active).
+        """
+        )
+
     def deadlineTimer(deadline):
         """A function that will time the event of the deadline. it should call
         process.deadlinePassedHandler when the timestamp has passed. This
@@ -279,6 +288,23 @@ class IProcessContext(interface.Interface):
         """
 
 
+class IActivityContainer(mapping.IMapping):
+    """Container for process activities
+
+    A mapping of activity id to activity object. Also provides convenience
+    methods to filter activities.
+    """
+
+    def getActive():
+        """Return list of active (not finished) activities
+        """
+
+    def getFinished():
+        """Return list of all finished activities
+        """
+
+
+
 class IActivity(interface.Interface):
     """Activity instance
     """
@@ -291,6 +317,9 @@ class IActivity(interface.Interface):
         """)
 
     definition = interface.Attribute("Activity definition")
+
+    active = interface.Attribute(
+        "True when activity is active, False when finished")
 
     def start(transition):
         """Start an activity originating from the given transition.

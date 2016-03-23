@@ -300,6 +300,7 @@ class Activity(persistent.Persistent):
         self.activity_definition_identifier = definition.id
         self.workitems = {}
         self.finishedWorkitems = {}
+        self.active = True
 
         # Didn't want to change the getter, but do want it set from the
         # constructor
@@ -356,12 +357,8 @@ class Activity(persistent.Persistent):
                 self.activity_definition_identifier)
         # We are only handling subflows.
         if self.process.starterActivityId is not None:
-            try:
-                starterActivity = self.process.activities[
-                    self.process.starterActivityId]
-            except KeyError:
-                starterActivity = self.process.finishedActivities[
-                    self.process.starterActivityId]
+            starterActivity = self.process.activities[
+                self.process.starterActivityId]
             path = (starterActivity.activity_definition_identifier_path +
                     '.' + path)
         return path
@@ -533,8 +530,7 @@ class Activity(persistent.Persistent):
 
     def finish(self):
         proc = self.process
-        del proc.activities[self.id]
-        proc.finishedActivities[self.id] = self
+        self.active = False
         zope.event.notify(ActivityFinished(self))
 
         transitions = getValidOutgoingTransitions(self.process, self.definition)
@@ -547,9 +543,11 @@ class Activity(persistent.Persistent):
             self.process.set_join_revert_data(self.definition, 0)
 
     def abort(self, cancelDeadlineTimer=True):
+
         # Revert all finished workitems first
         self.revert(cancelDeadlineTimer=cancelDeadlineTimer)
 
+        self.active = False
         # Join activites abortion should result in waiting next time
         if self.definition.andJoinSetting:
             self.process.set_join_revert_data(self.definition, 0)
@@ -559,8 +557,7 @@ class Activity(persistent.Persistent):
             if interfaces.IAbortWorkItem.providedBy(workitem):
                 workitem.abort()
                 zope.event.notify(WorkItemAborted(workitem, app, actual))
-        # Remove itself from the process activities list.
-        del self.process.activities[self.id]
+
 
     def restoreWFRD(self):
         wf_revert_names = [name for name in dir(self.process.applicationRelevantData)
@@ -628,6 +625,16 @@ class Sequence(object):
         return self.counter
 
 
+class ActivityContainer(dict):
+    interface.implements(interfaces.IActivityContainer)
+
+    def getActive(self):
+        return [a for a in self.values() if a.active]
+
+    def getFinished(self):
+        return [a for a in self.values() if not a.active]
+
+
 class Process(persistent.Persistent):
 
     interface.implements(interfaces.IProcess)
@@ -648,8 +655,7 @@ class Process(persistent.Persistent):
         self.process_definition_identifier = definition.id
         self.context = context
         self._definiton = definition
-        self.activities = {}
-        self.finishedActivities = {}
+        self.activities = ActivityContainer()
         self.activityIdSequence = Sequence()
         self.workflowRelevantData = self.WorkflowDataFactory()
         self.applicationRelevantData = self.WorkflowDataFactory()
@@ -732,12 +738,14 @@ class Process(persistent.Persistent):
             zope.event.notify(ProcessFinished(self))
 
     def abort(self):
-        allActivities = self.activities.values() + self.finishedActivities.values()
+        allActivities = self.activities.values()
         for activity in sorted(allActivities,
                                key=Process.chronological_key,
                                reverse=True):
-            if activity.id in self.activities:
+            if activity.active:
                 activity.abort()
+                # Remove activity from the process activities list.
+                del self.activities[activity.id]
             else:
                 activity.revert()
         self.isAborted = True
@@ -752,7 +760,7 @@ class Process(persistent.Persistent):
                 next = None
                 if activity_definition.andJoinSetting:
                     # If it's an and-join, we want only one.
-                    for i, a in self.activities.items():
+                    for a in self.activities.getActive():
                         if a.process is not activity.process:
                             continue
                         if a.activity_definition_identifier == transition.to:
@@ -782,7 +790,6 @@ class Process(persistent.Persistent):
         subflow_pd = self.getSubflowProcessDefinition(subflow_pd_name)
         subflow = subflow_pd(self.context, factory=proc_factory)
         subflow.activities = self.activities
-        subflow.finishedActivities = self.finishedActivities
         subflow.activityIdSequence = self.activityIdSequence
         subflow.subflows = self.subflows
 
@@ -827,7 +834,6 @@ class Process(persistent.Persistent):
                                       'supported at this piont.')
         activity = deadline.activity
         activity.abort(cancelDeadlineTimer=False)
-        self.finishedActivities[activity.id] = activity
         transitions = getValidOutgoingTransitions(
             self, activity.definition,
             exception=True
