@@ -110,8 +110,8 @@ Make sure process is finished now::
 
     >>> proc.isFinished
     True
-    >>> proc.activities
-    {}
+    >>> proc.activities.getActive()
+    []
 
 All subflows are registered in main flow
 
