@@ -557,6 +557,10 @@ class Activity(persistent.Persistent):
             if interfaces.IAbortWorkItem.providedBy(workitem):
                 workitem.abort()
                 zope.event.notify(WorkItemAborted(workitem, app, actual))
+            else:
+                # Just discard the workitem (we cannot abort it)
+                zope.event.notify(WorkItemDiscarded(workitem, app, actual))
+            del self.workitems[workitem.id]
 
 
     def restoreWFRD(self):
