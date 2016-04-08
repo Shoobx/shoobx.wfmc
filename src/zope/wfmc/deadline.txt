@@ -100,7 +100,7 @@ We should have followed the exception transition
     >>> deadlineActivity in proc.activities.getFinished()
     True
     >>> len(deadlineActivity.workitems) > 0
-    True
+    False
     >>> len(deadlineActivity.finishedWorkitems)
     0
     >>> proc.activities.getActive()[0].definition.id
