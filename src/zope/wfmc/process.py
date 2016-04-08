@@ -300,6 +300,7 @@ class Activity(persistent.Persistent):
         self.activity_definition_identifier = definition.id
         self.workitems = {}
         self.finishedWorkitems = {}
+        self.workitemIdSequence = Sequence()
         self.active = True
 
         # Didn't want to change the getter, but do want it set from the
@@ -373,24 +374,24 @@ class Activity(persistent.Persistent):
         elif self.definition.scripts:
             workitems = self.createScriptWorkItems()
 
-        self.workitems = workitems
+        for workitem, application, formal, actual in workitems:
+            self.addWorkItem(workitem, application, formal, actual)
+
+    def addWorkItem(self, workitem, application, formal, actual):
+        nextid = self.workitemIdSequence.next()
+        workitem.id = nextid
+        self.workitems[nextid] = (workitem, application, formal, actual)
 
     def createApplicationWorkItems(self):
         integration = self.process.definition.integration
-        workitems = {}
 
         participant = integration.createParticipant(
             self, self.process, self.definition.performer)
-        i = 0
         # Instantiate Applications
         for application, formal, actual in self.definition.applications:
             workitem = integration.createWorkItem(
                 participant, self.process, self, application)
-            i += 1
-            workitem.id = i
-            workitems[i] = workitem, application, formal, actual
-
-        return workitems
+            yield workitem, application, formal, actual
 
     def definition(self):
         try:
@@ -402,22 +403,15 @@ class Activity(persistent.Persistent):
 
     def createScriptWorkItems(self):
         integration = self.process.definition.integration
-        workitems = {}
 
-        i = 0
         for code in self.definition.scripts:
             workitem = integration.createScriptWorkItem(
                 self.process, self, code)
-            i += 1
-            workitem.id = i
-            workitems[i] = workitem, "__script__", (), ()
-
-        return workitems
+            yield workitem, "__script__", (), ()
 
     def createSubflowWorkItems(self):
         integration = self.process.definition.integration
-        workitems = {}
-        i = 0
+
         # Instantiate Subflows
         for subflow, execution, actual in self.definition.subflows:
             # Figre out formal parameters. At this point, process definition
@@ -427,11 +421,7 @@ class Activity(persistent.Persistent):
 
             workitem = integration.createSubflowWorkItem(
                 self.process, self, subflow, execution)
-            i += 1
-            workitem.id = i
-            workitems[i] = workitem, subflow, formal, actual
-
-        return workitems
+            yield workitem, subflow, formal, actual
 
     def start(self, transition):
         # Start the activity, if we've had enough incoming transitions
