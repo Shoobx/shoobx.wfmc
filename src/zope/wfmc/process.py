@@ -350,14 +350,10 @@ class Activity(persistent.Persistent):
             deadline = self.DeadlineFactory(self, deadline_time, deadlinedef)
             self.deadlines.append(deadline)
             self.process.deadlineTimer(deadline)
-        self.createWorkItems()
 
-    @property
-    def activity_definition_identifier_path(self):
-        stack = self.getExecutionStack()
-        ads = [a.definition for a in stack]
-        ads.append(self.definition)
-        return getActivityStackPath(ads)
+        self.activity_definition_identifier_path = \
+            calculateActivityStackPath(self)
+        self.createWorkItems()
 
     def getExecutionStack(self):
         """Return list of subflow activities that eventually started the
@@ -1229,3 +1225,12 @@ def getActivityStackPath(activity_defs):
     """Return path of activity definition stack (as a string)
     """
     return "/".join("%s@%s" % (ad.process.id, ad.id) for ad in activity_defs)
+
+
+def calculateActivityStackPath(activity):
+    if activity.definition is None:
+        return None
+    stack = activity.getExecutionStack()
+    ads = [a.definition for a in stack if a.definition]
+    ads.append(activity.definition)
+    return getActivityStackPath(ads)
