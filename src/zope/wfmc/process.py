@@ -354,15 +354,25 @@ class Activity(persistent.Persistent):
 
     @property
     def activity_definition_identifier_path(self):
-        path = (self.process.process_definition_identifier + '.' +
-                self.activity_definition_identifier)
-        # We are only handling subflows.
-        if self.process.starterActivityId is not None:
-            starterActivity = self.process.activities[
-                self.process.starterActivityId]
-            path = (starterActivity.activity_definition_identifier_path +
-                    '.' + path)
-        return path
+        stack = self.getExecutionStack()
+        ads = [a.definition for a in stack]
+        ads.append(self.definition)
+        return getActivityStackPath(ads)
+
+    def getExecutionStack(self):
+        """Return list of subflow activities that eventually started the
+        process of current activity.
+
+        The first activity returned by this function will belong to the main
+        process.
+        """
+        act = self
+        stack = []
+        while act.process.starterActivityId:
+            act = self.process.activities[act.process.starterActivityId]
+            stack.append(act)
+        stack.reverse()
+        return stack
 
     def createWorkItems(self):
         workitems = {}
@@ -1213,3 +1223,9 @@ def getProcessDefinition(name):
     if pd is None:
         raise RuntimeError("Process with name %s is not found" % name)
     return pd
+
+
+def getActivityStackPath(activity_defs):
+    """Return path of activity definition stack (as a string)
+    """
+    return "/".join("%s@%s" % (ad.process.id, ad.id) for ad in activity_defs)
