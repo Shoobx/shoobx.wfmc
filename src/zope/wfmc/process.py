@@ -465,6 +465,7 @@ class Activity(persistent.Persistent):
 
                 zope.event.notify(WorkItemStarting(workitem, app, actual))
                 workitem.start(args)
+                zope.event.notify(WorkItemStarted(workitem, app, actual))
 
         else:
             # Since we don't have any work items, we're done
@@ -1021,6 +1022,17 @@ class WorkItemStarting(object):
 
     def __repr__(self):
         return "WorkItemStarting(%r)" % self.application
+
+
+class WorkItemStarted(object):
+    """Event emitted just after starting a workitem"""
+    def __init__(self, workitem, application, parameters):
+        self.workitem = workitem
+        self.application = application
+        self.parameters = parameters
+
+    def __repr__(self):
+        return "WorkItemStarted(%r)" % self.application
 
 
 class WorkItemAborted:

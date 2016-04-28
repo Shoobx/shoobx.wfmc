@@ -295,6 +295,7 @@ to start execution:
     Transition(None, Activity('sample.author'))
     ActivityStarted(Activity('sample.author'))
     WorkItemStarting('author')
+    WorkItemStarted('author')
 
 We transition into the author activity and wait for work to get done.
 To move forward, we need to get at the authoring work item, so we can
@@ -311,6 +312,7 @@ Now we can finish the work item, by calling its finish method:
     Transition(Activity('sample.author'), Activity('sample.review'))
     ActivityStarted(Activity('sample.review'))
     WorkItemStarting('review')
+    WorkItemStarted('review')
 
 We see that we transitioned to the review activity.  Note that the
 `finish` method isn't a part of the workflow APIs.  It was defined by
@@ -330,6 +332,7 @@ be published:
     WorkItemFinished('reject')
     ActivityFinished(Activity('sample.reject'))
     ProcessFinished(Process('sample'))
+    WorkItemStarted('reject')
 
 Ordering output transitions
 ---------------------------
@@ -390,6 +393,7 @@ and run our process:
     Transition(None, Activity('sample.author'))
     ActivityStarted(Activity('sample.author'))
     WorkItemStarting('author')
+    WorkItemStarted('author')
 
     >>> work_list.pop().finish()
     WorkItemFinished('author')
@@ -397,6 +401,7 @@ and run our process:
     Transition(Activity('sample.author'), Activity('sample.review'))
     ActivityStarted(Activity('sample.review'))
     WorkItemStarting('review')
+    WorkItemStarted('review')
 
 This time, we'll say that we should publish:
 
@@ -410,6 +415,7 @@ This time, we'll say that we should publish:
     WorkItemFinished('reject')
     ActivityFinished(Activity('sample.reject'))
     ProcessFinished(Process('sample'))
+    WorkItemStarted('reject')
 
 But we went to the reject activity anyway. Why? Because transitions
 are tested in order. Because the transition to the reject activity was
@@ -472,6 +478,7 @@ expected:
     Transition(None, Activity('sample.author'))
     ActivityStarted(Activity('sample.author'))
     WorkItemStarting('author')
+    WorkItemStarted('author')
 
     >>> work_list.pop().finish()
     WorkItemFinished('author')
@@ -479,6 +486,7 @@ expected:
     Transition(Activity('sample.author'), Activity('sample.review'))
     ActivityStarted(Activity('sample.review'))
     WorkItemStarting('review')
+    WorkItemStarted('review')
 
     >>> work_list.pop().finish(True)
     WorkItemFinished('review')
@@ -490,6 +498,7 @@ expected:
     WorkItemFinished('publish')
     ActivityFinished(Activity('sample.publish'))
     ProcessFinished(Process('sample'))
+    WorkItemStarted('publish')
 
 
 Let's see the other way also, where we should transition to reject:
@@ -502,6 +511,7 @@ Let's see the other way also, where we should transition to reject:
     Transition(None, Activity('sample.author'))
     ActivityStarted(Activity('sample.author'))
     WorkItemStarting('author')
+    WorkItemStarted('author')
 
     >>> work_list.pop().finish()
     WorkItemFinished('author')
@@ -509,6 +519,7 @@ Let's see the other way also, where we should transition to reject:
     Transition(Activity('sample.author'), Activity('sample.review'))
     ActivityStarted(Activity('sample.review'))
     WorkItemStarting('review')
+    WorkItemStarted('review')
 
     >>> work_list.pop().finish(False)
     WorkItemFinished('review')
@@ -520,6 +531,7 @@ Let's see the other way also, where we should transition to reject:
     WorkItemFinished('reject')
     ActivityFinished(Activity('sample.reject'))
     ProcessFinished(Process('sample'))
+    WorkItemStarted('reject')
 
 
 Complex Flows
@@ -933,6 +945,7 @@ Now, let's try out our process:
     Transition(Activity('Publication.start'), Activity('Publication.prepare'))
     ActivityStarted(Activity('Publication.prepare'))
     WorkItemStarting('prepare')
+    WorkItemStarted('prepare')
 
 We should have added an item to bob's work list. Let's get it and
 finish it, submitting a document:
@@ -946,9 +959,11 @@ finish it, submitting a document:
     Transition(Activity('Publication.prepare'), Activity('Publication.tech1'))
     ActivityStarted(Activity('Publication.tech1'))
     WorkItemStarting('tech_review')
+    WorkItemStarted('tech_review')
     Transition(Activity('Publication.prepare'), Activity('Publication.tech2'))
     ActivityStarted(Activity('Publication.tech2'))
     WorkItemStarting('tech_review')
+    WorkItemStarted('tech_review')
 
 Notice that we transitioned to *two* activities, `tech1` and
 `tech2`.  This is because the prepare activity has an "and" split.
@@ -987,6 +1002,8 @@ Now we'll do the other technical review:
     Transition(Activity('Publication.review'), Activity('Publication.prepare'))
     ActivityStarted(Activity('Publication.prepare'))
     WorkItemStarting('prepare')
+    WorkItemStarted('prepare')
+    WorkItemStarted('ed_review')
 
 Now when we transitioned to the editorial review activity, we started
 it, because each of the input transitions had happened.  Our editorial
@@ -1012,9 +1029,11 @@ Let's address the comments:
     Transition(Activity('Publication.prepare'), Activity('Publication.tech1'))
     ActivityStarted(Activity('Publication.tech1'))
     WorkItemStarting('tech_review')
+    WorkItemStarted('tech_review')
     Transition(Activity('Publication.prepare'), Activity('Publication.tech2'))
     ActivityStarted(Activity('Publication.tech2'))
     WorkItemStarting('tech_review')
+    WorkItemStarted('tech_review')
 
 As before, after completing the initial edits, we start the technical
 review activities again.  We'll review it again. This time, we have no
@@ -1033,6 +1052,7 @@ comments, because the author applied our requested changes:
     Transition(Activity('Publication.tech2'), Activity('Publication.review'))
     ActivityStarted(Activity('Publication.review'))
     WorkItemStarting('ed_review')
+    WorkItemStarted('ed_review')
 
 This time, we are left in the technical review activity because there
 weren't any technical changes. We're ready to do our editorial review.
@@ -1051,6 +1071,7 @@ We'll request an editorial change:
     Transition(Activity('Publication.review'), Activity('Publication.final'))
     ActivityStarted(Activity('Publication.final'))
     WorkItemStarting('final')
+    WorkItemStarted('final')
 
 Because we requested editorial changes, we transitioned to the final
 editing activity, so that the author (still bob) can make the changes:
@@ -1072,6 +1093,7 @@ editing activity, so that the author (still bob) can make the changes:
     Transition(Activity('Publication.final'), Activity('Publication.rfinal'))
     ActivityStarted(Activity('Publication.rfinal'))
     WorkItemStarting('rfinal')
+    WorkItemStarted('rfinal')
 
 We transition to the activity for reviewing the final edits.  We
 review the document and approve it for publication:
@@ -1092,6 +1114,7 @@ review the document and approve it for publication:
     WorkItemFinished('publish')
     ActivityFinished(Activity('Publication.publish'))
     ProcessFinished(Process('Publication'))
+    WorkItemStarted('publish')
 
 At this point, the rest of the process finished automatically.  In
 addition, the decision was recorded in the process context object:

@@ -154,6 +154,7 @@ Now, when we instantiate and start our workflow:
     Transition(None, Activity('sample.author'))
     ActivityStarted(Activity('sample.author'))
     WorkItemStarting('author')
+    WorkItemStarted('author')
 
 We transition into the author activity and wait for work to get done.  To move
 forward, we need to get at the authoring work item, so we can finish it.  Our
@@ -170,6 +171,7 @@ Now we can finish the work item, by calling it's finish method:
     Transition(Activity('sample.author'), Activity('sample.review'))
     ActivityStarted(Activity('sample.review'))
     WorkItemStarting('review')
+    WorkItemStarted('review')
 
 We see that we transitioned to the review activity.  Note that the `finish`
 method isn't a part of the workflow APIs.  It was defined by our sample
@@ -189,3 +191,4 @@ published:
     WorkItemFinished('reject')
     ActivityFinished(Activity('sample.reject'))
     ProcessFinished(Process('sample'))
+    WorkItemStarted('reject')
