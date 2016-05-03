@@ -1131,10 +1131,12 @@ class InputOutputParameter(InputParameter, OutputParameter):
 
 class Application:
 
-    interface.implements(interfaces.IApplicationDefinition)
+    interface.implements(interfaces.IApplicationDefinition,
+                         interfaces.IExtendedAttributesContainer)
 
     def __init__(self, *parameters):
         self.parameters = parameters
+        self.attributes = OrderedDict()
 
     def defineParameters(self, *parameters):
         self.parameters += parameters
