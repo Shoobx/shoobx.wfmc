@@ -655,7 +655,7 @@ class Process(persistent.Persistent):
     def __init__(self, definition, start, context=None):
         self.process_definition_identifier = definition.id
         self.context = context
-        self._definiton = definition
+        self._definition = definition
         self.activities = ActivityContainer()
         self.activityIdSequence = Sequence()
         self.workflowRelevantData = self.WorkflowDataFactory()
@@ -671,7 +671,7 @@ class Process(persistent.Persistent):
         try:
             return getProcessDefinition(self.process_definition_identifier)
         except zope.component.interfaces.ComponentLookupError:
-            return self._definiton
+            return self._definition
 
     def start(self, *arguments):
         if self.isStarted:
