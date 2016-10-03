@@ -648,6 +648,8 @@ class Process(persistent.Persistent):
     isAborted = False
     starterActivityId = None
     starterWorkitemId = None
+    execution = interfaces.SYNCHRONOUS
+    asyncflowId = None
 
     deadlineTimer = defaultDeadlineTimer
     deadlineCanceller = defaultDeadlineCanceller
@@ -658,6 +660,7 @@ class Process(persistent.Persistent):
         self._definition = definition
         self.activities = ActivityContainer()
         self.activityIdSequence = Sequence()
+        self.asyncflowIdSequence = Sequence()
         self.workflowRelevantData = self.WorkflowDataFactory()
         self.applicationRelevantData = self.WorkflowDataFactory()
         self.subflows = []
@@ -705,6 +708,10 @@ class Process(persistent.Persistent):
             raise TypeError("Too many arguments. Expected %s. got %s" %
                             (len(inputparams), len(arguments)))
 
+        if self.execution == interfaces.ASYNCHRONOUS:
+            # Asynchronous processes gets their own asyncflowId
+            self.asyncflowId = self.asyncflowIdSequence.next()
+
         self.isStarted = True
         zope.event.notify(ProcessStarted(self))
         self.transition(None, (self.startTransition, ))
@@ -731,12 +738,26 @@ class Process(persistent.Persistent):
     def _finish(self):
         self.isFinished = True
         if self.starterActivityId:
+            if self.execution == interfaces.ASYNCHRONOUS:
+                # Starter activity was already finished, since this process is
+                # asynchronous
+                return
             # Subflow finished, continue with main flow
             starter = self.activities[self.starterActivityId]
             wi, _, _, _ = starter.workitems[self.starterWorkitemId]
             starter.workItemFinished(wi, self.outputs())
         else:
+            self._terminateAsyncflows()
             zope.event.notify(ProcessFinished(self))
+
+
+    def _terminateAsyncflows(self):
+        for act in self.activities.getActive():
+            if act.process.asyncflowId is None:
+                # This is activity from main process, don't touch it
+                continue
+
+            self.throwException(act)
 
     def abort(self):
         allActivities = self.activities.values()
@@ -787,7 +808,9 @@ class Process(persistent.Persistent):
         return getProcessDefinition(subflow_pd_name)
 
     def initSubflow(self, subflow_pd_name, starter_activity_id,
-                    starter_workitem_id, proc_factory=None):
+                    starter_workitem_id,
+                    execution=interfaces.SYNCHRONOUS,
+                    proc_factory=None):
         subflow_pd = self.getSubflowProcessDefinition(subflow_pd_name)
         subflow = subflow_pd(self.context, factory=proc_factory)
         subflow.activities = self.activities
@@ -796,6 +819,10 @@ class Process(persistent.Persistent):
 
         subflow.starterActivityId = starter_activity_id
         subflow.starterWorkitemId = starter_workitem_id
+        subflow.execution = execution
+        subflow.asyncflowIdSequence = self.asyncflowIdSequence
+
+        subflow.asyncflowId = self.asyncflowId
 
         self.subflows.append(subflow)
         return subflow
@@ -827,6 +854,20 @@ class Process(persistent.Persistent):
         Returns the key for sorting activities chronologically in a list
         """
         return activity.id
+
+    def throwException(self, activity):
+        """Throw process exception
+
+        We abort the activity and follow exception route
+        """
+        activity.abort()
+
+        transitions = getValidOutgoingTransitions(
+            self, activity.definition,
+            exception=True
+        )
+
+        activity.process.transition(activity, transitions)
 
     def deadlinePassedHandler(self, deadline):
         # TODO: Is this threadsafe?
@@ -994,10 +1035,14 @@ class SubflowWorkItem(object):
     def start(self, args):
         subproc = self.process.initSubflow(self.subflow,
                                            self.activity.id, self.id,
-                                           proc_factory=self.processFactory)
+                                           proc_factory=self.processFactory,
+                                           execution=self.execution)
         pd = subproc.definition
         tupArgs = [args.get(p.__name__, None) for p in pd.parameters if p.input]
         subproc.start(*tupArgs)
+
+        if self.execution == interfaces.ASYNCHRONOUS:
+            self.activity.workItemFinished(self)
 
 
 class WorkItemFinished(object):
