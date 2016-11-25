@@ -10,6 +10,9 @@
     <xpdl:Participants>
         <xpdl:Participant Id="System">
             <xpdl:ParticipantType Type="SYSTEM"/>
+            <xpdl:ExtendedAttributes>
+                <xpdl:ExtendedAttribute Name="SubSystemID" Value="HAL9000"/>
+            </xpdl:ExtendedAttributes>
         </xpdl:Participant>
     </xpdl:Participants>
     <xpdl:Applications>
@@ -105,6 +108,9 @@
                 <xpdl:Participant Id="tech1" Name="Technical Reviewer 1">
                     <xpdl:ParticipantType Type="HUMAN"/>
                     <xpdl:Description>He is a smart guy.</xpdl:Description>
+                    <xpdl:ExtendedAttributes>
+                        <xpdl:ExtendedAttribute Name="Capability" Value="Required"/>
+                    </xpdl:ExtendedAttributes>
                 </xpdl:Participant>
                 <xpdl:Participant Id="tech2" Name="Technical Reviewer 2">
                     <xpdl:ParticipantType Type="HUMAN"/>

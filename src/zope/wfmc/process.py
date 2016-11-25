@@ -1208,12 +1208,14 @@ class Application:
 
 class Participant:
 
-    interface.implements(interfaces.IParticipantDefinition)
+    interface.implements(interfaces.IParticipantDefinition,
+                         interfaces.IExtendedAttributesContainer)
 
     def __init__(self, name=None, type=None):
         self.__name__ = name
         self.type = type
         self.description = None
+        self.attributes = OrderedDict()
 
     def __repr__(self):
         return "Participant(%r, %r)" % (self.__name__, self.type)

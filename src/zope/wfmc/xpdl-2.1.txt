@@ -460,6 +460,13 @@ Extended attributes are stored in ActivityDefinition.attributes dictionary
                  (u'XOffset', u'110'),
                  (u'YOffset', u'20')])
 
+We have extended attributes also on Participants
+
+    >>> pd.participants['System'].attributes
+    OrderedDict([(u'SubSystemID', u'HAL9000')])
+    >>> pd.participants['tech1'].attributes
+    OrderedDict([(u'Capability', u'Required')])
+
 Edge cases
 -----------
 
