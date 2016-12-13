@@ -174,7 +174,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     start_handlers[(xpdlns10, 'WorkflowProcess')] = WorkflowProcess
     start_handlers[(xpdlns21, 'WorkflowProcess')] = WorkflowProcess
 
-    paramter_types = {
+    parameter_types = {
         'IN': zope.wfmc.process.InputParameter,
         'OUT': zope.wfmc.process.OutputParameter,
         'INOUT': zope.wfmc.process.InputOutputParameter,
@@ -183,7 +183,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     def FormalParameter(self, attrs):
         mode = attrs.get((None, 'Mode'), 'IN')
         id = attrs[(None, 'Id')]
-        parameter = self.paramter_types[mode](id)
+        parameter = self.parameter_types[mode](id)
         self.stack[-1].defineParameters(parameter)
         return parameter
     start_handlers[(xpdlns10, 'FormalParameter')] = FormalParameter
