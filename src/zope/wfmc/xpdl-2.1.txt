@@ -436,17 +436,49 @@ Most process elements can have names and descriptions.
     u'He is a smart guy.'
 
     >>> sorted([item.__name__ for item in pd.transitions])
-        [u'Transition', u'Transition', u'Transition', u'Transition',
-        u'Transition', u'Transition',
-        u'Transition', u'Transition', u'Transition', u'Transition',
-        u'Transition', u'Transition', u'Transition', u'Transition',
-        u'Transition', u'Transition', u'Transition to Tech Review 1',
-        u'Transition to Tech Review 2']
+    [u'Transition', u'Transition', u'Transition', u'Transition',
+    u'Transition', u'Transition',
+    u'Transition', u'Transition', u'Transition', u'Transition',
+    u'Transition', u'Transition', u'Transition', u'Transition',
+    u'Transition', u'Transition', u'Transition to Tech Review 1',
+    u'Transition to Tech Review 2']
 
     >>> sorted([item.description for item in pd.transitions])
-        [None, None, None, None, None, None, None, None, None, None, None, None,
-         None, None, None, None, None,
-         u'Use this transition if there are editorial changes required.']
+    [None, None, None, None, None, None, None, None, None, None, None, None,
+     None, None, None, None, None,
+     u'Use this transition if there are editorial changes required.']
+
+
+Pools and Lanes
+---------------
+
+The package gets the Pools and Lanes from the XPDL
+
+Pools:
+
+    >>> package.pools
+    {'Publication_pool1': Pool(u'Publication', u'Publication')}
+
+Pool.process is the reference to the ProcessDefinition itself
+
+    >>> package.pools['Publication_pool1'].process
+    u'Publication'
+
+Lanes:
+
+    >>> sorted(package.pools['Publication_pool1'].lanes.items())
+    [('Publication_pool1_lan1', Lane(u'Author')),
+     ('Publication_pool1_lan2', Lane(u'Technical Reviewer 1')),
+     ('Publication_pool1_lan3', Lane(u'Technical Reviewer 2')),
+     ('Publication_pool1_lan4', Lane(u'Editorial Reviewer')),
+     ('Publication_pool1_lan5', Lane(u'System')),
+     ('Publication_pool1_lan6', Lane(u'Expression lane'))]
+
+A single Lane has the performers:
+
+    >>> package.pools['Publication_pool1'].lanes[
+    ...     'Publication_pool1_lan4'].performers
+    (u'reviewer',)
 
 
 Extended attributes

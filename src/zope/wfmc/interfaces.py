@@ -381,6 +381,28 @@ class IParameterDefinition(interface.Interface):
     output = interface.Attribute("Is this an output parameter?")
 
 
+class IPoolDefinition(interface.Interface):
+    """Pool definition
+    """
+
+    name = interface.Attribute("Pool name")
+
+    process = interface.Attribute("Process ID, to which the pool belongs")
+
+    lanes = interface.Attribute("Lanes of the pool")
+
+
+class ILaneDefinition(interface.Interface):
+    """Lane definition
+    """
+
+    id = interface.Attribute("Lane id")
+
+    name = interface.Attribute("Lane name")
+
+    performers = interface.Attribute("Performers for the lane")
+
+
 class IParticipantDefinition(interface.Interface):
     """Participant definition
     """

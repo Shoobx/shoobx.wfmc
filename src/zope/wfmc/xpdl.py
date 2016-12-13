@@ -21,6 +21,7 @@ import xml.sax.xmlreader
 import xml.sax.handler
 
 import zope.wfmc.process
+from zope import interface
 from zope.wfmc import interfaces
 
 xpdlns10 = "http://www.wfmc.org/2002/XPDL1.0"
@@ -53,6 +54,7 @@ class Package(dict):
     def __init__(self):
         self.applications = {}
         self.participants = {}
+        self.pools = {}
         self.script = None
         self.parseErrors = []
 
@@ -61,6 +63,11 @@ class Package(dict):
             application.id = id
             self.applications[id] = application
 
+    def definePools(self, **pools):
+        for id, pool in pools.items():
+            pool.id = id
+            self.pools[id] = pool
+
     def defineParticipants(self, **participants):
         for id, participant in participants.items():
             participant.id = id
@@ -68,6 +75,39 @@ class Package(dict):
 
     def addScript(self, script):
         self.script = script
+
+
+class PoolDefinition:
+
+    interface.implements(interfaces.IPoolDefinition)
+
+    def __init__(self, name=None, process=None):
+        self.__name__ = name
+        self.process = process
+        self.lanes = {}
+
+    def defineLanes(self, **lanes):
+        for id, lane in lanes.items():
+            lane.id = id
+            self.lanes[id] = lane
+
+    def __repr__(self):
+        return "Pool(%r, %r)" % (self.__name__, self.process)
+
+
+class LaneDefinition:
+
+    interface.implements(interfaces.ILaneDefinition)
+
+    def __init__(self, name=None):
+        self.__name__ = name
+        self.performers = ()
+
+    def definePerformer(self, performer):
+        self.performers += (performer,)
+
+    def __repr__(self):
+        return "Lane(%r)" % (self.__name__, )
 
 
 class DeadlineDefinition(object):
@@ -94,6 +134,8 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     text = u''
 
     ProcessDefinitionFactory = zope.wfmc.process.ProcessDefinition
+    PoolDefinitionFactory = PoolDefinition
+    LaneDefinitionFactory = LaneDefinition
     ParticipantFactory = zope.wfmc.process.Participant
     DataFieldFactory = zope.wfmc.process.DataField
     ApplicationFactory = zope.wfmc.process.Application
@@ -188,6 +230,25 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
         return parameter
     start_handlers[(xpdlns10, 'FormalParameter')] = FormalParameter
     start_handlers[(xpdlns21, 'FormalParameter')] = FormalParameter
+
+    def Pool(self, attrs):
+        id = attrs[(None, 'Id')]
+        name = attrs.get((None, 'Name'))
+        process = attrs.get((None, 'Process'))
+        pool = self.PoolDefinitionFactory(name, process)
+        self.stack[-1].definePools(**{str(id): pool})
+        return pool
+    start_handlers[(xpdlns10, 'Pool')] = Pool
+    start_handlers[(xpdlns21, 'Pool')] = Pool
+
+    def Lane(self, attrs):
+        id = attrs[(None, 'Id')]
+        name = attrs.get((None, 'Name'))
+        lane = self.LaneDefinitionFactory(name)
+        self.stack[-1].defineLanes(**{str(id): lane})
+        return lane
+    start_handlers[(xpdlns10, 'Lane')] = Lane
+    start_handlers[(xpdlns21, 'Lane')] = Lane
 
     def Participant(self, attrs):
         id = attrs[(None, 'Id')]
@@ -306,13 +367,8 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     end_handlers[(xpdlns21, 'ActualParameter')] = actualparameter
 
     def performer(self, ignored):
-        activity = self.stack[-1]
-        if not isinstance(activity, zope.wfmc.process.ActivityDefinition):
-            # We are not parsing activity yet (probably this is a performer
-            # in a pool)
-            return
-
-        self.stack[-1].definePerformer(self.text.strip())
+        activity_or_lane = self.stack[-1]
+        activity_or_lane.definePerformer(self.text.strip())
     end_handlers[(xpdlns10, 'Performer')] = performer
     end_handlers[(xpdlns21, 'Performer')] = performer
 
