@@ -81,9 +81,9 @@ class PoolDefinition:
 
     interface.implements(interfaces.IPoolDefinition)
 
-    def __init__(self, name=None, process=None):
+    def __init__(self, name=None, process_def=None):
         self.__name__ = name
-        self.process = process
+        self.process_def = process_def
         self.lanes = {}
 
     def defineLanes(self, **lanes):
@@ -92,7 +92,7 @@ class PoolDefinition:
             self.lanes[id] = lane
 
     def __repr__(self):
-        return "Pool(%r, %r)" % (self.__name__, self.process)
+        return "Pool(%r, %r)" % (self.__name__, self.process_def)
 
 
 class LaneDefinition:
@@ -234,8 +234,8 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     def Pool(self, attrs):
         id = attrs[(None, 'Id')]
         name = attrs.get((None, 'Name'))
-        process = attrs.get((None, 'Process'))
-        pool = self.PoolDefinitionFactory(name, process)
+        process_def = attrs.get((None, 'Process'))
+        pool = self.PoolDefinitionFactory(name, process_def)
         self.stack[-1].definePools(**{str(id): pool})
         return pool
     start_handlers[(xpdlns10, 'Pool')] = Pool

@@ -459,9 +459,9 @@ Pools:
     >>> package.pools
     {'Publication_pool1': Pool(u'Publication', u'Publication')}
 
-Pool.process is the reference to the ProcessDefinition itself
+Pool.process_def is the reference to the ProcessDefinition itself
 
-    >>> package.pools['Publication_pool1'].process
+    >>> package.pools['Publication_pool1'].process_def
     u'Publication'
 
 Lanes:

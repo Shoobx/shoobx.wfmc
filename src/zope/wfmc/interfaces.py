@@ -387,7 +387,8 @@ class IPoolDefinition(interface.Interface):
 
     name = interface.Attribute("Pool name")
 
-    process = interface.Attribute("Process ID, to which the pool belongs")
+    process_def = interface.Attribute(
+        "Process definition ID, to which the pool belongs")
 
     lanes = interface.Attribute("Lanes of the pool")
 
