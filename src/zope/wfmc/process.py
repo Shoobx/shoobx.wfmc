@@ -308,10 +308,6 @@ class Activity(persistent.Persistent):
         self._definition = definition
 
         self.id = self.process.activityIdSequence.next()
-        if hasattr(self, "definition") and \
-                self.definition.andJoinSetting and \
-                not self.process.has_join_revert_data(self.definition):
-            self.process.set_join_revert_data(self.definition, 0)
 
         self.deadlines = []
         for deadlinedef in self.definition.deadlines:
@@ -440,8 +436,7 @@ class Activity(persistent.Persistent):
                     "while waiting for and completion"
                     % (transition, transition.id))
             self.incoming += (transition, )
-            if self.process.get_join_revert_data(self.definition) + \
-                    len(self.incoming) < len(definition.incoming):
+            if len(self.incoming) < len(definition.incoming):
                 # Tells us whether or not we need to wait
                 # for enough transitions at an add-joint, specifically for
                 # the case where we revert back through the joint and want to
@@ -526,7 +521,6 @@ class Activity(persistent.Persistent):
             self.finish()
 
     def finish(self):
-        proc = self.process
         self.active = False
         zope.event.notify(ActivityFinished(self))
 
@@ -536,18 +530,13 @@ class Activity(persistent.Persistent):
         for deadline in self.deadlines:
             self.process.deadlineCanceller(deadline)
 
-        if self.definition.andJoinSetting:
-            self.process.set_join_revert_data(self.definition, 0)
-
     def abort(self, cancelDeadlineTimer=True):
+        if cancelDeadlineTimer:
+            self.cancelDeadlines()
 
-        # Revert all finished workitems first
-        self.revert(cancelDeadlineTimer=cancelDeadlineTimer)
+        self.restoreWFRD()
 
         self.active = False
-        # Join activites abortion should result in waiting next time
-        if self.definition.andJoinSetting:
-            self.process.set_join_revert_data(self.definition, 0)
 
         # Abort all workitems.
         for workitem, app, formal, actual in self.workitems.values():
@@ -558,7 +547,7 @@ class Activity(persistent.Persistent):
                 # Just discard the workitem (we cannot abort it)
                 zope.event.notify(WorkItemDiscarded(workitem, app, actual))
             del self.workitems[workitem.id]
-
+        zope.event.notify(ActivityAborted(self))
 
     def restoreWFRD(self):
         wf_revert_names = [name for name in dir(self.process.applicationRelevantData)
@@ -571,6 +560,10 @@ class Activity(persistent.Persistent):
             else:
                 setattr(self.process.workflowRelevantData, wfname, old_val)
 
+    def cancelDeadlines(self):
+        for deadline in self.deadlines:
+            self.process.deadlineCanceller(deadline)
+
     def revert(self, cancelDeadlineTimer=True):
 
         reverted_workitems = []
@@ -580,25 +573,31 @@ class Activity(persistent.Persistent):
                 workitem.revert()
                 reverted_workitems.append(workitem)
 
-            # Restore workflowRelevantData
-            self.restoreWFRD()
+        # Restore workflowRelevantData
+        self.restoreWFRD()
 
         if cancelDeadlineTimer:
-            for deadline in self.deadlines:
-                self.process.deadlineCanceller(deadline)
+            self.cancelDeadlines()
 
-        # Join activites should not have to wait next time you visit them
-        # after a true revert
-        if self.definition.andJoinSetting:
-            # the new activity must be one less then the number of in
-            # activities since the number of reverts can not be smaller
-            # then the 1 minus the number of in because the activity is
-            # removed from the map.
-            new_num = len(self.definition.incoming) - 1
-            self.process.set_join_revert_data(self.definition, new_num)
+        # We should track transitions into Joins for revert purposes
+        self.removeTransitionFromJoin()
         zope.event.notify(ActivityReverted(self))
 
         return reverted_workitems
+
+    def removeTransitionFromJoin(self):
+        for transition in self.definition.outgoing:
+            if self.process.definition.activities[transition.to].andJoinSetting:
+                try:
+                    joinAct = self.process.activities.getByDefinitionId(
+                        transition.to
+                    ).next()
+                except StopIteration:
+                    # This can happen if the join was already reverted
+                    return
+                joinAct.incoming = tuple(t for t in joinAct.incoming if
+                                         t.id != transition.id)
+                joinAct.active = True
 
     def __repr__(self):
         return "Activity(%r)" % (
@@ -750,7 +749,6 @@ class Process(persistent.Persistent):
             self._terminateAsyncflows()
             zope.event.notify(ProcessFinished(self))
 
-
     def _terminateAsyncflows(self):
         for act in self.activities.getActive():
             if act.process.asyncflowId is None:
@@ -827,27 +825,6 @@ class Process(persistent.Persistent):
         self.subflows.append(subflow)
         return subflow
 
-    def get_join_revert_data(self, act_def):
-        if act_def.andJoinSetting:
-            join_reverts = "join_reverts_"+act_def.id
-            if hasattr(self.applicationRelevantData, join_reverts):
-                return getattr(self.applicationRelevantData, join_reverts)
-            else:
-                return None
-        else:
-            raise TypeError("The activity %s is not an andJoin." % act_def.id)
-
-    def set_join_revert_data(self, act_def, value):
-        if act_def.andJoinSetting:
-            join_reverts = "join_reverts_"+act_def.id
-            setattr(self.applicationRelevantData, join_reverts, value)
-        else:
-            raise TypeError("The activity %s is not an andJoin." % act_def.id)
-
-    def has_join_revert_data(self, act_def):
-        join_reverts = "join_reverts_"+act_def.id
-        return hasattr(self.applicationRelevantData, join_reverts)
-
     @staticmethod
     def chronological_key(activity):
         """
@@ -884,9 +861,6 @@ class Process(persistent.Persistent):
         # activity.process, since self could be parent flow and we need local
         # flow in case of subflow
         activity.process.transition(activity, transitions)
-
-        if activity.definition.andJoinSetting:
-            self.set_join_revert_data(activity.definition, 0)
 
 
 class ProcessStarted:
@@ -1150,6 +1124,15 @@ class ActivityReverted:
 
     def __repr__(self):
         return "ActivityReverted(%r)" % self.activity
+
+
+class ActivityAborted:
+
+    def __init__(self, activity):
+        self.activity = activity
+
+    def __repr__(self):
+        return "ActivityAborted(%r)" % self.activity
 
 
 class ActivityStarted:
