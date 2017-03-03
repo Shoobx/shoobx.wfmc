@@ -597,6 +597,8 @@ class Activity(persistent.Persistent):
                     return
                 joinAct.incoming = tuple(t for t in joinAct.incoming if
                                          t.id != transition.id)
+                if not joinAct.incoming:
+                    del joinAct.process.activities[joinAct.id]
                 joinAct.active = True
 
     def __repr__(self):
