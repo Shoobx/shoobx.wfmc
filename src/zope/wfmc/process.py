@@ -579,27 +579,9 @@ class Activity(persistent.Persistent):
         if cancelDeadlineTimer:
             self.cancelDeadlines()
 
-        # We should track transitions into Joins for revert purposes
-        self.removeTransitionFromJoin()
         zope.event.notify(ActivityReverted(self))
 
         return reverted_workitems
-
-    def removeTransitionFromJoin(self):
-        for transition in self.definition.outgoing:
-            if self.process.definition.activities[transition.to].andJoinSetting:
-                try:
-                    joinAct = self.process.activities.getByDefinitionId(
-                        transition.to
-                    ).next()
-                except StopIteration:
-                    # This can happen if the join was already reverted
-                    return
-                joinAct.incoming = tuple(t for t in joinAct.incoming if
-                                         t.id != transition.id)
-                if not joinAct.incoming:
-                    del joinAct.process.activities[joinAct.id]
-                joinAct.active = True
 
     def __repr__(self):
         return "Activity(%r)" % (
@@ -766,10 +748,9 @@ class Process(persistent.Persistent):
                                reverse=True):
             if activity.active:
                 activity.abort()
-                # Remove activity from the process activities list.
-                del self.activities[activity.id]
             else:
                 activity.revert()
+            del self.activities[activity.id]
         self.isAborted = True
         zope.event.notify(ProcessAborted(self))
 
