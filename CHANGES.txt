@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-sbx.4.0.0 (unreleased)
+sbx.4.0.0 (2017-05-15)
 ----------------------
 
 - Raise an exception on duplicate `ExtendedAttribute` `Name` in a single
