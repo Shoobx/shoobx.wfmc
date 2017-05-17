@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.0.0.sbx2 (unreleased)
+4.0.0.sbx2 (2017-05-17)
 -----------------------
 
 - Delaing with version numbering and sorting.
