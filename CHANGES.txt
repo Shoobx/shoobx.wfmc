@@ -5,8 +5,7 @@ CHANGES
 4.0.0.sbx2 (unreleased)
 -----------------------
 
-- Nothing changed yet.
-
+- Delaing with version numbering and sorting.
 
 4.0.0.sbx1 (2017-05-17)
 -----------------------
