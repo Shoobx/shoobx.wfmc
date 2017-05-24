@@ -1,5 +1,10 @@
 include *.rst
+include *.txt
+
+include bootstrap.py
 include buildout.cfg
 include versions.cfg
+
 recursive-include src *.py
 recursive-include src *.txt
+recursive-include src *.xpdl
