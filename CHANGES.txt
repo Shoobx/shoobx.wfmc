@@ -2,8 +2,8 @@
 CHANGES
 =======
 
-4.0.0-3 (unreleased)
------------------------
+4.0.0.post3 (2017-05-24)
+------------------------
 
 - Last Shoobx internal release.
 
