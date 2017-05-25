@@ -25,7 +25,7 @@ setup(name='shoobx.wfmc',
       author_email='zope3-dev@zope.org',
       description="Workflow-Management Coalition Workflow Engine",
       long_description=(
-          read('README.txt')
+          read('README.rst')
           + '\n\n' +
           'Detailed Documentation\n' +
           '++++++++++++++++++++++\n\n'
@@ -34,7 +34,7 @@ setup(name='shoobx.wfmc',
           + '\n\n' +
           read('src', 'shoobx', 'wfmc', 'xpdl.txt')
           + '\n\n' +
-          read('CHANGES.txt')
+          read('CHANGES.rst')
           ),
       keywords = "bpmn wfmc xpdl workflow engine",
       classifiers = [
