@@ -18,7 +18,7 @@ import zope.event
 from zope.component import testing, provideAdapter
 from zope.testing import doctest
 
-from zope.wfmc import process
+from shoobx.wfmc import process
 
 def tearDown(test):
     testing.tearDown(test)

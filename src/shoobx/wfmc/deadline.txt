@@ -2,7 +2,7 @@
 Deadline support
 ===============
 
-Here we demonstrate and test deadline support in zope.wfmc. Currently, only
+Here we demonstrate and test deadline support in shoobx.wfmc. Currently, only
 SYNCHRONOUSE deadlines are supported. When the deadline condition is met,
 the activity is put into its process's finishedActivities, but workitems are
 left untouched. Then the appropriate exception transition is followed.
@@ -10,7 +10,7 @@ left untouched. Then the appropriate exception transition is followed.
 Directory with this file contains sample process using subflows::
 
     >>> import os
-    >>> from zope.wfmc import xpdl
+    >>> from shoobx.wfmc import xpdl
     >>> sample_process = os.path.join(this_directory, "deadline.xpdl")
     >>> with open(sample_process) as f:
     ...     package = xpdl.read(f)
@@ -18,7 +18,7 @@ Directory with this file contains sample process using subflows::
 First create environment for executing a process.
 
     >>> import zope.interface
-    >>> from zope.wfmc import interfaces
+    >>> from shoobx.wfmc import interfaces
 
 Define WorkItems used by the process::
 
@@ -46,7 +46,7 @@ Define WorkItems used by the process::
 
 Define integration object::
 
-    >>> from zope.wfmc.attributeintegration import AttributeIntegration
+    >>> from shoobx.wfmc.attributeintegration import AttributeIntegration
     >>> class Integration(AttributeIntegration):
     ...     def administratorParticipant(self, activity, process):
     ...         return "admin"
@@ -66,7 +66,7 @@ Set integration for all definitions::
 Register all processes in static factory::
 
     >>> import zope.component
-    >>> from zope.wfmc.process import StaticProcessDefinitionFactory
+    >>> from shoobx.wfmc.process import StaticProcessDefinitionFactory
     >>> pdfactory = StaticProcessDefinitionFactory()
     >>> for pd in package.values():
     ...     pdfactory.register(pd)

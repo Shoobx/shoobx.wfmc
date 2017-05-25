@@ -13,16 +13,15 @@
 ##############################################################################
 """XPDL reader for process definitions
 """
-
 import logging
 import sys
 import xml.sax
 import xml.sax.xmlreader
 import xml.sax.handler
 
-import zope.wfmc.process
+import shoobx.wfmc.process
 from zope import interface
-from zope.wfmc import interfaces
+from shoobx.wfmc import interfaces
 
 xpdlns10 = "http://www.wfmc.org/2002/XPDL1.0"
 xpdlns21 = "http://www.wfmc.org/2008/XPDL2.1"
@@ -133,15 +132,15 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     end_handlers = {}
     text = u''
 
-    ProcessDefinitionFactory = zope.wfmc.process.ProcessDefinition
+    ProcessDefinitionFactory = shoobx.wfmc.process.ProcessDefinition
     PoolDefinitionFactory = PoolDefinition
     LaneDefinitionFactory = LaneDefinition
-    ParticipantFactory = zope.wfmc.process.Participant
-    DataFieldFactory = zope.wfmc.process.DataField
-    ApplicationFactory = zope.wfmc.process.Application
-    ActivityDefinitionFactory = zope.wfmc.process.ActivityDefinition
-    TransitionDefinitionFactory = zope.wfmc.process.TransitionDefinition
-    TextCondition = zope.wfmc.process.TextCondition
+    ParticipantFactory = shoobx.wfmc.process.Participant
+    DataFieldFactory = shoobx.wfmc.process.DataField
+    ApplicationFactory = shoobx.wfmc.process.Application
+    ActivityDefinitionFactory = shoobx.wfmc.process.ActivityDefinition
+    TransitionDefinitionFactory = shoobx.wfmc.process.TransitionDefinition
+    TextCondition = shoobx.wfmc.process.TextCondition
     DeadlineDefinitionFactory = DeadlineDefinition
 
     def __init__(self, package):
@@ -217,9 +216,9 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     start_handlers[(xpdlns21, 'WorkflowProcess')] = WorkflowProcess
 
     parameter_types = {
-        'IN': zope.wfmc.process.InputParameter,
-        'OUT': zope.wfmc.process.OutputParameter,
-        'INOUT': zope.wfmc.process.InputOutputParameter,
+        'IN': shoobx.wfmc.process.InputParameter,
+        'OUT': shoobx.wfmc.process.OutputParameter,
+        'INOUT': shoobx.wfmc.process.InputOutputParameter,
         }
 
     def FormalParameter(self, attrs):
@@ -349,14 +348,14 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
 
     def StartEvent(self, attrs):
         ad = self.stack[-1]
-        assert isinstance(ad, zope.wfmc.process.ActivityDefinition)
+        assert isinstance(ad, shoobx.wfmc.process.ActivityDefinition)
         ad.event = interfaces.START_EVENT
     start_handlers[(xpdlns10, 'StartEvent')] = StartEvent
     start_handlers[(xpdlns21, 'StartEvent')] = StartEvent
 
     def EndEvent(self, attrs):
         ad = self.stack[-1]
-        assert isinstance(ad, zope.wfmc.process.ActivityDefinition)
+        assert isinstance(ad, shoobx.wfmc.process.ActivityDefinition)
         ad.event = interfaces.END_EVENT
     start_handlers[(xpdlns10, 'EndEvent')] = EndEvent
     start_handlers[(xpdlns21, 'EndEvent')] = EndEvent

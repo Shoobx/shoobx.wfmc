@@ -5,7 +5,7 @@ XPDL-2.1 Import
 Here we will demonstrate, that xpdl-2.1 files are also importable and works.
 For general description of how to work with XPDL files, refer xpdl.txt.
 
-    >>> from zope.wfmc import xpdl
+    >>> from shoobx.wfmc import xpdl
     >>> xpdl.RAISE_ON_DUPLICATE_ERROR = True
     >>> import os
     >>> package = xpdl.read(open(os.path.join(this_directory,
@@ -18,7 +18,7 @@ This package contains a single definition:
     {u'Publication': ProcessDefinition(u'Publication')}
 
     >>> pd = package[u'Publication']
-    >>> from zope.wfmc.attributeintegration import AttributeIntegration
+    >>> from shoobx.wfmc.attributeintegration import AttributeIntegration
     >>> integration = AttributeIntegration()
     >>> pd.integration = integration
 
@@ -35,7 +35,7 @@ so that we can see what's going on:
 and we'll register the process definition as a utility:
 
     >>> import zope.component
-    >>> from zope.wfmc.process import StaticProcessDefinitionFactory
+    >>> from shoobx.wfmc.process import StaticProcessDefinitionFactory
     >>> pdfactory = StaticProcessDefinitionFactory()
     >>> zope.component.provideUtility(pdfactory)
     >>> pdfactory.register(pd)
@@ -43,7 +43,7 @@ and we'll register the process definition as a utility:
 and we'll define and register participant and application adapters:
 
     >>> import zope.interface
-    >>> from zope.wfmc import interfaces
+    >>> from shoobx.wfmc import interfaces
 
     >>> class Participant(object):
     ...     zope.component.adapts(interfaces.IActivity)
@@ -511,7 +511,7 @@ Having two ExtendedAttribute elements is nonsense.
     Traceback (most recent call last):
     ...
     HandlerError: u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."
-    File ".../src/zope/wfmc/publication-2.1-duplicate-ExtendedAttribute.xpdl", line 240. in ExtendedAttribute
+    File ".../src/shoobx/wfmc/publication-2.1-duplicate-ExtendedAttribute.xpdl", line 240. in ExtendedAttribute
 
 Sometimes we can't always raise an exception when this happens so instead
 we can record the parse error.

@@ -8,7 +8,7 @@ defined in Python or via the XML Process-Definition Language, XPDL.
 
 In this document, we'll look at Python-defined process definitions:
 
-    >>> from zope.wfmc import process
+    >>> from shoobx.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
 
 The argument to the process is a process id.
@@ -53,7 +53,7 @@ utility. This is necessary so that process instances can find their
 definitions.  In addition, the utility name must match the process id:
 
     >>> import zope.component
-    >>> from zope.wfmc.process import StaticProcessDefinitionFactory
+    >>> from shoobx.wfmc.process import StaticProcessDefinitionFactory
     >>> pdfactory = StaticProcessDefinitionFactory()
     >>> zope.component.provideUtility(pdfactory)
     >>> pdfactory.register(pd)
@@ -214,16 +214,16 @@ completed. Output parameters are passed to the `workItemFinished`
 method.
 
 A simple way to create integration objects is with
-`zope.wfmc.attributeintegration.AttributeIntegration`.
+`shoobx.wfmc.attributeintegration.AttributeIntegration`.
 
-    >>> from zope.wfmc.attributeintegration import AttributeIntegration
+    >>> from shoobx.wfmc.attributeintegration import AttributeIntegration
     >>> integration = AttributeIntegration()
     >>> pd.integration = integration
 
 We'll start by defining a simple Participant class:
 
     >>> import zope.interface
-    >>> from zope.wfmc import interfaces
+    >>> from shoobx.wfmc import interfaces
 
     >>> class Participant(object):
     ...     zope.component.adapts(interfaces.IActivity)

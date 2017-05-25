@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Adapter-based workflow integration
-
-$Id$
 """
 
-from zope.wfmc.adapter import integration
+from shoobx.wfmc.adapter import integration

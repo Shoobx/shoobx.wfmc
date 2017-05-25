@@ -12,12 +12,8 @@
 #
 ##############################################################################
 """Attribute-based integration components
-
-
-$Id$
 """
-
-from zope.wfmc import interfaces, process
+from shoobx.wfmc import interfaces, process
 from zope import interface
 
 

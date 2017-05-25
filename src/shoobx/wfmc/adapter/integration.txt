@@ -4,12 +4,12 @@ Adapter-based workflow application integration
 This package provides an adapter-based workflow integration component. The
 component is implemented by the integration module:
 
-    >>> from zope.wfmc import process, adapter
+    >>> from shoobx.wfmc import process, adapter
     >>> import zope.component
 
 To demonstrate how this works, we'll use the simple wfmc example process:
 
-    >>> from zope.wfmc.process import StaticProcessDefinitionFactory
+    >>> from shoobx.wfmc.process import StaticProcessDefinitionFactory
     >>> pdfactory = StaticProcessDefinitionFactory()
     >>> zope.component.provideUtility(pdfactory)
 
@@ -53,8 +53,8 @@ To demonstrate how this works, we'll use the simple wfmc example process:
     >>> pd.activities['review'].definePerformer('reviewer')
 
 For each of the participants provided, we need to provide a named adapter from
-an activity instance (`zope.wfmc.interfaces.IActivity`) to
-`zope.wfmc.interfaces.IParticipant`.  When a process needs to get a
+an activity instance (`shoobx.wfmc.interfaces.IActivity`) to
+`shoobx.wfmc.interfaces.IParticipant`.  When a process needs to get a
 participant, it adapts the activity instance to `IParticipant` using a
 qualified name, consisting of the process-definition identifier, a dot, and
 the performer's participant identifier. If an adapter can't be found with that
@@ -66,7 +66,7 @@ We first look for an adapter with a name consisting of the process id followed
 by a dot, and then we look for an adapter with a single dot as it's name.
 
 Application implementations are provided as named adapters from participants
-to `zope.wfmc.interfaces.IWorkItem`.  As when looking up applications, we
+to `shoobx.wfmc.interfaces.IWorkItem`.  As when looking up applications, we
 first look for an adapter with a name consisting of the process-definition id,
 a dot, and the application id.  If that fails, we look for an adapter
 consisting of a dot followed by the application id.  Workflow items provide a
@@ -80,7 +80,7 @@ Let's implement participants for our process. We'll start with a generic
 participant:
 
     >>> import zope.interface
-    >>> from zope.wfmc import interfaces
+    >>> from shoobx.wfmc import interfaces
 
     >>> class Participant(object):
     ...     zope.component.adapts(interfaces.IActivity)

@@ -14,7 +14,7 @@
 """Integration Components
 """
 from zope import component, interface
-from zope.wfmc import interfaces
+from shoobx.wfmc import interfaces
 
 interface.moduleProvides(interfaces.IIntegration)
 

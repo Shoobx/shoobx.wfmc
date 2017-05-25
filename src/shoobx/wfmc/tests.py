@@ -20,7 +20,7 @@ import zope.interface
 from zope.component import testing, provideAdapter
 from zope.testing import doctest
 
-from zope.wfmc import interfaces, process
+from shoobx.wfmc import interfaces, process
 
 
 def tearDown(test):
@@ -63,7 +63,7 @@ def test_multiple_input_parameters():
     We'll create a very simple process that inputs two variables and
     has a single activity that just outputs them.
 
-    >>> from zope.wfmc import process
+    >>> from shoobx.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
 
@@ -92,7 +92,7 @@ def test_multiple_input_parameters():
 
     >>> pd.activities['eek'].addApplication('eek', ['x', 'y'])
 
-    >>> from zope.wfmc import interfaces
+    >>> from shoobx.wfmc import interfaces
 
     >>> class Participant(object):
     ...     zope.component.adapts(interfaces.IActivity)
@@ -101,7 +101,7 @@ def test_multiple_input_parameters():
     ...     def __init__(self, activity, process):
     ...         self.activity = activity
 
-    >>> from zope.wfmc.attributeintegration import AttributeIntegration
+    >>> from shoobx.wfmc.attributeintegration import AttributeIntegration
     >>> integration = AttributeIntegration()
     >>> pd.integration = integration
 
@@ -129,7 +129,7 @@ def test_multiple_input_parameters():
 
 def test_pickling():
     """
-    >>> from zope.wfmc import process
+    >>> from shoobx.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
 
@@ -163,7 +163,7 @@ def test_pickling():
 def test_inputoutput():
     """
 
-    >>> from zope.wfmc import process
+    >>> from shoobx.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
 
@@ -194,7 +194,7 @@ def test_inputoutput():
     ...     def __init__(self, activity, process):
     ...         self.activity = activity
 
-    >>> from zope.wfmc.attributeintegration import AttributeIntegration
+    >>> from shoobx.wfmc.attributeintegration import AttributeIntegration
     >>> integration = AttributeIntegration()
     >>> pd.integration = integration
 
@@ -220,7 +220,7 @@ def test_inputoutput():
 def test_wrong_number_process_args_error_message():
     """
 
-    >>> from zope.wfmc import process
+    >>> from shoobx.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
 
@@ -243,7 +243,7 @@ def test_wrong_number_process_args_error_message():
 
 def test_process_abort():
     """
-    >>> from zope.wfmc import process
+    >>> from shoobx.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
 
@@ -269,7 +269,7 @@ def test_process_abort():
     >>> pd.activities['eek'].addApplication('eek', ['x', 'y'])
     >>> pd.activities['ook'].addApplication('ook')
 
-    >>> from zope.wfmc.attributeintegration import AttributeIntegration
+    >>> from shoobx.wfmc.attributeintegration import AttributeIntegration
     >>> integration = AttributeIntegration()
     >>> integration.eekWorkItem = WorkItemStub
     >>> integration.ookWorkItem = WorkItemStub
@@ -295,7 +295,7 @@ def test_process_abort():
 def test_getValidOutgoingTransitions():
     """
 
-    >>> from zope.wfmc import process
+    >>> from shoobx.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
 
@@ -318,7 +318,7 @@ def test_getValidOutgoingTransitions():
 def test_getValidOutgoingTransitions_custom_checker():
     """
 
-    >>> from zope.wfmc import process
+    >>> from shoobx.wfmc import process
     >>> pd = process.ProcessDefinition('sample')
     >>> from zope import component, interface
 
