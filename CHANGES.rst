@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.0.2 (unreleased)
+4.0.2 (2017-05-25)
 ------------------
 
 - Update and improve Trove classifiers.
