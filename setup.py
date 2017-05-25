@@ -32,9 +32,9 @@ setup(name='shoobx.wfmc',
           'Detailed Documentation\n' +
           '======================\n\n'
           + '\n\n' +
-          read('src', 'zope', 'wfmc', 'README.txt')
+          read('src', 'shoobx', 'wfmc', 'README.txt')
           + '\n\n' +
-          read('src', 'zope', 'wfmc', 'xpdl.txt')
+          read('src', 'shoobx', 'wfmc', 'xpdl.txt')
           + '\n\n' +
           read('CHANGES.txt')
           ),
@@ -53,7 +53,7 @@ setup(name='shoobx.wfmc',
       license='ZPL 2.1',
       packages=find_packages('src'),
       package_dir = {'': 'src'},
-      namespace_packages=['zope'],
+      namespace_packages=['shoobx'],
       extras_require = dict(
           test=['zope.testing'
                 ]),
