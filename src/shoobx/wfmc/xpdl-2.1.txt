@@ -511,7 +511,7 @@ Having two ExtendedAttribute elements is nonsense.
     Traceback (most recent call last):
     ...
     HandlerError: u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."
-    File ".../src/shoobx/wfmc/publication-2.1-duplicate-ExtendedAttribute.xpdl", line 240. in ExtendedAttribute
+    File ".../shoobx/wfmc/publication-2.1-duplicate-ExtendedAttribute.xpdl", line 240. in ExtendedAttribute
 
 Sometimes we can't always raise an exception when this happens so instead
 we can record the parse error.

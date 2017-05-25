@@ -1,0 +1,3 @@
+[run]
+include = */shoobx/wfmc/*
+omit = */test*

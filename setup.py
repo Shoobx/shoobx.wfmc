@@ -12,8 +12,6 @@
 #
 ##############################################################################
 """Setup for shoobx.wfmc package
-
-$Id: setup.py 72841 2007-02-26 22:25:58Z ctheune $
 """
 import os
 from setuptools import setup, find_packages
@@ -30,7 +28,7 @@ setup(name='shoobx.wfmc',
           read('README.txt')
           + '\n\n' +
           'Detailed Documentation\n' +
-          '======================\n\n'
+          '++++++++++++++++++++++\n\n'
           + '\n\n' +
           read('src', 'shoobx', 'wfmc', 'README.txt')
           + '\n\n' +
@@ -38,7 +36,7 @@ setup(name='shoobx.wfmc',
           + '\n\n' +
           read('CHANGES.txt')
           ),
-      keywords = "zope3 wfmc xpdl workflow engine",
+      keywords = "bpmn wfmc xpdl workflow engine",
       classifiers = [
           'Development Status :: 5 - Production/Stable',
           'Environment :: Web Environment',
@@ -46,9 +44,7 @@ setup(name='shoobx.wfmc',
           'License :: OSI Approved :: Zope Public License',
           'Programming Language :: Python',
           'Natural Language :: English',
-          'Operating System :: OS Independent',
-          'Topic :: Internet :: WWW/HTTP',
-          'Framework :: Zope3'],
+          'Operating System :: OS Independent'],
       url='http://pypi.python.org/pypi/shoobx.wfmc',
       license='ZPL 2.1',
       packages=find_packages('src'),
