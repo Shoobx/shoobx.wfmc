@@ -1,6 +1,6 @@
-================================
+--------------------------------
 Shoobx WfMC-based Process Engine
-================================
+--------------------------------
 
 .. image:: https://travis-ci.org/Shoobx/shoobx.wfmc.png?branch=master
    :target: https://travis-ci.org/Shoobx/shoobx.wfmc
