@@ -1,7 +1,7 @@
 CHANGES
 +++++++
 
-4.0.0 (unreleased)
+4.0.0 (2017-05-25)
 ------------------
 
 - Renamed from `zope.wfmc` to `shoobx.wfmc`.
