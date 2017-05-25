@@ -97,7 +97,7 @@ activity completed immediately.
 Note that we didn't transition into the rejected activity.  By
 default, when an activity is completed, the first transition for which
 its condition evaluates to `True` is used.  By default, transitions
-have boolean conditions [1]_ that evaluate to `True`, so the transition
+have boolean conditions that evaluate to `True`, so the transition
 to `publish` is used because it was defined before the transition to
 `reject`.  What we want is to transition to `publish` if a reviewer
 approves the content for publication, but to `reject` if the reviewer

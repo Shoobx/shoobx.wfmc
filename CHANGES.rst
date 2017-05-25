@@ -1,10 +1,11 @@
+=======
 CHANGES
-+++++++
+=======
 
 4.0.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix small ReST issues, so that PyPI description will render.
 
 
 4.0.0 (2017-05-25)
