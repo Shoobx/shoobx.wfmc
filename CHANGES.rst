@@ -5,7 +5,7 @@ CHANGES
 4.0.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update and improve Trove classifiers.
 
 
 4.0.1 (2017-05-25)
