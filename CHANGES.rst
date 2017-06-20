@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.0.3 (unreleased)
+4.0.3 (2017-06-20)
 ------------------
 
 - Nothing changed yet.
