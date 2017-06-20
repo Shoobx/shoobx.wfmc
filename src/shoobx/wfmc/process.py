@@ -534,8 +534,6 @@ class Activity(persistent.Persistent):
         if cancelDeadlineTimer:
             self.cancelDeadlines()
 
-        self.restoreWFRD()
-
         self.active = False
 
         # Abort all workitems.
