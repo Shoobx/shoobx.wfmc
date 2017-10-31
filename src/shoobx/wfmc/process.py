@@ -15,7 +15,6 @@
 """
 import logging
 import threading
-import copy
 import persistent
 import datetime
 from datetime import timedelta
