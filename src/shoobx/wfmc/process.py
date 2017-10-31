@@ -294,7 +294,7 @@ class Activity(persistent.Persistent):
 
     incoming = ()
     deadlineTimer = None
-    deadlineDateFunc = datetime.datetime.now
+    deadlineDateMod = datetime.datetime
 
     def __init__(self, process, definition):
         self.process = process
@@ -332,11 +332,11 @@ class Activity(persistent.Persistent):
                 continue
 
             if isinstance(evaled, timedelta):
-                deadline_time = self.deadlineDateFunc() + evaled
+                deadline_time = self.deadlineDateMod.now() + evaled
             elif isinstance(evaled, datetime.datetime):
                 deadline_time = evaled
             elif isinstance(evaled, int):
-                deadline_time = self.deadlineDateFunc() + \
+                deadline_time = self.deadlineDateMod.now() + \
                     timedelta(seconds=evaled)
             else:
                 raise ValueError(
