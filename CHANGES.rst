@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.0.4 (unreleased)
+4.0.4 (2017-11-01)
 ------------------
 
 - Make the `now` function pluggable.
