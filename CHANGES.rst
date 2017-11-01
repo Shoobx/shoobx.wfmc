@@ -5,7 +5,7 @@ CHANGES
 4.0.4 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Make the `now` function pluggable.
 
 
 4.0.3 (2017-06-20)
