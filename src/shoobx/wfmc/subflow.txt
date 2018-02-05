@@ -25,25 +25,25 @@ Define WorkItems used by the process::
     >>> @zope.interface.implementer(interfaces.IWorkItem)
     ... class OutputWorkItem(object):
     ...     id = None
-    ...
+    ... 
     ...     def __init__(self, process, activity):
     ...         self.process = process
     ...         self.activity = activity
-    ...
+    ... 
     ...     def start(self, args):
-    ...         print "OUTPUT:", args['message']
+    ...         print(("OUTPUT: " + args['message']))
     ...         self.activity.workItemFinished(self)
 
     >>> @zope.interface.implementer(interfaces.IWorkItem)
     ... class InputWorkItem(object):
     ...     id = None
-    ...
+    ... 
     ...     def __init__(self, process, activity):
     ...         self.process = process
     ...         self.activity = activity
-    ...
+    ... 
     ...     def start(self, args):
-    ...         print "INPUT:", args['message']
+    ...         print(("INPUT: " + args['message']))
 
 Define integration object::
 
@@ -89,7 +89,7 @@ Now we can create and execute our process::
     >>> lastactivity.activity_definition_identifier
     'innerflow_first'
 
-    >>> wi, _, _, _ = lastactivity.workitems.values()[0]
+    >>> wi, _, _, _ = list((lastactivity.workitems.values()))[0]
     >>> lastactivity.workItemFinished(wi, {'result': "from-the-deep"})
     INPUT: Hello Parameter
 
@@ -97,12 +97,12 @@ Now we can create and execute our process::
     >>> lastactivity.activity_definition_identifier
     'subflow_second'
 
-    >>> wi, _, _, _ = lastactivity.workitems.values()[0]
+    >>> wi, _, _, _ = list((lastactivity.workitems.values()))[0]
     >>> lastactivity.workItemFinished(wi, {'result': "completed"})
     INPUT: Inner subflow activity
 
     >>> lastactivity = proc.activities[max(proc.activities.keys())]
-    >>> wi, _, _, _ = lastactivity.workitems.values()[0]
+    >>> wi, _, _, _ = list((lastactivity.workitems.values()))[0]
     >>> lastactivity.workItemFinished(wi, {'result': "from-the-deep-2"})
     OUTPUT: Second mainflow activity
 
@@ -127,3 +127,5 @@ Subflow output variable, however, is written to main flow context:
 
     >>> proc.workflowRelevantData.subflow_result
     'completed'
+
+

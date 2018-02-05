@@ -13,14 +13,30 @@
 ##############################################################################
 """Test hookup
 """
+from __future__ import print_function
 import os
+import re
+import sys
 import unittest
 import zope.event
 import zope.interface
+
 from zope.component import testing, provideAdapter
 from zope.testing import doctest
-
 from shoobx.wfmc import interfaces, process
+from doctest import OutputChecker, DocTestSuite
+
+
+class Py23DocChecker(OutputChecker):
+    def check_output(self, want, got, optionflags):
+        if sys.version_info[0] == 3:
+            # if running on py2, attempt to prefix all the strings
+            # with "u" to signify that they're unicode literals
+            want = re.sub("u'(.*?)'", "'\\1'", want)
+            want = re.sub('u"(.*?)"', '"\\1"', want)
+        else:
+            want = re.sub('shoobx.wfmc.xpdl.HandlerError', 'HandlerError', want)
+        return OutputChecker.check_output(self, want, got, optionflags)
 
 
 def tearDown(test):
@@ -46,16 +62,16 @@ class WorkItemStub(object):
 
     def start(self, args):
         self.args = args
-        print 'Workitem %i for activity %r started.' % (
-            self.id, self.activity.definition.id)
+        print('Workitem %i for activity %r started.' % (
+            self.id, self.activity.definition.id))
 
     def abort(self):
-        print 'Workitem %i for activity %r aborted.' % (
-            self.id, self.activity.definition.id)
+        print('Workitem %i for activity %r aborted.' % (
+            self.id, self.activity.definition.id))
 
     def revert(self):
-        print 'Workitem %i for activity %r reverted.' % (
-            self.id, self.activity.definition.id)
+        print('Workitem %i for activity %r reverted.' % (
+            self.id, self.activity.definition.id))
 
 
 def test_multiple_input_parameters():
@@ -94,9 +110,9 @@ def test_multiple_input_parameters():
 
     >>> from shoobx.wfmc import interfaces
 
-    >>> class Participant(object):
+    >>> @zope.interface.implementer(interfaces.IParticipant)
+    ... class Participant(object):
     ...     zope.component.adapts(interfaces.IActivity)
-    ...     zope.interface.implements(interfaces.IParticipant)
     ...
     ...     def __init__(self, activity, process):
     ...         self.activity = activity
@@ -108,16 +124,16 @@ def test_multiple_input_parameters():
     >>> integration.Participant = Participant
 
 
-    >>> class Eek:
+    >>> @interface.implementer(interfaces.IWorkItem)
+    ... class Eek:
     ...     component.adapts(interfaces.IParticipant)
-    ...     interface.implements(interfaces.IWorkItem)
     ...
     ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...
     ...     def start(self, args):
     ...         x = args['x']; y=args['y']
-    ...         print x, y
+    ...         print(x, y)
 
 
     >>> integration.eekWorkItem = Eek
@@ -364,7 +380,10 @@ def test_suite():
         suite.addTest(doctest.DocFileSuite(
             doctestfile,
             setUp=setUp, tearDown=tearDown,
+            checker=Py23DocChecker(),
             optionflags=doctest.NORMALIZE_WHITESPACE | doctest.REPORT_NDIFF))
     suite.addTest(doctest.DocTestSuite(
         setUp=setUp, tearDown=testing.tearDown))
     return suite
+
+

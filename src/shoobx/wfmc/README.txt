@@ -64,7 +64,7 @@ the workflow executing by registering a subscriber that logs workflow
 events:
 
     >>> def log_workflow(event):
-    ...     print event
+    ...     print (event)
 
     >>> import zope.event
     >>> zope.event.subscribers.append(log_workflow)
@@ -225,10 +225,10 @@ We'll start by defining a simple Participant class:
     >>> import zope.interface
     >>> from shoobx.wfmc import interfaces
 
-    >>> class Participant(object):
+    >>> @zope.interface.implementer(interfaces.IParticipant)
+    ... class Participant(object):
     ...     zope.component.adapts(interfaces.IActivity)
-    ...     zope.interface.implements(interfaces.IParticipant)
-    ...
+    ... 
     ...     def __init__(self, activity, process):
     ...         self.activity = activity
 
@@ -246,17 +246,17 @@ Now we'll define our work-items. First we'll define some classes:
 
     >>> work_list = []
 
-    >>> class ApplicationBase:
+    >>> @zope.interface.implementer(interfaces.IWorkItem)
+    ... class ApplicationBase:
     ...     zope.component.adapts(interfaces.IParticipant)
-    ...     zope.interface.implements(interfaces.IWorkItem)
-    ...
+    ... 
     ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...         work_list.append(self)
-    ...
+    ... 
     ...     def start(self, args):
     ...         pass
-    ...
+    ... 
     ...     def finish(self):
     ...         self.participant.activity.workItemFinished(self)
 
@@ -267,12 +267,12 @@ Now we'll define our work-items. First we'll define some classes:
 
     >>> class Publish(ApplicationBase):
     ...     def start(self, args):
-    ...         print "Published"
+    ...         print ("Published")
     ...         self.finish()
 
     >>> class Reject(ApplicationBase):
     ...     def start(self, args):
-    ...         print "Rejected"
+    ...         print ("Rejected")
     ...         self.finish()
 
 and then we'll hook them up with the integration object:
@@ -769,7 +769,7 @@ them. Finally, we'll create multiple authors and use the selected one:
     ...     def __init__(self, activity, process):
     ...         Participant.__init__(self, activity, process)
     ...         author_name = activity.process.workflowRelevantData.author
-    ...         print "Author `%s` selected" % author_name
+    ...         print(("Author `%s` selected" % author_name))
     ...         self.user = authors[author_name]
 
 In this example, we need to define a separate attribute for each participant:
@@ -799,18 +799,18 @@ performers:
 
 Now we'll create our applications. Let's start with our author:
 
-    >>> class ApplicationBase(object):
+    >>> @zope.interface.implementer(interfaces.IWorkItem)
+    ... class ApplicationBase(object):
     ...     zope.component.adapts(interfaces.IParticipant)
-    ...     zope.interface.implements(interfaces.IWorkItem)
-    ...
+    ... 
     ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...         self.activity = participant.activity
     ...         participant.user.work_list.append(self)
-    ...
+    ... 
     ...     def start(self, args):
     ...         pass
-    ...
+    ... 
     ...     def finish(self):
     ...         self.participant.activity.workItemFinished(self)
 
@@ -820,13 +820,13 @@ Now we'll create our applications. Let's start with our author:
     ...         process = self.activity.process
     ...         doc = getattr(process.applicationRelevantData, 'doc', '')
     ...         if doc:
-    ...             print 'Previous draft:'
-    ...             print doc
-    ...             print 'Changes we need to make:'
+    ...             print ('Previous draft:')
+    ...             print (doc)
+    ...             print ('Changes we need to make:')
     ...             for change in process.workflowRelevantData.tech_changes:
-    ...                 print change
+    ...                 print (change)
     ...         else:
-    ...             print 'Please write the initial draft'
+    ...             print ('Please write the initial draft')
     ...
     ...     def finish(self, doc):
     ...         self.activity.process.applicationRelevantData.doc = doc
@@ -896,16 +896,16 @@ We'll reuse the `publish` and `reject` application from the previous
 example.
 
     >>> class Final(ApplicationBase):
-    ...
+    ... 
     ...     def summary(self):
     ...         process = self.activity.process
     ...         doc = getattr(process.applicationRelevantData, 'doc', '')
-    ...         print 'Previous draft:'
-    ...         print self.activity.process.applicationRelevantData.doc
-    ...         print 'Changes we need to make:'
+    ...         print ('Previous draft:')
+    ...         print((self.activity.process.applicationRelevantData.doc))
+    ...         print ('Changes we need to make:')
     ...         for change in process.workflowRelevantData.ed_changes:
-    ...            print change
-    ...
+    ...            print (change)
+    ... 
     ...     def finish(self, doc):
     ...         self.activity.process.applicationRelevantData.doc = doc
     ...         super(Final, self).finish()
@@ -926,9 +926,9 @@ changes.
 Our process now returns data.  When we create a process, we need to
 supply an object that it can call back to:
 
-    >>> class PublicationContext:
-    ...     zope.interface.implements(interfaces.IProcessContext)
-    ...
+    >>> @zope.interface.implementer(interfaces.IProcessContext)
+    ... class PublicationContext:
+    ... 
     ...     def processFinished(self, process, decision):
     ...         self.decision = decision
 
@@ -970,7 +970,7 @@ Notice that we transitioned to *two* activities, `tech1` and
 Now we'll do a tech review.  Let's see what tech1 has:
 
     >>> item = tech1.work_list.pop()
-    >>> print item.getDoc()
+    >>> print((item.getDoc()))
     I give my pledge, as an American
     to save, and faithfully to defend from waste
     the natural resources of my Country.
@@ -1059,7 +1059,7 @@ weren't any technical changes. We're ready to do our editorial review.
 We'll request an editorial change:
 
     >>> item = reviewer.work_list.pop()
-    >>> print item.getDoc()
+    >>> print((item.getDoc()))
     I give my pledge, as an Earthling
     to save, and faithfully to defend from waste
     the natural resources of my planet.
@@ -1099,7 +1099,7 @@ We transition to the activity for reviewing the final edits.  We
 review the document and approve it for publication:
 
     >>> item = reviewer.work_list.pop()
-    >>> print item.getDoc()
+    >>> print((item.getDoc()))
     I give my pledge, as a Earthling
     to save, and faithfully to defend from waste
     the natural resources of my planet.
@@ -1132,3 +1132,5 @@ See also
 ---------
 http://www.wfmc.org
 http://www.wfmc.org/standards/standards.htm
+
+

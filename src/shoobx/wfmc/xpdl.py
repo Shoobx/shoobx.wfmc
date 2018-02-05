@@ -13,6 +13,7 @@
 ##############################################################################
 """XPDL reader for process definitions
 """
+from __future__ import absolute_import
 import logging
 import sys
 import xml.sax
@@ -22,6 +23,7 @@ import xml.sax.handler
 import shoobx.wfmc.process
 from zope import interface
 from shoobx.wfmc import interfaces
+import six
 
 xpdlns10 = "http://www.wfmc.org/2002/XPDL1.0"
 xpdlns21 = "http://www.wfmc.org/2008/XPDL2.1"
@@ -46,6 +48,9 @@ class HandlerError(Exception):
     def __str__(self):
         return ('%s\nFile "%s", line %s. in %s'
                 % (self.orig, self.xml, self.line, self.tag))
+
+    def __call__(self):
+        return self
 
 
 class Package(dict):
@@ -76,9 +81,8 @@ class Package(dict):
         self.script = script
 
 
+@interface.implementer(interfaces.IPoolDefinition)
 class PoolDefinition:
-
-    interface.implements(interfaces.IPoolDefinition)
 
     def __init__(self, name=None, process_def=None):
         self.__name__ = name
@@ -94,9 +98,8 @@ class PoolDefinition:
         return "Pool(%r, %r)" % (self.__name__, self.process_def)
 
 
+@interface.implementer(interfaces.ILaneDefinition)
 class LaneDefinition:
-
-    interface.implements(interfaces.ILaneDefinition)
 
     def __init__(self, name=None):
         self.__name__ = name
@@ -158,8 +161,8 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
             try:
                 result = handler(self, attrs)
             except:
-                raise HandlerError(sys.exc_info()[1], name[1], self.locator
-                    ), None, sys.exc_info()[2]
+                six.reraise(HandlerError(sys.exc_info()[1], name[1], self.locator
+                    ), None, sys.exc_info()[2])
         else:
             result = None
 
@@ -177,8 +180,8 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
             try:
                 handler(self, last)
             except:
-                raise HandlerError(sys.exc_info()[1], name[1], self.locator
-                    ), None, sys.exc_info()[2]
+                six.reraise(HandlerError(sys.exc_info()[1], name[1], self.locator
+                    ), None, sys.exc_info()[2])
 
         self.textstack.pop()
 
