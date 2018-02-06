@@ -51,8 +51,8 @@ def defaultDeadlineCanceller(process, deadline):
         deadline.deadlineTimer.cancel()
 
 
+@interface.implementer(interfaces.IProcessDefinitionFactory)
 class StaticProcessDefinitionFactory(object):
-    interface.implements(interfaces.IProcessDefinitionFactory)
 
     def __init__(self):
         self.definitions = {}
@@ -66,9 +66,8 @@ class StaticProcessDefinitionFactory(object):
         self.definitions[pd.id] = pd
 
 
+@interface.implementer(interfaces.ITransitionDefinition)
 class TransitionDefinition(object):
-
-    interface.implements(interfaces.ITransitionDefinition)
 
     def __init__(self, from_, to, condition=always_true, id=None,
                  __name__=None, otherwise=False):
@@ -88,9 +87,8 @@ class TransitionDefinition(object):
         return "TransitionDefinition(from=%r, to=%r)" % (self.from_, self.to)
 
 
+@interface.implementer(interfaces.IProcessDefinition)
 class ProcessDefinition(object):
-
-    interface.implements(interfaces.IProcessDefinition)
 
     TransitionDefinitionFactory = TransitionDefinition
 
@@ -207,10 +205,9 @@ class ProcessDefinition(object):
             pass
 
 
-class ActivityDefinition(object):
-
-    interface.implements(interfaces.IActivityDefinition,
+@interface.implementer(interfaces.IActivityDefinition,
                          interfaces.IExtendedAttributesContainer)
+class ActivityDefinition(object):
 
     performer = ''
     process = None
@@ -287,8 +284,8 @@ class Deadline(object):
                                       'are supported at this point.')
 
 
+@interface.implementer(interfaces.IActivity)
 class Activity(persistent.Persistent):
-    interface.implements(interfaces.IActivity)
     DeadlineFactory = Deadline
 
     incoming = ()
@@ -448,7 +445,10 @@ class Activity(persistent.Persistent):
 
         if self.workitems:
             evaluator = getEvaluator(self.process)
-            for workitem, app, formal, actual in self.workitems.values():
+            workitems = list(self.workitems.values())
+            # We need the list() here to make a copy to
+            # loop over, as we modify self.workitems in the loop.
+            for workitem, app, formal, actual in list(self.workitems.values()):
                 __traceback_info__ = (
                     workitem, self.activity_definition_identifier)
 
@@ -536,8 +536,9 @@ class Activity(persistent.Persistent):
 
         self.active = False
 
-        # Abort all workitems.
-        for workitem, app, formal, actual in self.workitems.values():
+        # Abort all workitems. We need the list() here to make a copy to
+        # loop over, as we modify self.workitems in the loop.
+        for workitem, app, formal, actual in list(self.workitems.values()):
             if interfaces.IAbortWorkItem.providedBy(workitem):
                 workitem.abort()
                 zope.event.notify(WorkItemAborted(workitem, app, actual))
@@ -607,8 +608,8 @@ class Sequence(object):
         return self.counter
 
 
+@interface.implementer(interfaces.IActivityContainer)
 class ActivityContainer(dict):
-    interface.implements(interfaces.IActivityContainer)
 
     def getActive(self):
         return [a for a in self.values() if a.active]
@@ -617,9 +618,8 @@ class ActivityContainer(dict):
         return [a for a in self.values() if not a.active]
 
 
+@interface.implementer(interfaces.IProcess)
 class Process(persistent.Persistent):
-
-    interface.implements(interfaces.IProcess)
 
     ActivityFactory = Activity
     WorkflowDataFactory = WorkflowData
@@ -844,8 +844,8 @@ class Process(persistent.Persistent):
         activity.process.transition(activity, transitions)
 
 
+@interface.implementer(interfaces.IProcessStarted)
 class ProcessStarted:
-    interface.implements(interfaces.IProcessStarted)
 
     def __init__(self, process):
         self.process = process
@@ -854,8 +854,8 @@ class ProcessStarted:
         return "ProcessStarted(%r)" % self.process
 
 
+@interface.implementer(interfaces.IProcessFinished)
 class ProcessFinished:
-    interface.implements(interfaces.IProcessFinished)
 
     def __init__(self, process):
         self.process = process
@@ -864,8 +864,8 @@ class ProcessFinished:
         return "ProcessFinished(%r)" % self.process
 
 
+@interface.implementer(interfaces.IProcessAborted)
 class ProcessAborted:
-    interface.implements(interfaces.IProcessAborted)
 
     def __init__(self, process):
         self.process = process
@@ -1125,9 +1125,8 @@ class ActivityStarted:
         return "ActivityStarted(%r)" % self.activity
 
 
+@interface.implementer(interfaces.IParameterDefinition)
 class Parameter(object):
-
-    interface.implements(interfaces.IParameterDefinition)
 
     input = output = False
     initialValue = None
@@ -1150,10 +1149,9 @@ class InputOutputParameter(InputParameter, OutputParameter):
 
     pass
 
-class Application:
-
-    interface.implements(interfaces.IApplicationDefinition,
+@interface.implementer(interfaces.IApplicationDefinition,
                          interfaces.IExtendedAttributesContainer)
+class Application:
 
     def __init__(self, *parameters):
         self.parameters = parameters
@@ -1170,10 +1168,9 @@ class Application:
         return "<Application %r: (%s) --> (%s)>" % (self.id, input, output)
 
 
-class Participant:
-
-    interface.implements(interfaces.IParticipantDefinition,
+@interface.implementer(interfaces.IParticipantDefinition,
                          interfaces.IExtendedAttributesContainer)
+class Participant:
 
     def __init__(self, name=None, type=None):
         self.__name__ = name
@@ -1185,9 +1182,8 @@ class Participant:
         return "Participant(%r, %r)" % (self.__name__, self.type)
 
 
+@interface.implementer(interfaces.IDataFieldDefinition)
 class DataField:
-
-    interface.implements(interfaces.IDataFieldDefinition)
 
     def __init__(self, name=None, title=None, initialValue=None):
         self.__name__ = name
@@ -1204,13 +1200,13 @@ ALLOWED_BUILTINS = {k: v for k, v in __builtins__.items()
                     if k in ALLOWED_BUILTIN_NAMES}
 
 
+@interface.implementer(interfaces.IPythonExpressionEvaluator)
 class PythonExpressionEvaluator(object):
     """Simple Python Expression Evaluator.
 
     This evaluator only produces a limited namespace and does not use a safe
     Python engine.
     """
-    interface.implements(interfaces.IPythonExpressionEvaluator)
     component.adapts(interfaces.IProcess)
 
     def __init__(self, process):
@@ -1232,7 +1228,7 @@ class PythonExpressionEvaluator(object):
         ns.update(locals)
         ns.update(ALLOWED_BUILTINS)
         result = {}
-        exec code in ALLOWED_BUILTINS, result
+        exec(code, ALLOWED_BUILTINS, result)
         for name, value in result:
             pass
 

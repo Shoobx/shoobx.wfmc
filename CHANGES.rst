@@ -5,7 +5,7 @@ CHANGES
 4.0.5 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Python 3 support.
 
 
 4.0.4 (2017-11-01)

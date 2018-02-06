@@ -25,24 +25,24 @@ Define WorkItems used by the process::
     >>> @zope.interface.implementer(interfaces.IWorkItem)
     ... class OutputWorkItem(object):
     ...     id = None
-    ...
+    ... 
     ...     def __init__(self, process, activity):
     ...         self.process = process
     ...         self.activity = activity
-    ...
+    ... 
     ...     def start(self, args):
-    ...         print "START:", args['message']
+    ...         print(("START: " + args['message']))
 
     >>> @zope.interface.implementer(interfaces.IWorkItem)
     ... class InputWorkItem(object):
     ...     id = None
-    ...
+    ... 
     ...     def __init__(self, process, activity):
     ...         self.process = process
     ...         self.activity = activity
-    ...
+    ... 
     ...     def start(self, args):
-    ...         print "START:", args['message']
+    ...         print(("START: " + args['message']))
 
 Define integration object::
 
@@ -133,3 +133,5 @@ Do it again without the wait
     >>> proc.activities.getActive()[0].finish()
     >>> proc.isFinished
     True
+
+

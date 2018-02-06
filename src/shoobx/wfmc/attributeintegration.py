@@ -17,14 +17,13 @@ from shoobx.wfmc import interfaces, process
 from zope import interface
 
 
+@interface.implementer(interfaces.IIntegration)
 class AttributeIntegration:
     """Integration component that uses simple attributes
 
     Subclasses provide attributes with suffices Participant or Application to
     provide participant and application factories of a given name.
     """
-
-    interface.implements(interfaces.IIntegration)
 
     def createParticipant(self, activity, proc, performer):
         factory = getattr(self, performer + 'Participant')

@@ -27,7 +27,7 @@ before (in "README.txt").  As before, we'll create an event subscriber
 so that we can see what's going on:
 
     >>> def log_workflow(event):
-    ...     print event
+    ...     print (event)
 
     >>> import zope.event
     >>> zope.event.subscribers.append(log_workflow)
@@ -45,9 +45,9 @@ and we'll define and register participant and application adapters:
     >>> import zope.interface
     >>> from shoobx.wfmc import interfaces
 
-    >>> class Participant(object):
+    >>> @zope.interface.implementer(interfaces.IParticipant)
+    ... class Participant(object):
     ...     zope.component.adapts(interfaces.IActivity)
-    ...     zope.interface.implements(interfaces.IParticipant)
     ...
     ...     def __init__(self, activity, process):
     ...         self.activity = activity
@@ -66,7 +66,7 @@ and we'll define and register participant and application adapters:
     ...     def __init__(self, activity, process):
     ...         Participant.__init__(self, activity, process)
     ...         author_name = activity.process.workflowRelevantData.author
-    ...         print "Author `%s` selected" % author_name
+    ...         print("Author `%s` selected" % author_name)
     ...         self.user = authors[author_name]
 
     >>> integration.authorParticipant = Author
@@ -85,9 +85,9 @@ and we'll define and register participant and application adapters:
 
     >>> integration.SystemParticipant = Participant
 
-    >>> class ApplicationBase(object):
+    >>> @zope.interface.implementer(interfaces.IWorkItem)
+    ... class ApplicationBase(object):
     ...     zope.component.adapts(interfaces.IParticipant)
-    ...     zope.interface.implements(interfaces.IWorkItem)
     ...
     ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
@@ -106,13 +106,13 @@ and we'll define and register participant and application adapters:
     ...         process = self.activity.process
     ...         doc = getattr(process.applicationRelevantData, 'doc', '')
     ...         if doc:
-    ...             print 'Previous draft:'
-    ...             print doc
-    ...             print 'Changes we need to make:'
+    ...             print('Previous draft:')
+    ...             print(doc)
+    ...             print('Changes we need to make:')
     ...             for change in process.workflowRelevantData.tech_changes:
-    ...                 print change
+    ...                 print(change)
     ...         else:
-    ...             print 'Please write the initial draft'
+    ...             print('Please write the initial draft')
     ...
     ...     def finish(self, doc):
     ...         self.activity.process.applicationRelevantData.doc = doc
@@ -165,11 +165,11 @@ and we'll define and register participant and application adapters:
     ...     def summary(self):
     ...         process = self.activity.process
     ...         doc = getattr(process.applicationRelevantData, 'doc', '')
-    ...         print 'Previous draft:'
-    ...         print self.activity.process.applicationRelevantData.doc
-    ...         print 'Changes we need to make:'
+    ...         print('Previous draft:')
+    ...         print(self.activity.process.applicationRelevantData.doc)
+    ...         print('Changes we need to make:')
     ...         for change in process.workflowRelevantData.ed_changes:
-    ...            print change
+    ...            print(change)
     ...
     ...     def finish(self, doc):
     ...         self.activity.process.applicationRelevantData.doc = doc
@@ -186,15 +186,15 @@ and we'll define and register participant and application adapters:
     >>> integration.rfinalWorkItem = ReviewFinal
 
 
-    >>> class Publish:
+    >>> @zope.interface.implementer(interfaces.IWorkItem)
+    ... class Publish:
     ...     zope.component.adapts(interfaces.IParticipant)
-    ...     zope.interface.implements(interfaces.IWorkItem)
     ...
     ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...
     ...     def start(self, args):
-    ...         print "Published"
+    ...         print("Published")
     ...         self.finish()
     ...
     ...     def finish(self):
@@ -205,15 +205,16 @@ and we'll define and register participant and application adapters:
 
     >>> class Reject(Publish):
     ...     def start(self):
-    ...         print "Rejected"
+    ...         print("Rejected")
     ...         self.finish()
 
     >>> integration.rejectWorkItem = Reject
 
 and a process context, so we can pass parameters:
 
-    >>> class PublicationContext:
-    ...     zope.interface.implements(interfaces.IProcessContext)
+    >>> @zope.interface.implementer(interfaces.IProcessContext)
+    ... class PublicationContext:
+    ...     pass
 
 
 Now, let's try out our process.  We'll follow the same steps we did in
@@ -254,7 +255,7 @@ Now, let's try out our process.  We'll follow the same steps we did in
     WorkItemStarted(u'tech_review')
 
     >>> item = tech1.work_list.pop()
-    >>> print item.getDoc()
+    >>> print(item.getDoc())
     I give my pledge, as an American
     to save, and faithfully to defend from waste
     the natural resources of my Country.
@@ -339,7 +340,7 @@ Now, let's try out our process.  We'll follow the same steps we did in
     WorkItemStarted(u'ed_review')
 
     >>> item = reviewer.work_list.pop()
-    >>> print item.getDoc()
+    >>> print(item.getDoc())
     I give my pledge, as an human
     to save, and faithfully to defend from waste
     the natural resources of my planet.
@@ -378,7 +379,7 @@ Now, let's try out our process.  We'll follow the same steps we did in
     WorkItemStarted(u'rfinal')
 
     >>> item = reviewer.work_list.pop()
-    >>> print item.getDoc()
+    >>> print(item.getDoc())
     I give my pledge, as a human
     to save, and faithfully to defend from waste
     the natural resources of my planet.
@@ -443,10 +444,9 @@ Most process elements can have names and descriptions.
     u'Transition', u'Transition', u'Transition to Tech Review 1',
     u'Transition to Tech Review 2']
 
-    >>> sorted([item.description for item in pd.transitions])
-    [None, None, None, None, None, None, None, None, None, None, None, None,
-     None, None, None, None, None,
-     u'Use this transition if there are editorial changes required.']
+    >>> descriptions = [item.description for item in pd.transitions if item.description]
+    >>> u'Use this transition if there are editorial changes required.' in descriptions
+    True
 
 
 Pools and Lanes
@@ -510,7 +510,7 @@ Having two ExtendedAttribute elements is nonsense.
     >>> package = xpdl.read(open(os.path.join(this_directory, fname))) # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    HandlerError: u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."
+    shoobx.wfmc.xpdl.HandlerError: u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."
     File ".../shoobx/wfmc/publication-2.1-duplicate-ExtendedAttribute.xpdl", line 240. in ExtendedAttribute
 
 Sometimes we can't always raise an exception when this happens so instead
@@ -519,4 +519,6 @@ we can record the parse error.
     >>> package = xpdl.read(open(os.path.join(this_directory, fname)))
     >>> package.parseErrors
     [u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."]
-    
+
+
+
