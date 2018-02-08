@@ -2,10 +2,10 @@
 CHANGES
 =======
 
-4.1.1 (unreleased)
+4.1.1 (2018-02-08)
 ------------------
 
-- Nothing changed yet.
+- More Python 3 compatibility.
 
 
 4.1.0 (2018-02-06)

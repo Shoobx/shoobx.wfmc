@@ -110,7 +110,7 @@ class ProcessDefinition(object):
         Gets all activities, including subflows
         """
         result = self.activities.copy()
-        for idx, act in self.activities.iteritems():
+        for idx, act in self.activities.items():
             if act.subflows:
                 sf = self.obtainSubflow(act)
                 result.update(sf.definition.getAllActivities())
