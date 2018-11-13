@@ -310,8 +310,9 @@ class Activity(persistent.Persistent):
         for deadlinedef in self.definition.deadlines:
             evaluator = interfaces.IPythonExpressionEvaluator(self.process)
             if not deadlinedef.duration:
-                log.warn('There is an empty deadline time in '
-                          '{} for activity {}.'.format(process, definition.id))
+                log.warning(
+                    'There is an empty deadline time in '
+                    '{} for activity {}.'.format(process, definition.id))
                 continue
             try:
                 evaled = evaluator.evaluate(deadlinedef.duration,
@@ -323,8 +324,9 @@ class Activity(persistent.Persistent):
                     'for activity {}. Error: {}'.format(definition.id, e))
 
             if evaled is None:
-                log.warn('There is an empty deadline time in '
-                          '{} for activity {}.'.format(process, definition.id))
+                log.warning(
+                    'There is an empty deadline time in '
+                    '{} for activity {}.'.format(process, definition.id))
                 continue
 
             if isinstance(evaled, timedelta):
@@ -654,7 +656,7 @@ class Process(persistent.Persistent):
     def definition(self):
         try:
             return getProcessDefinition(self.process_definition_identifier)
-        except zope.component.interfaces.ComponentLookupError:
+        except zope.interface.interfaces.ComponentLookupError:
             return self._definition
 
     def start(self, *arguments):

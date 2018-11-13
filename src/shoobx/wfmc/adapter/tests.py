@@ -13,10 +13,10 @@
 ##############################################################################
 """Test hookup
 """
+import doctest
 import unittest
 import zope.event
 from zope.component import testing, provideAdapter
-from zope.testing import doctest
 
 from shoobx.wfmc import process
 

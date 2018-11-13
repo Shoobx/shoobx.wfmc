@@ -14,6 +14,7 @@
 """Test hookup
 """
 from __future__ import print_function
+import doctest
 import os
 import re
 import sys
@@ -22,12 +23,10 @@ import zope.event
 import zope.interface
 
 from zope.component import testing, provideAdapter
-from zope.testing import doctest
 from shoobx.wfmc import interfaces, process
-from doctest import OutputChecker, DocTestSuite
 
 
-class Py23DocChecker(OutputChecker):
+class Py23DocChecker(doctest.OutputChecker):
     def check_output(self, want, got, optionflags):
         if sys.version_info[0] == 3:
             # if running on py2, attempt to prefix all the strings
@@ -36,7 +35,7 @@ class Py23DocChecker(OutputChecker):
             want = re.sub('u"(.*?)"', '"\\1"', want)
         else:
             want = re.sub('shoobx.wfmc.xpdl.HandlerError', 'HandlerError', want)
-        return OutputChecker.check_output(self, want, got, optionflags)
+        return doctest.OutputChecker.check_output(self, want, got, optionflags)
 
 
 def tearDown(test):
