@@ -2,10 +2,14 @@
 CHANGES
 =======
 
-4.1.2 (unreleased)
+4.2.0 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add Python 3.7 support.
+
+- Remove Python 3.5 support.
+
+- Remvoe all deprecation and resource warnings.
 
 
 4.1.1 (2018-02-08)
