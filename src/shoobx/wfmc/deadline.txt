@@ -1,6 +1,6 @@
-===============
+================
 Deadline support
-===============
+================
 
 Here we demonstrate and test deadline support in shoobx.wfmc. Currently, only
 SYNCHRONOUSE deadlines are supported. When the deadline condition is met,
@@ -25,22 +25,22 @@ Define WorkItems used by the process::
     >>> @zope.interface.implementer(interfaces.IWorkItem)
     ... class OutputWorkItem(object):
     ...     id = None
-    ... 
+    ...
     ...     def __init__(self, process, activity):
     ...         self.process = process
     ...         self.activity = activity
-    ... 
+    ...
     ...     def start(self, args):
     ...         print(("START: " + args['message']))
 
     >>> @zope.interface.implementer(interfaces.IWorkItem)
     ... class InputWorkItem(object):
     ...     id = None
-    ... 
+    ...
     ...     def __init__(self, process, activity):
     ...         self.process = process
     ...         self.activity = activity
-    ... 
+    ...
     ...     def start(self, args):
     ...         print(("START: " + args['message']))
 
@@ -82,12 +82,14 @@ Now we can create and execute our process::
     START: First activity
 
 We should be on an activity with a deadline
+
     >>> deadlineActivity = proc.activities.getActive()[0]
     >>> len(deadlineActivity.definition.deadlines)
     1
 
 
 Wait for the deadline to pass
+
     >>> import datetime, time
     >>> deadline = proc.activities.getActive()[0].deadlines[0]
     >>> while datetime.datetime.now() < deadline.deadline_time:
@@ -95,6 +97,7 @@ Wait for the deadline to pass
     START: Exception activity
 
 We should have followed the exception transition
+
     >>> deadlineActivity not in proc.activities.getActive()
     True
     >>> deadlineActivity in proc.activities.getFinished()
@@ -107,6 +110,7 @@ We should have followed the exception transition
     'exception'
 
 Finish normally
+
     >>> proc.activities.getActive()[0].finish()
     START: Third activity
     >>> proc.activities.getActive()[0].finish()
@@ -114,6 +118,7 @@ Finish normally
     True
 
 Do it again without the wait
+
     >>> proc = mainproc_def(context)
     >>> proc.start()
     START: First activity
@@ -134,4 +139,10 @@ Do it again without the wait
     >>> proc.isFinished
     True
 
+Clean up deadline timer threads.
 
+    >>> import threading
+    >>> while threading.activeCount() > 1:
+    ...     res = [thread.cancel()
+    ...      for thread in threading.enumerate()
+    ...      if thread is not threading.current_thread()]
