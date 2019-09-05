@@ -177,7 +177,7 @@ class ProcessDefinition(object):
                 start += ((aid, activity), )
                 if not activity.outgoing:
                     raise interfaces.InvalidProcessDefinition(
-                        "Activity %s has no transitions" %aid)
+                        "Activity %s has no transitions" % aid)
 
         if len(start) != 1:
             if start:
@@ -206,7 +206,7 @@ class ProcessDefinition(object):
 
 
 @interface.implementer(interfaces.IActivityDefinition,
-                         interfaces.IExtendedAttributesContainer)
+                       interfaces.IExtendedAttributesContainer)
 class ActivityDefinition(object):
 
     performer = ''
@@ -236,7 +236,8 @@ class ActivityDefinition(object):
         formal = app.parameters
         if len(formal) != len(actual):
             raise TypeError("Wrong number of parameters => "
-                            "Actual=%s, Formal=%s for Application %s with id=%s"
+                            "Actual=%s, Formal=%s "
+                            "for Application %s with id=%s"
                             % (actual, formal, app, app.id))
         self.applications += ((application, formal, tuple(actual)), )
 
@@ -275,11 +276,11 @@ class ActivityDefinition(object):
 
 
 class Deadline(object):
-    def __init__(self, activity, deadline_time, deadlinedef):
+    def __init__(self, activity, deadline_time, deadlineDef):
         self.activity = activity
         self.deadline_time = deadline_time
-        self.definition = deadlinedef
-        if deadlinedef.execution != u'SYNCHR':
+        self.definition = deadlineDef
+        if deadlineDef.execution != u'SYNCHR':
             raise NotImplementedError('Only Synchronous (SYNCHR) deadlines '
                                       'are supported at this point.')
 
@@ -307,48 +308,56 @@ class Activity(persistent.Persistent):
         self.id = self.process.activityIdSequence.next()
 
         self.deadlines = []
-        for deadlinedef in self.definition.deadlines:
-            evaluator = interfaces.IPythonExpressionEvaluator(self.process)
-            if not deadlinedef.duration:
-                log.warning(
-                    'There is an empty deadline time in '
-                    '{} for activity {}.'.format(process, definition.id))
-                continue
-            try:
-                evaled = evaluator.evaluate(deadlinedef.duration,
-                                            {'timedelta': timedelta,
-                                             'datetime': datetime})
-            except Exception as e:
-                raise RuntimeError(
-                    'Evaluating the deadline duration failed '
-                    'for activity {}. Error: {}'.format(definition.id, e))
 
-            if evaled is None:
-                log.warning(
-                    'There is an empty deadline time in '
-                    '{} for activity {}.'.format(process, definition.id))
-                continue
-
-            if isinstance(evaled, timedelta):
-                deadline_time = self.now() + evaled
-            elif isinstance(evaled, datetime.datetime):
-                deadline_time = evaled
-            elif isinstance(evaled, int):
-                deadline_time = self.now() + \
-                    timedelta(seconds=evaled)
-            else:
-                raise ValueError(
-                    'Deadline time was not a timedelta, datetime, or integer '
-                    'number of seconds.\n{}'.format(evaled)
-                )
-
-            deadline = self.DeadlineFactory(self, deadline_time, deadlinedef)
-            self.deadlines.append(deadline)
-            self.process.deadlineTimer(deadline)
+        for deadlineDef in self.definition.deadlines:
+            deadline = self.digestDeadlineDefinition(process, definition,
+                                                     deadlineDef)
+            if deadline is not None:
+                self.deadlines.append(deadline)
+                self.process.deadlineTimer(deadline)
 
         self.activity_definition_identifier_path = \
             calculateActivityStackPath(self)
         self.createWorkItems()
+
+    def digestDeadlineDefinition(self, process, definition,
+                                 deadlineDef):
+        evaluator = interfaces.IPythonExpressionEvaluator(self.process)
+        if not deadlineDef.duration:
+            log.warning(
+                'There is an empty deadline time in '
+                '{} for activity {}.'.format(process, definition.id))
+            return
+        try:
+            evaled = evaluator.evaluate(deadlineDef.duration,
+                                        {'timedelta': timedelta,
+                                         'datetime': datetime})
+        except Exception as e:
+            raise RuntimeError(
+                'Evaluating the deadline duration failed '
+                'for activity {}. Error: {}'.format(definition.id, e))
+
+        if evaled is None:
+            log.warning(
+                'There is an empty deadline time in '
+                '{} for activity {}.'.format(process, definition.id))
+            return
+
+        if isinstance(evaled, timedelta):
+            deadline_time = self.now() + evaled
+        elif isinstance(evaled, datetime.datetime):
+            deadline_time = evaled
+        elif isinstance(evaled, int):
+            deadline_time = self.now() + \
+                timedelta(seconds=evaled)
+        else:
+            raise ValueError(
+                'Deadline time was not a timedelta, datetime, or integer '
+                'number of seconds.\n{}'.format(evaled)
+            )
+
+        deadline = self.DeadlineFactory(self, deadline_time, deadlineDef)
+        return deadline
 
     def getExecutionStack(self):
         """Return list of subflow activities that eventually started the
@@ -447,7 +456,6 @@ class Activity(persistent.Persistent):
 
         if self.workitems:
             evaluator = getEvaluator(self.process)
-            workitems = list(self.workitems.values())
             # We need the list() here to make a copy to
             # loop over, as we modify self.workitems in the loop.
             for workitem, app, formal, actual in list(self.workitems.values()):
@@ -529,8 +537,7 @@ class Activity(persistent.Persistent):
         transitions = getValidOutgoingTransitions(self.process, self.definition)
 
         self.process.transition(self, transitions)
-        for deadline in self.deadlines:
-            self.process.deadlineCanceller(deadline)
+        self.cancelDeadlines()
 
     def abort(self, cancelDeadlineTimer=True):
         if cancelDeadlineTimer:
@@ -832,8 +839,8 @@ class Process(persistent.Persistent):
     def deadlinePassedHandler(self, deadline):
         # TODO: Is this threadsafe?
         if deadline.definition.execution != u'SYNCHR':
-            raise NotImplementedError('Only Synchronous (SYNCHR) deadlines are '
-                                      'supported at this piont.')
+            raise NotImplementedError('Only Synchronous (SYNCHR) deadlines are'
+                                      ' supported at this point.')
         activity = deadline.activity
         activity.abort(cancelDeadlineTimer=False)
         transitions = getValidOutgoingTransitions(
