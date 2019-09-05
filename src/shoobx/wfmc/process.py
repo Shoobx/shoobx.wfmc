@@ -323,7 +323,8 @@ class Activity(persistent.Persistent):
         for deadlinedef in self.definition.deadlines:
             self.digestDeadlineDefinition(process, definition, deadlinedef)
 
-        deletionDeadline = self.attributes.get('wfmc:DeletionDeadline')
+        deletionDeadline = self.definition.attributes.get(
+            'wfmc:DeletionDeadline')
         if deletionDeadline is not None:
             self.digestDeadlineDefinition(process, definition,
                                           deletionDeadline, True)
