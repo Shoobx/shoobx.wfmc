@@ -46,6 +46,17 @@ def defaultDeadlineTimer(process, deadline):
     timer.start()
 
 
+def defaultDeletionDeadlineTimer(process, deadline):
+    timestamp = deadline.deadline_time
+    timer = threading.Timer(
+        (timestamp - datetime.datetime.now()).seconds,
+        process.deletionDeadlinePassedHandler,
+        args=[deadline]
+    )
+    deadline.deadlineTimer = timer
+    timer.start()
+
+
 def defaultDeadlineCanceller(process, deadline):
     if deadline.deadlineTimer:
         deadline.deadlineTimer.cancel()
@@ -206,7 +217,7 @@ class ProcessDefinition(object):
 
 
 @interface.implementer(interfaces.IActivityDefinition,
-                         interfaces.IExtendedAttributesContainer)
+                       interfaces.IExtendedAttributesContainer)
 class ActivityDefinition(object):
 
     performer = ''
@@ -307,48 +318,64 @@ class Activity(persistent.Persistent):
         self.id = self.process.activityIdSequence.next()
 
         self.deadlines = []
+        self.deletionDeadline = None
+
         for deadlinedef in self.definition.deadlines:
-            evaluator = interfaces.IPythonExpressionEvaluator(self.process)
-            if not deadlinedef.duration:
-                log.warning(
-                    'There is an empty deadline time in '
-                    '{} for activity {}.'.format(process, definition.id))
-                continue
-            try:
-                evaled = evaluator.evaluate(deadlinedef.duration,
-                                            {'timedelta': timedelta,
-                                             'datetime': datetime})
-            except Exception as e:
-                raise RuntimeError(
-                    'Evaluating the deadline duration failed '
-                    'for activity {}. Error: {}'.format(definition.id, e))
+            self.digestDeadlineDefinition(process, definition, deadlinedef)
 
-            if evaled is None:
-                log.warning(
-                    'There is an empty deadline time in '
-                    '{} for activity {}.'.format(process, definition.id))
-                continue
-
-            if isinstance(evaled, timedelta):
-                deadline_time = self.now() + evaled
-            elif isinstance(evaled, datetime.datetime):
-                deadline_time = evaled
-            elif isinstance(evaled, int):
-                deadline_time = self.now() + \
-                    timedelta(seconds=evaled)
-            else:
-                raise ValueError(
-                    'Deadline time was not a timedelta, datetime, or integer '
-                    'number of seconds.\n{}'.format(evaled)
-                )
-
-            deadline = self.DeadlineFactory(self, deadline_time, deadlinedef)
-            self.deadlines.append(deadline)
-            self.process.deadlineTimer(deadline)
+        deletionDeadline = self.attributes.get('wfmc:DeletionDeadline')
+        if deletionDeadline is not None:
+            self.digestDeadlineDefinition(process, definition,
+                                          deletionDeadline, True)
 
         self.activity_definition_identifier_path = \
             calculateActivityStackPath(self)
         self.createWorkItems()
+
+    def digestDeadlineDefinition(self, process, definition,
+                                 deadlinedef, isDeletionDeadline=False):
+        evaluator = interfaces.IPythonExpressionEvaluator(self.process)
+        if not deadlinedef.duration:
+            log.warning(
+                'There is an empty deadline time in '
+                '{} for activity {}.'.format(process, definition.id))
+            return
+        try:
+            evaled = evaluator.evaluate(deadlinedef.duration,
+                                        {'timedelta': timedelta,
+                                         'datetime': datetime})
+        except Exception as e:
+            raise RuntimeError(
+                'Evaluating the deadline duration failed '
+                'for activity {}. Error: {}'.format(definition.id, e))
+
+        if evaled is None:
+            log.warning(
+                'There is an empty deadline time in '
+                '{} for activity {}.'.format(process, definition.id))
+            return
+
+        if isinstance(evaled, timedelta):
+            deadline_time = self.now() + evaled
+        elif isinstance(evaled, datetime.datetime):
+            deadline_time = evaled
+        elif isinstance(evaled, int):
+            deadline_time = self.now() + \
+                timedelta(seconds=evaled)
+        else:
+            raise ValueError(
+                'Deadline time was not a timedelta, datetime, or integer '
+                'number of seconds.\n{}'.format(evaled)
+            )
+
+        deadline = self.DeadlineFactory(self, deadline_time, deadlinedef)
+
+        if isDeletionDeadline:
+            self.deletionDeadline = deadline
+            self.process.deletionDeadlineTimer(deadline)
+        else:
+            self.deadlines.append(deadline)
+            self.process.deadlineTimer(deadline)
 
     def getExecutionStack(self):
         """Return list of subflow activities that eventually started the
@@ -447,7 +474,6 @@ class Activity(persistent.Persistent):
 
         if self.workitems:
             evaluator = getEvaluator(self.process)
-            workitems = list(self.workitems.values())
             # We need the list() here to make a copy to
             # loop over, as we modify self.workitems in the loop.
             for workitem, app, formal, actual in list(self.workitems.values()):
@@ -529,8 +555,7 @@ class Activity(persistent.Persistent):
         transitions = getValidOutgoingTransitions(self.process, self.definition)
 
         self.process.transition(self, transitions)
-        for deadline in self.deadlines:
-            self.process.deadlineCanceller(deadline)
+        self.cancelDeadlines()
 
     def abort(self, cancelDeadlineTimer=True):
         if cancelDeadlineTimer:
@@ -564,6 +589,8 @@ class Activity(persistent.Persistent):
     def cancelDeadlines(self):
         for deadline in self.deadlines:
             self.process.deadlineCanceller(deadline)
+        if self.deletionDeadline is not None:
+            self.process.deletionDeadlineCanceller(deadline)
 
     def revert(self, cancelDeadlineTimer=True):
 
@@ -636,6 +663,8 @@ class Process(persistent.Persistent):
 
     deadlineTimer = defaultDeadlineTimer
     deadlineCanceller = defaultDeadlineCanceller
+    deletionDeadlineTimer = defaultDeletionDeadlineTimer
+    deletionDeadlineCanceller = defaultDeadlineCanceller
 
     def __init__(self, definition, start, context=None):
         self.process_definition_identifier = definition.id
@@ -832,8 +861,8 @@ class Process(persistent.Persistent):
     def deadlinePassedHandler(self, deadline):
         # TODO: Is this threadsafe?
         if deadline.definition.execution != u'SYNCHR':
-            raise NotImplementedError('Only Synchronous (SYNCHR) deadlines are '
-                                      'supported at this piont.')
+            raise NotImplementedError('Only Synchronous (SYNCHR) deadlines are'
+                                      ' supported at this point.')
         activity = deadline.activity
         activity.abort(cancelDeadlineTimer=False)
         transitions = getValidOutgoingTransitions(

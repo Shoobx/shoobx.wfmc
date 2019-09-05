@@ -268,6 +268,18 @@ class IProcess(interface.Interface):
         is called on activity.finish calls, as well as activity.revert.
         """
 
+    def deletionDeadlineTimer(deadline):
+        """A function that will time the event of the deletion deadline, if
+        present.  It should call process.deletionDeadlinePassedHandler when the
+        timestamp has passed.  This function is meant to be over-written in
+        different implementations of the engine.
+        """
+
+    def deletionDeadlineCanceller(deadline):
+        """Cancels the deletion deadline timer created by
+        deletionDeadlineTimer.  This method is called on activity.finish calls,
+        as well as activity.revert."""
+
     def start(*arguments):
         """Start the process with the given parameters.
         """
