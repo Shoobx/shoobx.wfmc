@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.2.2 (unreleased)
+4.2.2 (2019-09-06)
 ------------------
 
 - Exposed deadline parsing as `Activity.digestDeadlineDefinition`
