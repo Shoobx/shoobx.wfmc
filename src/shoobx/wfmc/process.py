@@ -321,7 +321,7 @@ class Activity(persistent.Persistent):
         self.createWorkItems()
 
     def digestDeadlineDefinition(self, process, definition,
-                                 deadlineDef):
+                                 deadlineDef, defaultDeadline=None):
         evaluator = interfaces.IPythonExpressionEvaluator(self.process)
         if not deadlineDef.duration:
             log.warning(
@@ -331,7 +331,8 @@ class Activity(persistent.Persistent):
         try:
             evaled = evaluator.evaluate(deadlineDef.duration,
                                         {'timedelta': timedelta,
-                                         'datetime': datetime})
+                                         'datetime': datetime,
+                                         'DEADLINE': defaultDeadline})
         except Exception as e:
             raise RuntimeError(
                 'Evaluating the deadline duration failed '
