@@ -371,6 +371,73 @@ def test_getValidOutgoingTransitions_custom_checker():
     """
 
 
+def test_evaluateInputs():
+    """
+
+    >>> from shoobx.wfmc import process
+    >>> from shoobx.wfmc import interfaces
+    >>> from zope.component import provideAdapter
+
+    >>> provideAdapter(process.PythonExpressionEvaluator)
+    >>> pd = process.ProcessDefinition('sample')
+    >>> proc = process.Process(pd, None)
+    >>> evaluator = interfaces.IPythonExpressionEvaluator(proc)
+    >>> inp1 = process.InputParameter('p1')
+    >>> inp2 = process.InputParameter('p2')
+    >>> formal = (inp1, inp2)
+    >>> actual = ('unknown', 'True')
+
+    # Use strict=False to allow including valid inputs.
+    >>> process.evaluateInputs(
+    ...     proc,
+    ...     formal,
+    ...     actual,
+    ...     evaluator,
+    ...     strict=False,
+    ... )
+    [('p2', True)]
+
+    # Use strict=True to not allow any inputs if any fails.
+    >>> process.evaluateInputs(
+    ...     proc,
+    ...     formal,
+    ...     actual,
+    ...     evaluator,
+    ...     strict=True,
+    ... )
+    Traceback (most recent call last):
+    ...
+    shoobx.wfmc.interfaces.EvaluateException: unknown
+    """
+
+
+def test_getInitialDataFieldsValues():
+    """
+
+    >>> from shoobx.wfmc import process
+    >>> from shoobx.wfmc import interfaces
+    >>> from zope.component import provideAdapter
+
+    >>> provideAdapter(process.PythonExpressionEvaluator)
+    >>> pd = process.ProcessDefinition('sample')
+    >>> proc = process.Process(pd, None)
+    >>> evaluator = interfaces.IPythonExpressionEvaluator(proc)
+    >>> p1 = process.InputParameter('p1')
+    >>> p2 = process.InputParameter('p2')
+    >>> p3 = process.InputParameter('p3')
+    >>> p2.initialValue = "10"
+    >>> p3.initialValue = "True"
+    >>> datafields = {'p1': p1, 'p2': p2, 'p3': p3}
+    >>> vals = process.getInitialDataFieldsValues(datafields, evaluator)
+    >>> vals['p1']  # None
+
+    >>> vals['p2']
+    10
+    >>> vals['p3']
+    True
+    """
+
+
 def test_suite():
     suite = unittest.TestSuite()
     for doctestfile in ['README.txt', 'xpdl.txt',

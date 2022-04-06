@@ -2,6 +2,15 @@
 CHANGES
 =======
 
+4.3.0 (2022-04-07)
+------------------
+
+- `evaluateInputs`: refactored to handle most common exceptions.
+
+- `getInitialDataFieldsValues`: new function to parse datafields initial values.
+
+- drop Python 2 support.
+
 4.2.2 (2019-09-06)
 ------------------
 

@@ -3,6 +3,7 @@
 .installed.cfg
 .tox
 bin
+dist
 build
 coverage.xml
 develop-eggs
