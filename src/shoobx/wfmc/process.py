@@ -29,6 +29,7 @@ log = logging.getLogger(__name__)
 
 WFRD_PREFIX = "WFRD_REVERT_"
 DEL_MARKER = "WFRD_DEL_MARK_"
+EVAL_EXCEPTIONS = (NameError, KeyError, ValueError, TypeError)
 
 
 def always_true(data):
@@ -49,6 +50,22 @@ def defaultDeadlineTimer(process, deadline):
 def defaultDeadlineCanceller(process, deadline):
     if deadline.deadlineTimer:
         deadline.deadlineTimer.cancel()
+
+
+def getInitialDataFieldsValues(datafields, evaluator, strict=True):
+    """Form dictionary of initial datafields values."""
+    vals = {}
+    for _id, datafield in datafields.items():
+        val = None
+        if datafield.initialValue:
+            try:
+                val = evaluator.evaluate(datafield.initialValue)
+            except interfaces.EvaluateException:
+                if strict:
+                    raise
+                continue
+        vals[_id] = val
+    return vals
 
 
 @interface.implementer(interfaces.IProcessDefinitionFactory)
@@ -675,12 +692,9 @@ class Process(persistent.Persistent):
         evaluator = interfaces.IPythonExpressionEvaluator(self)
 
         # Assign data defaults.
-        for id, datafield in definition.datafields.items():
-            val = None
-            if datafield.initialValue:
-                val = evaluator.evaluate(datafield.initialValue)
-            setattr(data, id, val)
-
+        for _id, val in getInitialDataFieldsValues(
+                definition.datafields, evaluator).items():
+            setattr(data, _id, val)
         # Now apply input parameters on top of the defaults.
         args = arguments
         inputparams = [p for p in definition.parameters if p.input]
@@ -888,24 +902,29 @@ def getEvaluator(process):
     return interfaces.IPythonExpressionEvaluator(process)
 
 
-def evaluateInputs(process, formal, actual, evaluator, strict=True):
-    """Evaluate input parameters for the process or activity
+def evaluateInputs(
+    process,
+    formal,
+    actual,
+    evaluator,
+    strict=True,
+):
+    """Evaluate input parameters for the process or activity.
 
-    Return list of pairs: (name, value) for each input parameter
+    Return list of pairs: (name, value) for each input parameter.
     """
     args = []
     for parameter, expr in zip(formal, actual):
         if parameter.input:
-            if expr is u'':
+            if expr == '':
                 expr = getattr(parameter, 'initialValue', '')
             __traceback_info__ = (parameter, expr)
             try:
                 value = evaluator.evaluate(expr)
-            except:
+            except interfaces.EvaluateException:
                 if strict:
                     raise
-                else:
-                    continue
+                continue
             args.append((parameter.__name__, value))
 
     return args
@@ -1227,7 +1246,10 @@ class PythonExpressionEvaluator(object):
         ns.update(vars(self.process.workflowRelevantData))
         ns.update(vars(self.process.applicationRelevantData))
         ns.update(locals)
-        return eval(expr, ALLOWED_BUILTINS, ns)
+        try:
+            return eval(expr, ALLOWED_BUILTINS, ns)
+        except EVAL_EXCEPTIONS as e:
+            raise interfaces.EvaluateException(expr) from e
 
     def execute(self, code, locals={}):
         __traceback_info__ = (code, locals)

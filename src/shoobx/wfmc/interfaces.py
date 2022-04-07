@@ -465,6 +465,13 @@ class ProcessError(Exception):
     """
 
 
+class EvaluateException(Exception):
+    """Can't evaluate python expression.
+
+    Must be used for limited list of exceptions.
+    """
+
+
 class IProcessStarted(interface.Interface):
     """A process has begun executing.
     """
@@ -501,6 +508,9 @@ class IPythonExpressionEvaluator(interface.Interface):
         """Evaluate the python expression.
 
         `locals` is a mapping containing additional namesapce attributes.
+
+        Raises:
+            EvaluateException
 
         Returns the result of the expression.
         """
