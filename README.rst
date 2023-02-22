@@ -2,8 +2,8 @@
 Shoobx WfMC-based Process Engine
 --------------------------------
 
-.. image:: https://travis-ci.org/Shoobx/shoobx.wfmc.png?branch=master
-   :target: https://travis-ci.org/Shoobx/shoobx.wfmc
+.. image:: https://github.com/Shoobx/shoobx.wfmc/actions/workflows/test.yml/badge.svg
+   :target: https://github.com/Shoobx/shoobx.wfmc/actions
 
 .. image:: https://coveralls.io/repos/github/Shoobx/shoobx.wfmc/badge.svg?branch=master
    :target: https://coveralls.io/github/Shoobx/shoobx.wfmc?branch=master
