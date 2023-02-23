@@ -5,7 +5,11 @@ CHANGES
 4.3.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Moving CI to github actions
+
+- Removed buildout support
+
+- Added Python 3.10 and 3.11 support.
 
 
 4.3.0 (2022-04-07)
