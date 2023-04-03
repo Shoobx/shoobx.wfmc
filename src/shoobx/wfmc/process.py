@@ -297,7 +297,7 @@ class Deadline(object):
         self.activity = activity
         self.deadline_time = deadline_time
         self.definition = deadlineDef
-        if deadlineDef.execution != u'SYNCHR':
+        if deadlineDef.execution != 'SYNCHR':
             raise NotImplementedError('Only Synchronous (SYNCHR) deadlines '
                                       'are supported at this point.')
 
@@ -852,7 +852,7 @@ class Process(persistent.Persistent):
 
     def deadlinePassedHandler(self, deadline):
         # TODO: Is this threadsafe?
-        if deadline.definition.execution != u'SYNCHR':
+        if deadline.definition.execution != 'SYNCHR':
             raise NotImplementedError('Only Synchronous (SYNCHR) deadlines are'
                                       ' supported at this point.')
         activity = deadline.activity
@@ -958,7 +958,7 @@ def getValidOutgoingTransitions(process, activity_definition, exception=False,
     if exception:
         # TODO: Need support for exception Name specification
         for transition in activity_definition.outgoing:
-            if transition.type == u'DEFAULTEXCEPTION':
+            if transition.type == 'DEFAULTEXCEPTION':
                 return [transition]
         else:
             raise interfaces.ProcessError(
@@ -1189,9 +1189,9 @@ class Application:
         self.parameters += parameters
 
     def __repr__(self):
-        input = u', '.join([param.__name__ for param in self.parameters
+        input = ', '.join([param.__name__ for param in self.parameters
                            if param.input == True])
-        output = u', '.join([param.__name__ for param in self.parameters
+        output = ', '.join([param.__name__ for param in self.parameters
                            if param.output == True])
         return "<Application %r: (%s) --> (%s)>" % (self.id, input, output)
 

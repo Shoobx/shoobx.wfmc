@@ -116,7 +116,7 @@ Make sure process is finished now::
 All subflows are registered in main flow
 
     >>> sorted(proc.subflows, key=lambda p: p.definition.id)
-    [Process(u'innerflow'), Process(u'innerflow'), Process(u'subflow')]
+    [Process('innerflow'), Process('innerflow'), Process('subflow')]
 
 Variable from inner subflow should not be visible in main flow namespace::
 

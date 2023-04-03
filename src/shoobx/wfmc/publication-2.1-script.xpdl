@@ -384,12 +384,12 @@
                 <xpdl:Activity FinishMode="Automatic" Id="publish" Name="Publish" StartMode="Automatic">
                     <xpdl:Implementation>
                         <xpdl:Task>
-                            <xpdl:TaskApplication Id="publish"/>
+                            <xpdl:TaskScript>
+                                <xpdl:Script>from publisher import push
+push(content)</xpdl:Script>
+                            </xpdl:TaskScript>
                         </xpdl:Task>
                     </xpdl:Implementation>
-                    <xpdl:Performers>
-                        <xpdl:Performer>System</xpdl:Performer>
-                    </xpdl:Performers>
                     <xpdl:TransitionRestrictions>
                         <xpdl:TransitionRestriction>
                             <xpdl:Join Type="Exclusive"/>
