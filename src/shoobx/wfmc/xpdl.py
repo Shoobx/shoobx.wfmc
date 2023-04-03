@@ -388,8 +388,8 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     def exceptionName(self, actdef):
         exceptionName = self.text.strip()
         actdef.deadlines[-1].exceptionName = exceptionName
-    end_handlers[(xpdlns10, 'exceptionName')] = exceptionName
-    end_handlers[(xpdlns21, 'exceptionName')] = exceptionName
+    end_handlers[(xpdlns10, 'ExceptionName')] = exceptionName
+    end_handlers[(xpdlns21, 'ExceptionName')] = exceptionName
 
     def Join(self, attrs):
         Type = attrs.get((None, 'Type'))

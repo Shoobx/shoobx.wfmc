@@ -13,6 +13,8 @@ CHANGES
 
 - Removed Python 2 support.
 
+- Fixed Deadline / ExceptionName parsing.
+
 
 4.3.0 (2022-04-07)
 ------------------
