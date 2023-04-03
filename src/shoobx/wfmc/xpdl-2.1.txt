@@ -499,6 +499,38 @@ We have extended attributes also on Participants
     >>> pd.participants['tech1'].attributes
     OrderedDict([('Capability', 'Required')])
 
+Extended attributes can be simple Values or Complex content, but the parser
+makes this transparent.
+
+    >>> reject_activity = pd.activities['reject']
+    >>> reject_activity.attributes
+    OrderedDict([('ParticipantID', 'System'),
+                 ('XOffset', '540'),
+                 ('YOffset', '80'),
+                 ('Comment', 'Push back to <Q&A>')])
+
+Either way XML reserved characters need to be handled right
+
+    >>> publish_activity = pd.activities['publish']
+    >>> publish_activity.attributes
+    OrderedDict([('ParticipantID', 'System'),
+                 ('XOffset', '540'),
+                 ('YOffset', '20'),
+                 ('Comment', 'Push to <Production>')])
+
+Scripts
+-------
+
+An activity can be also a system script:
+
+    >>> fname = 'publication-2.1-script.xpdl'
+    >>> package = xpdl.read(open(os.path.join(this_directory, fname)))
+    >>> pd = package['Publication']
+    >>> publish_activity = pd.activities['publish']
+    >>> publish_activity.scripts
+    ('from publisher import push\npush(content)',)
+
+
 Edge cases
 -----------
 
@@ -521,4 +553,13 @@ we can record the parse error.
     ["The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."]
 
 
+Just in case there are duplicate Deadlines for a single
+ExtendedAttributes container, raise an error.
+Having two ExtendedAttribute elements is nonsense.
 
+    >>> fname = 'publication-2.1-duplicate-Deadline.xpdl'
+    >>> package = xpdl.read(open(os.path.join(this_directory, fname))) # doctest: +ELLIPSIS
+    Traceback (most recent call last):
+    ...
+    shoobx.wfmc.xpdl.HandlerError: Current implementation only supports one deadline per activity
+    File ".../shoobx/wfmc/publication-2.1-duplicate-Deadline.xpdl", line 376. in Deadline

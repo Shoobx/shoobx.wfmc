@@ -192,7 +192,6 @@
                     <xpdl:DataType>
                         <xpdl:BasicType Type="BOOLEAN"/>
                     </xpdl:DataType>
-                    <xpdl:InitialValue>False</xpdl:InitialValue>
                 </xpdl:DataField>
                 <xpdl:DataField Id="tech_changes" IsArray="false">
                     <xpdl:DataType>
@@ -370,6 +369,14 @@
                     <xpdl:Performers>
                         <xpdl:Performer>reviewer</xpdl:Performer>
                     </xpdl:Performers>
+                    <xpdl:Deadline>
+                        <xpdl:DeadlineDuration ScriptType="text/sharkwfdeadlines">datetime.timedelta(days=5)</xpdl:DeadlineDuration>
+                        <xpdl:ExceptionName>ShortException</xpdl:ExceptionName>
+                    </xpdl:Deadline>
+                    <xpdl:Deadline>
+                        <xpdl:DeadlineDuration ScriptType="text/sharkwfdeadlines">datetime.timedelta(days=15)</xpdl:DeadlineDuration>
+                        <xpdl:ExceptionName>LongException</xpdl:ExceptionName>
+                    </xpdl:Deadline>
                     <xpdl:ExtendedAttributes>
                         <xpdl:ExtendedAttribute Name="ParticipantID" Value="reviewer"/>
                         <xpdl:ExtendedAttribute Name="XOffset" Value="440"/>
@@ -396,10 +403,9 @@
                         </xpdl:TransitionRestriction>
                     </xpdl:TransitionRestrictions>
                     <xpdl:ExtendedAttributes>
-                        <xpdl:ExtendedAttribute Name="ParticipantID">System</xpdl:ExtendedAttribute>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="System"/>
                         <xpdl:ExtendedAttribute Name="XOffset" Value="540"/>
                         <xpdl:ExtendedAttribute Name="YOffset" Value="20"/>
-                        <xpdl:ExtendedAttribute Name="Comment">Push to &lt;Production&gt;</xpdl:ExtendedAttribute>
                     </xpdl:ExtendedAttributes>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,204,204" Height="60" IsVisible="true" LaneId="Publication_pool1_lan5" ToolId="JaWE" Width="90">
@@ -417,10 +423,9 @@
                         <xpdl:Performer>System</xpdl:Performer>
                     </xpdl:Performers>
                     <xpdl:ExtendedAttributes>
-                        <xpdl:ExtendedAttribute Name="ParticipantID">System</xpdl:ExtendedAttribute>
+                        <xpdl:ExtendedAttribute Name="ParticipantID" Value="System"/>
                         <xpdl:ExtendedAttribute Name="XOffset" Value="540"/>
                         <xpdl:ExtendedAttribute Name="YOffset" Value="80"/>
-                        <xpdl:ExtendedAttribute Name="Comment" Value="Push back to &lt;Q&amp;A&gt;"/>
                     </xpdl:ExtendedAttributes>
                     <xpdl:NodeGraphicsInfos>
                         <xpdl:NodeGraphicsInfo BorderColor="0,0,0" FillColor="255,204,204" Height="60" IsVisible="true" LaneId="Publication_pool1_lan5" ToolId="JaWE" Width="90">
