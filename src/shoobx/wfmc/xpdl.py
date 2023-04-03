@@ -23,7 +23,6 @@ import xml.sax.handler
 import shoobx.wfmc.process
 from zope import interface
 from shoobx.wfmc import interfaces
-import six
 
 xpdlns10 = "http://www.wfmc.org/2002/XPDL1.0"
 xpdlns21 = "http://www.wfmc.org/2008/XPDL2.1"
@@ -133,7 +132,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
 
     start_handlers = {}
     end_handlers = {}
-    text = u''
+    text = ''
 
     ProcessDefinitionFactory = shoobx.wfmc.process.ProcessDefinition
     PoolDefinitionFactory = PoolDefinition
@@ -161,8 +160,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
             try:
                 result = handler(self, attrs)
             except:
-                six.reraise(HandlerError(sys.exc_info()[1], name[1], self.locator
-                    ), None, sys.exc_info()[2])
+                raise HandlerError(sys.exc_info()[1], name[1], self.locator)
         else:
             result = None
 
@@ -171,7 +169,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
             result = self.stack[-1]
 
         self.stack.append(result)
-        self.textstack.append(u'')
+        self.textstack.append('')
 
     def endElementNS(self, name, qname):
         last = self.stack.pop()
@@ -180,8 +178,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
             try:
                 handler(self, last)
             except:
-                six.reraise(HandlerError(sys.exc_info()[1], name[1], self.locator
-                    ), None, sys.exc_info()[2])
+                raise HandlerError(sys.exc_info()[1], name[1], self.locator)
 
         self.textstack.pop()
 
@@ -195,7 +192,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     # Application handlers
 
     # Pointless container elements that we want to "ignore" by having them
-    # dup their containers:
+    # dupe their containers:
     def Package(self, attrs):
         package = self.package
         package.id = attrs[(None, 'Id')]
@@ -375,7 +372,7 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
     end_handlers[(xpdlns21, 'Performer')] = performer
 
     def startDeadline(self, attrs):
-        execution = attrs.get((None, u'Execution')) or u'SYNCHR'
+        execution = attrs.get((None, 'Execution')) or 'SYNCHR'
         actdef = self.stack[-1]
         self.DeadlineDefinitionFactory(
             None, actdef, exceptionName=None, execution=execution)
@@ -396,14 +393,14 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
 
     def Join(self, attrs):
         Type = attrs.get((None, 'Type'))
-        if Type in (u'AND', u'Parallel'):
+        if Type in ('AND', 'Parallel'):
             self.stack[-1].andJoin(True)
     start_handlers[(xpdlns10, 'Join')] = Join
     start_handlers[(xpdlns21, 'Join')] = Join
 
     def Split(self, attrs):
         Type = attrs.get((None, 'Type'))
-        if Type in (u'AND', u'Parallel'):
+        if Type in ('AND', 'Parallel'):
             self.stack[-1].andSplit(True)
     start_handlers[(xpdlns10, 'Split')] = Split
     start_handlers[(xpdlns21, 'Split')] = Split
@@ -468,8 +465,8 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
         name = attrs[(None, 'Name')]
         value = attrs.get((None, 'Value'))
         if name in container:
-            msg = (u"The Name '{}' is already used, uniqueness violated, "
-                   u"value: '{}' see: {}.".format(
+            msg = ("The Name '{}' is already used, uniqueness violated, "
+                   "value: '{}' see: {}.".format(
                     name, value, self.package.id))
             if RAISE_ON_DUPLICATE_ERROR:
                 raise KeyError(msg)

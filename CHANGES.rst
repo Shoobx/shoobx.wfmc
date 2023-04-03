@@ -11,6 +11,8 @@ CHANGES
 
 - Added Python 3.10 and 3.11 support.
 
+- Removed Python 2 support.
+
 
 4.3.0 (2022-04-07)
 ------------------

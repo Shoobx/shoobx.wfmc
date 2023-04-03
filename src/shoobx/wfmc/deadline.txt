@@ -142,7 +142,7 @@ Do it again without the wait
 Clean up deadline timer threads.
 
     >>> import threading
-    >>> while threading.activeCount() > 1:
+    >>> while threading.active_count() > 1:
     ...     res = [thread.cancel()
     ...      for thread in threading.enumerate()
     ...      if thread is not threading.current_thread()]

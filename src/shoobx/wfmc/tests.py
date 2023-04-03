@@ -16,26 +16,12 @@
 from __future__ import print_function
 import doctest
 import os
-import re
-import sys
 import unittest
 import zope.event
 import zope.interface
 
 from zope.component import testing, provideAdapter
 from shoobx.wfmc import interfaces, process
-
-
-class Py23DocChecker(doctest.OutputChecker):
-    def check_output(self, want, got, optionflags):
-        if sys.version_info[0] == 3:
-            # if running on py2, attempt to prefix all the strings
-            # with "u" to signify that they're unicode literals
-            want = re.sub("u'(.*?)'", "'\\1'", want)
-            want = re.sub('u"(.*?)"', '"\\1"', want)
-        else:
-            want = re.sub('shoobx.wfmc.xpdl.HandlerError', 'HandlerError', want)
-        return doctest.OutputChecker.check_output(self, want, got, optionflags)
 
 
 def tearDown(test):
@@ -446,7 +432,6 @@ def test_suite():
         suite.addTest(doctest.DocFileSuite(
             doctestfile,
             setUp=setUp, tearDown=tearDown,
-            checker=Py23DocChecker(),
             optionflags=doctest.NORMALIZE_WHITESPACE | doctest.REPORT_NDIFF))
     suite.addTest(doctest.DocTestSuite(
         setUp=setUp, tearDown=testing.tearDown))

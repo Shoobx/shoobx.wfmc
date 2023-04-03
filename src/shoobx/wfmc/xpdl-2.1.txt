@@ -15,9 +15,9 @@ For general description of how to work with XPDL files, refer xpdl.txt.
 This package contains a single definition:
 
     >>> package
-    {u'Publication': ProcessDefinition(u'Publication')}
+    {'Publication': ProcessDefinition('Publication')}
 
-    >>> pd = package[u'Publication']
+    >>> pd = package['Publication']
     >>> from shoobx.wfmc.attributeintegration import AttributeIntegration
     >>> integration = AttributeIntegration()
     >>> pd.integration = integration
@@ -223,36 +223,36 @@ Now, let's try out our process.  We'll follow the same steps we did in
     >>> context = PublicationContext()
     >>> proc = pd(context)
     >>> proc.start('bob')
-    ProcessStarted(Process(u'Publication'))
-    Transition(None, Activity(u'Publication.start'))
-    ActivityStarted(Activity(u'Publication.start'))
-    ActivityFinished(Activity(u'Publication.start'))
+    ProcessStarted(Process('Publication'))
+    Transition(None, Activity('Publication.start'))
+    ActivityStarted(Activity('Publication.start'))
+    ActivityFinished(Activity('Publication.start'))
     Author `bob` selected
-    Transition(Activity(u'Publication.start'),
-               Activity(u'Publication.prepare'))
-    ActivityStarted(Activity(u'Publication.prepare'))
-    WorkItemStarting(u'prepare')
-    WorkItemStarted(u'prepare')
+    Transition(Activity('Publication.start'),
+               Activity('Publication.prepare'))
+    ActivityStarted(Activity('Publication.prepare'))
+    WorkItemStarting('prepare')
+    WorkItemStarted('prepare')
 
     >>> item = authors['bob'].work_list.pop()
     >>> item.finish("I give my pledge, as an American\n"
     ...             "to save, and faithfully to defend from waste\n"
     ...             "the natural resources of my Country.")
-    WorkItemFinished(u'prepare')
-    ActivityFinished(Activity(u'Publication.prepare'))
-    Transition(Activity(u'Publication.prepare'), Activity(u'Publication.review0'))
-    ActivityStarted(Activity(u'Publication.review0'))
-    ActivityFinished(Activity(u'Publication.review0'))
-    Transition(Activity(u'Publication.review0'),
-               Activity(u'Publication.tech1'))
-    ActivityStarted(Activity(u'Publication.tech1'))
-    WorkItemStarting(u'tech_review')
-    WorkItemStarted(u'tech_review')
-    Transition(Activity(u'Publication.review0'),
-               Activity(u'Publication.tech2'))
-    ActivityStarted(Activity(u'Publication.tech2'))
-    WorkItemStarting(u'tech_review')
-    WorkItemStarted(u'tech_review')
+    WorkItemFinished('prepare')
+    ActivityFinished(Activity('Publication.prepare'))
+    Transition(Activity('Publication.prepare'), Activity('Publication.review0'))
+    ActivityStarted(Activity('Publication.review0'))
+    ActivityFinished(Activity('Publication.review0'))
+    Transition(Activity('Publication.review0'),
+               Activity('Publication.tech1'))
+    ActivityStarted(Activity('Publication.tech1'))
+    WorkItemStarting('tech_review')
+    WorkItemStarted('tech_review')
+    Transition(Activity('Publication.review0'),
+               Activity('Publication.tech2'))
+    ActivityStarted(Activity('Publication.tech2'))
+    WorkItemStarting('tech_review')
+    WorkItemStarted('tech_review')
 
     >>> item = tech1.work_list.pop()
     >>> print(item.getDoc())
@@ -261,34 +261,34 @@ Now, let's try out our process.  We'll follow the same steps we did in
     the natural resources of my Country.
 
     >>> item.finish(True, ['Change "American" to "human"'])
-    WorkItemFinished(u'tech_review')
-    ActivityFinished(Activity(u'Publication.tech1'))
-    Transition(Activity(u'Publication.tech1'),
-               Activity(u'Publication.review1'))
+    WorkItemFinished('tech_review')
+    ActivityFinished(Activity('Publication.tech1'))
+    Transition(Activity('Publication.tech1'),
+               Activity('Publication.review1'))
 
     >>> item = tech2.work_list.pop()
     >>> item.finish(True, ['Change "Country" to "planet"'])
-    WorkItemFinished(u'tech_review')
-    ActivityFinished(Activity(u'Publication.tech2'))
-    Transition(Activity(u'Publication.tech2'), Activity(u'Publication.review1'))
-    ActivityStarted(Activity(u'Publication.review1'))
-    ActivityFinished(Activity(u'Publication.review1'))
-    Transition(Activity(u'Publication.review1'),
-               Activity(u'Publication.review'))
-    ActivityStarted(Activity(u'Publication.review'))
-    WorkItemStarting(u'ed_review')
-    WorkItemFinished(u'ed_review')
-    ActivityFinished(Activity(u'Publication.review'))
-    Transition(Activity(u'Publication.review'), Activity(u'Publication.review2'))
-    ActivityStarted(Activity(u'Publication.review2'))
-    ActivityFinished(Activity(u'Publication.review2'))
+    WorkItemFinished('tech_review')
+    ActivityFinished(Activity('Publication.tech2'))
+    Transition(Activity('Publication.tech2'), Activity('Publication.review1'))
+    ActivityStarted(Activity('Publication.review1'))
+    ActivityFinished(Activity('Publication.review1'))
+    Transition(Activity('Publication.review1'),
+               Activity('Publication.review'))
+    ActivityStarted(Activity('Publication.review'))
+    WorkItemStarting('ed_review')
+    WorkItemFinished('ed_review')
+    ActivityFinished(Activity('Publication.review'))
+    Transition(Activity('Publication.review'), Activity('Publication.review2'))
+    ActivityStarted(Activity('Publication.review2'))
+    ActivityFinished(Activity('Publication.review2'))
     Author `bob` selected
-    Transition(Activity(u'Publication.review2'),
-               Activity(u'Publication.prepare'))
-    ActivityStarted(Activity(u'Publication.prepare'))
-    WorkItemStarting(u'prepare')
-    WorkItemStarted(u'prepare')
-    WorkItemStarted(u'ed_review')
+    Transition(Activity('Publication.review2'),
+               Activity('Publication.prepare'))
+    ActivityStarted(Activity('Publication.prepare'))
+    WorkItemStarting('prepare')
+    WorkItemStarted('prepare')
+    WorkItemStarted('ed_review')
 
     >>> item = authors['bob'].work_list.pop()
     >>> item.summary()
@@ -303,41 +303,41 @@ Now, let's try out our process.  We'll follow the same steps we did in
     >>> item.finish("I give my pledge, as an human\n"
     ...             "to save, and faithfully to defend from waste\n"
     ...             "the natural resources of my planet.")
-    WorkItemFinished(u'prepare')
-    ActivityFinished(Activity(u'Publication.prepare'))
-    Transition(Activity(u'Publication.prepare'), Activity(u'Publication.review0'))
-    ActivityStarted(Activity(u'Publication.review0'))
-    ActivityFinished(Activity(u'Publication.review0'))
-    Transition(Activity(u'Publication.review0'),
-               Activity(u'Publication.tech1'))
-    ActivityStarted(Activity(u'Publication.tech1'))
-    WorkItemStarting(u'tech_review')
-    WorkItemStarted(u'tech_review')
-    Transition(Activity(u'Publication.review0'),
-               Activity(u'Publication.tech2'))
-    ActivityStarted(Activity(u'Publication.tech2'))
-    WorkItemStarting(u'tech_review')
-    WorkItemStarted(u'tech_review')
+    WorkItemFinished('prepare')
+    ActivityFinished(Activity('Publication.prepare'))
+    Transition(Activity('Publication.prepare'), Activity('Publication.review0'))
+    ActivityStarted(Activity('Publication.review0'))
+    ActivityFinished(Activity('Publication.review0'))
+    Transition(Activity('Publication.review0'),
+               Activity('Publication.tech1'))
+    ActivityStarted(Activity('Publication.tech1'))
+    WorkItemStarting('tech_review')
+    WorkItemStarted('tech_review')
+    Transition(Activity('Publication.review0'),
+               Activity('Publication.tech2'))
+    ActivityStarted(Activity('Publication.tech2'))
+    WorkItemStarting('tech_review')
+    WorkItemStarted('tech_review')
 
     >>> item = tech1.work_list.pop()
     >>> item.finish(True, [])
-    WorkItemFinished(u'tech_review')
-    ActivityFinished(Activity(u'Publication.tech1'))
-    Transition(Activity(u'Publication.tech1'),
-               Activity(u'Publication.review1'))
+    WorkItemFinished('tech_review')
+    ActivityFinished(Activity('Publication.tech1'))
+    Transition(Activity('Publication.tech1'),
+               Activity('Publication.review1'))
 
     >>> item = tech2.work_list.pop()
     >>> item.finish(True, [])
-    WorkItemFinished(u'tech_review')
-    ActivityFinished(Activity(u'Publication.tech2'))
-    Transition(Activity(u'Publication.tech2'), Activity(u'Publication.review1'))
-    ActivityStarted(Activity(u'Publication.review1'))
-    ActivityFinished(Activity(u'Publication.review1'))
-    Transition(Activity(u'Publication.review1'),
-               Activity(u'Publication.review'))
-    ActivityStarted(Activity(u'Publication.review'))
-    WorkItemStarting(u'ed_review')
-    WorkItemStarted(u'ed_review')
+    WorkItemFinished('tech_review')
+    ActivityFinished(Activity('Publication.tech2'))
+    Transition(Activity('Publication.tech2'), Activity('Publication.review1'))
+    ActivityStarted(Activity('Publication.review1'))
+    ActivityFinished(Activity('Publication.review1'))
+    Transition(Activity('Publication.review1'),
+               Activity('Publication.review'))
+    ActivityStarted(Activity('Publication.review'))
+    WorkItemStarting('ed_review')
+    WorkItemStarted('ed_review')
 
     >>> item = reviewer.work_list.pop()
     >>> print(item.getDoc())
@@ -346,17 +346,17 @@ Now, let's try out our process.  We'll follow the same steps we did in
     the natural resources of my planet.
 
     >>> item.finish(['change "an" to "a"'])
-    WorkItemFinished(u'ed_review')
-    ActivityFinished(Activity(u'Publication.review'))
-    Transition(Activity(u'Publication.review'), Activity(u'Publication.review2'))
-    ActivityStarted(Activity(u'Publication.review2'))
-    ActivityFinished(Activity(u'Publication.review2'))
+    WorkItemFinished('ed_review')
+    ActivityFinished(Activity('Publication.review'))
+    Transition(Activity('Publication.review'), Activity('Publication.review2'))
+    ActivityStarted(Activity('Publication.review2'))
+    ActivityFinished(Activity('Publication.review2'))
     Author `bob` selected
-    Transition(Activity(u'Publication.review2'),
-               Activity(u'Publication.final'))
-    ActivityStarted(Activity(u'Publication.final'))
-    WorkItemStarting(u'final')
-    WorkItemStarted(u'final')
+    Transition(Activity('Publication.review2'),
+               Activity('Publication.final'))
+    ActivityStarted(Activity('Publication.final'))
+    WorkItemStarting('final')
+    WorkItemStarted('final')
 
     >>> item = authors['bob'].work_list.pop()
     >>> item.summary()
@@ -370,13 +370,13 @@ Now, let's try out our process.  We'll follow the same steps we did in
     >>> item.finish("I give my pledge, as a human\n"
     ...             "to save, and faithfully to defend from waste\n"
     ...             "the natural resources of my planet.")
-    WorkItemFinished(u'final')
-    ActivityFinished(Activity(u'Publication.final'))
-    Transition(Activity(u'Publication.final'),
-               Activity(u'Publication.rfinal'))
-    ActivityStarted(Activity(u'Publication.rfinal'))
-    WorkItemStarting(u'rfinal')
-    WorkItemStarted(u'rfinal')
+    WorkItemFinished('final')
+    ActivityFinished(Activity('Publication.final'))
+    Transition(Activity('Publication.final'),
+               Activity('Publication.rfinal'))
+    ActivityStarted(Activity('Publication.rfinal'))
+    WorkItemStarting('rfinal')
+    WorkItemStarted('rfinal')
 
     >>> item = reviewer.work_list.pop()
     >>> print(item.getDoc())
@@ -385,23 +385,23 @@ Now, let's try out our process.  We'll follow the same steps we did in
     the natural resources of my planet.
 
     >>> item.finish([])
-    WorkItemFinished(u'rfinal')
-    ActivityFinished(Activity(u'Publication.rfinal'))
-    Transition(Activity(u'Publication.rfinal'), Activity(u'Publication.rfinal1'))
-    ActivityStarted(Activity(u'Publication.rfinal1'))
-    ActivityFinished(Activity(u'Publication.rfinal1'))
-    Transition(Activity(u'Publication.rfinal1'),
-               Activity(u'Publication.publish'))
-    ActivityStarted(Activity(u'Publication.publish'))
-    WorkItemStarting(u'publish')
+    WorkItemFinished('rfinal')
+    ActivityFinished(Activity('Publication.rfinal'))
+    Transition(Activity('Publication.rfinal'), Activity('Publication.rfinal1'))
+    ActivityStarted(Activity('Publication.rfinal1'))
+    ActivityFinished(Activity('Publication.rfinal1'))
+    Transition(Activity('Publication.rfinal1'),
+               Activity('Publication.publish'))
+    ActivityStarted(Activity('Publication.publish'))
+    WorkItemStarting('publish')
     Published
-    WorkItemFinished(u'publish')
-    ActivityFinished(Activity(u'Publication.publish'))
-    Transition(Activity(u'Publication.publish'), Activity(u'Publication.finish'))
-    ActivityStarted(Activity(u'Publication.finish'))
-    ActivityFinished(Activity(u'Publication.finish'))
-    ProcessFinished(Process(u'Publication'))
-    WorkItemStarted(u'publish')
+    WorkItemFinished('publish')
+    ActivityFinished(Activity('Publication.publish'))
+    Transition(Activity('Publication.publish'), Activity('Publication.finish'))
+    ActivityStarted(Activity('Publication.finish'))
+    ActivityFinished(Activity('Publication.finish'))
+    ProcessFinished(Process('Publication'))
+    WorkItemStarted('publish')
 
     >>> proc.workflowRelevantData.publish
     True
@@ -413,39 +413,39 @@ Descriptions
 Most process elements can have names and descriptions.
 
     >>> pd.__name__
-    u'Publication'
+    'Publication'
 
     >>> pd.description
-    u'This is the sample process'
+    'This is the sample process'
 
     >>> pd.applications['prepare'].__name__
-    u'Prepare'
+    'Prepare'
 
     >>> pd.applications['prepare'].description
-    u'Prepare the initial draft'
+    'Prepare the initial draft'
 
     >>> pd.activities['tech1'].__name__
-    u'Technical Review 1'
+    'Technical Review 1'
 
     >>> pd.activities['tech1'].description
-    u'This is the first Technical Review.'
+    'This is the first Technical Review.'
 
     >>> pd.participants['tech1'].__name__
-    u'Technical Reviewer 1'
+    'Technical Reviewer 1'
 
     >>> pd.participants['tech1'].description
-    u'He is a smart guy.'
+    'He is a smart guy.'
 
     >>> sorted([item.__name__ for item in pd.transitions])
-    [u'Transition', u'Transition', u'Transition', u'Transition',
-    u'Transition', u'Transition',
-    u'Transition', u'Transition', u'Transition', u'Transition',
-    u'Transition', u'Transition', u'Transition', u'Transition',
-    u'Transition', u'Transition', u'Transition to Tech Review 1',
-    u'Transition to Tech Review 2']
+    ['Transition', 'Transition', 'Transition', 'Transition',
+    'Transition', 'Transition',
+    'Transition', 'Transition', 'Transition', 'Transition',
+    'Transition', 'Transition', 'Transition', 'Transition',
+    'Transition', 'Transition', 'Transition to Tech Review 1',
+    'Transition to Tech Review 2']
 
     >>> descriptions = [item.description for item in pd.transitions if item.description]
-    >>> u'Use this transition if there are editorial changes required.' in descriptions
+    >>> 'Use this transition if there are editorial changes required.' in descriptions
     True
 
 
@@ -457,28 +457,28 @@ The package gets the Pools and Lanes from the XPDL
 Pools:
 
     >>> package.pools
-    {'Publication_pool1': Pool(u'Publication', u'Publication')}
+    {'Publication_pool1': Pool('Publication', 'Publication')}
 
 Pool.process_def is the reference to the ProcessDefinition itself
 
     >>> package.pools['Publication_pool1'].process_def
-    u'Publication'
+    'Publication'
 
 Lanes:
 
     >>> sorted(package.pools['Publication_pool1'].lanes.items())
-    [('Publication_pool1_lan1', Lane(u'Author')),
-     ('Publication_pool1_lan2', Lane(u'Technical Reviewer 1')),
-     ('Publication_pool1_lan3', Lane(u'Technical Reviewer 2')),
-     ('Publication_pool1_lan4', Lane(u'Editorial Reviewer')),
-     ('Publication_pool1_lan5', Lane(u'System')),
-     ('Publication_pool1_lan6', Lane(u'Expression lane'))]
+    [('Publication_pool1_lan1', Lane('Author')),
+     ('Publication_pool1_lan2', Lane('Technical Reviewer 1')),
+     ('Publication_pool1_lan3', Lane('Technical Reviewer 2')),
+     ('Publication_pool1_lan4', Lane('Editorial Reviewer')),
+     ('Publication_pool1_lan5', Lane('System')),
+     ('Publication_pool1_lan6', Lane('Expression lane'))]
 
 A single Lane has the performers:
 
     >>> package.pools['Publication_pool1'].lanes[
     ...     'Publication_pool1_lan4'].performers
-    (u'reviewer',)
+    ('reviewer',)
 
 
 Extended attributes
@@ -488,16 +488,16 @@ Extended attributes are stored in ActivityDefinition.attributes dictionary
 
     >>> author_activity = pd.activities['prepare']
     >>> author_activity.attributes
-    OrderedDict([(u'ParticipantID', u'author'),
-                 (u'XOffset', u'110'),
-                 (u'YOffset', u'20')])
+    OrderedDict([('ParticipantID', 'author'),
+                 ('XOffset', '110'),
+                 ('YOffset', '20')])
 
 We have extended attributes also on Participants
 
     >>> pd.participants['System'].attributes
-    OrderedDict([(u'SubSystemID', u'HAL9000')])
+    OrderedDict([('SubSystemID', 'HAL9000')])
     >>> pd.participants['tech1'].attributes
-    OrderedDict([(u'Capability', u'Required')])
+    OrderedDict([('Capability', 'Required')])
 
 Edge cases
 -----------
@@ -510,7 +510,7 @@ Having two ExtendedAttribute elements is nonsense.
     >>> package = xpdl.read(open(os.path.join(this_directory, fname))) # doctest: +ELLIPSIS
     Traceback (most recent call last):
     ...
-    shoobx.wfmc.xpdl.HandlerError: u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."
+    shoobx.wfmc.xpdl.HandlerError: "The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."
     File ".../shoobx/wfmc/publication-2.1-duplicate-ExtendedAttribute.xpdl", line 240. in ExtendedAttribute
 
 Sometimes we can't always raise an exception when this happens so instead
@@ -518,7 +518,7 @@ we can record the parse error.
     >>> xpdl.RAISE_ON_DUPLICATE_ERROR = False
     >>> package = xpdl.read(open(os.path.join(this_directory, fname)))
     >>> package.parseErrors
-    [u"The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."]
+    ["The Name 'ParticipantID' is already used, uniqueness violated, value: 'system' see: Publication."]
 
 
 
