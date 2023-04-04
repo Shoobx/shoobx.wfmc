@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.3.1 (unreleased)
+4.3.1 (2023-04-04)
 ------------------
 
 - Moving CI to github actions
