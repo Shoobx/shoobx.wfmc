@@ -128,6 +128,81 @@ def test_multiple_input_parameters():
     99 42
     """
 
+def test_literal_input_parameters():
+    """
+    We'll create a very simple process that inputs two variables and
+    has a single activity that just outputs them.
+
+    The first variable will be a normal Input variable, the second
+    will be a literal input variable
+
+    The first variable will return the actual value, the second
+    will be the literal value "y", representing the expression definition
+
+    >>> from shoobx.wfmc import process
+    >>> pd = process.ProcessDefinition('sample')
+    >>> from zope import component, interface
+
+    >>> pdfactory = process.StaticProcessDefinitionFactory()
+    >>> zope.component.provideUtility(pdfactory)
+    >>> pdfactory.register(pd)
+
+    >>> pd.defineParameters(
+    ...     process.InputParameter('x'),
+    ...     process.LiteralInputParameter('y'),
+    ...     )
+
+    >>> pd.defineActivities(
+    ...    eek = process.ActivityDefinition(),
+    ...    ook = process.ActivityDefinition(),
+    ...    )
+
+    >>> pd.defineTransitions(process.TransitionDefinition('eek', 'ook'))
+
+    >>> pd.defineApplications(
+    ...     eek = process.Application(
+    ...         process.InputParameter('x'),
+    ...         process.LiteralInputParameter('y'),
+    ...         )
+    ...     )
+
+    >>> pd.activities['eek'].addApplication('eek', ['x', 'y'])
+
+    >>> from shoobx.wfmc import interfaces
+
+    >>> @zope.interface.implementer(interfaces.IParticipant)
+    ... class Participant(object):
+    ...     zope.component.adapts(interfaces.IActivity)
+    ...
+    ...     def __init__(self, activity, process):
+    ...         self.activity = activity
+
+    >>> from shoobx.wfmc.attributeintegration import AttributeIntegration
+    >>> integration = AttributeIntegration()
+    >>> pd.integration = integration
+
+    >>> integration.Participant = Participant
+
+
+    >>> @interface.implementer(interfaces.IWorkItem)
+    ... class Eek:
+    ...     component.adapts(interfaces.IParticipant)
+    ...
+    ...     def __init__(self, participant, process, activity):
+    ...         self.participant = participant
+    ...
+    ...     def start(self, args):
+    ...         x = args['x']; y=args['y']
+    ...         print(x, y)
+
+
+    >>> integration.eekWorkItem = Eek
+
+    >>> proc = pd()
+    >>> proc.start(99, 42)
+    99 y
+    """
+
 def test_pickling():
     """
     >>> from shoobx.wfmc import process
@@ -436,5 +511,3 @@ def test_suite():
     suite.addTest(doctest.DocTestSuite(
         setUp=setUp, tearDown=testing.tearDown))
     return suite
-
-

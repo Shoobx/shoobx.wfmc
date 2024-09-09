@@ -378,7 +378,10 @@ class IParameterDefinition(interface.Interface):
 
     input = interface.Attribute("Is this an input parameter?")
 
+    skipInputEval = interface.Attribute("Should we skip evaluating the input parameter?")
+
     output = interface.Attribute("Is this an output parameter?")
+
 
 
 class IPoolDefinition(interface.Interface):

@@ -919,12 +919,17 @@ def evaluateInputs(
             if expr == '':
                 expr = getattr(parameter, 'initialValue', '')
             __traceback_info__ = (parameter, expr)
-            try:
-                value = evaluator.evaluate(expr)
-            except interfaces.EvaluateException:
-                if strict:
-                    raise
-                continue
+
+            if not parameter.skipInputEval:
+                try:
+                    value = evaluator.evaluate(expr)
+                except interfaces.EvaluateException:
+                    if strict:
+                        raise
+                    continue
+            else:
+                value = expr
+
             args.append((parameter.__name__, value))
 
     return args
@@ -1156,7 +1161,7 @@ class ActivityStarted:
 @interface.implementer(interfaces.IParameterDefinition)
 class Parameter(object):
 
-    input = output = False
+    input = output = skipInputEval = False
     initialValue = None
 
     def __init__(self, name):
@@ -1172,6 +1177,9 @@ class OutputParameter(Parameter):
 
 class InputParameter(Parameter):
     input = True
+
+class LiteralInputParameter(InputParameter):
+    skipInputEval = True
 
 class InputOutputParameter(InputParameter, OutputParameter):
 
