@@ -441,7 +441,7 @@ class Activity(persistent.Persistent):
 
         # Instantiate Subflows
         for subflow, execution, actual in self.definition.subflows:
-            # Figre out formal parameters. At this point, process definition
+            # Figure out formal parameters. At this point, process definition
             # has to be available.
             subflow_pd = self.process.getSubflowProcessDefinition(subflow)
             formal = subflow_pd.parameters
@@ -479,7 +479,7 @@ class Activity(persistent.Persistent):
                 __traceback_info__ = (
                     workitem, self.activity_definition_identifier)
 
-                inputs = evaluateInputs(self.process, formal, actual, evaluator)
+                inputs = evaluateInputs(workitem, formal, actual, evaluator)
                 args = {n: a for n, a in inputs}
 
                 __traceback_info__ = (self.activity_definition_identifier,
@@ -903,17 +903,18 @@ def getEvaluator(process):
 
 
 def evaluateInputs(
-    process,
-    formal,
+    workitem,
+    defaultFormal,
     actual,
     evaluator,
     strict=True,
 ):
-    """Evaluate input parameters for the process or activity.
+    """Evaluate input parameters for the workitem.
 
     Return list of pairs: (name, value) for each input parameter.
     """
     args = []
+    formal = getattr(workitem, 'parameters', None) or defaultFormal
     for parameter, expr in zip(formal, actual):
         if parameter.input:
             if expr == '':

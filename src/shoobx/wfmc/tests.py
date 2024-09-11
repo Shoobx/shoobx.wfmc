@@ -134,7 +134,7 @@ def test_literal_input_parameters():
     has a single activity that just outputs them.
 
     The first variable will be a normal Input variable, the second
-    will be a literal input variable
+    will be a literal input variable defined by the workitem
 
     The first variable will return the actual value, the second
     will be the literal value "y", representing the expression definition
@@ -149,7 +149,7 @@ def test_literal_input_parameters():
 
     >>> pd.defineParameters(
     ...     process.InputParameter('x'),
-    ...     process.LiteralInputParameter('y'),
+    ...     process.InputParameter('y'),
     ...     )
 
     >>> pd.defineActivities(
@@ -162,7 +162,7 @@ def test_literal_input_parameters():
     >>> pd.defineApplications(
     ...     eek = process.Application(
     ...         process.InputParameter('x'),
-    ...         process.LiteralInputParameter('y'),
+    ...         process.InputParameter('y'),
     ...         )
     ...     )
 
@@ -188,6 +188,7 @@ def test_literal_input_parameters():
     ... class Eek:
     ...     component.adapts(interfaces.IParticipant)
     ...
+    ...     parameters=(process.InputParameter('x'), process.LiteralInputParameter('y'))
     ...     def __init__(self, participant, process, activity):
     ...         self.participant = participant
     ...

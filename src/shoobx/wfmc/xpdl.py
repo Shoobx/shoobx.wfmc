@@ -217,7 +217,6 @@ class XPDLHandler(xml.sax.handler.ContentHandler):
 
     parameter_types = {
         'IN': shoobx.wfmc.process.InputParameter,
-        'LITERALIN': shoobx.wfmc.process.LiteralInputParameter,
         'OUT': shoobx.wfmc.process.OutputParameter,
         'INOUT': shoobx.wfmc.process.InputOutputParameter,
         }
