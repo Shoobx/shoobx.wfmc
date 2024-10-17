@@ -5,7 +5,7 @@ CHANGES
 4.3.2 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Added support for LiteralParameters
 
 
 4.3.1 (2023-04-04)
