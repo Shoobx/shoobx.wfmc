@@ -2,7 +2,7 @@
 CHANGES
 =======
 
-4.3.2 (unreleased)
+4.3.2 (2024-10-17)
 ------------------
 
 - Added support for LiteralParameters
